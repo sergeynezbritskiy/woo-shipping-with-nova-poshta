@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace plugins\NovaPoshta\classes;
+namespace plugins\NovaPoshta\classes\base;
 use Exception;
 
 /**

@@ -47,6 +47,21 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
             add_action('plugins_loaded', array($this, 'loadPluginDomain'));
             add_action('admin_init', array(DatabaseSync::instance(), 'synchroniseLocations'));
+            add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
+            add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
+        }
+
+        public function addNovaPoshtaShippingMethod($methods)
+        {
+            $methods[] = 'WC_NovaPoshta_Shipping_Method';
+            return $methods;
+        }
+
+        public function initNovaPoshtaShippingMethod()
+        {
+            if (!class_exists('WC_NovaPoshta_Shipping_Method')) {
+                require_once __DIR__ . '/classes/WC_NovaPoshta_Shipping_Method.php';
+            }
         }
 
         /**
