@@ -9,9 +9,9 @@ Author URI: http://sergey-nezbritskiy.com
 */
 
 use plugins\NovaPoshta\classes\base\Base;
-use plugins\NovaPoshta\classes\base\DatabaseSync;
+use plugins\NovaPoshta\classes\base\Options;
 use plugins\NovaPoshta\classes\Database;
-use plugins\NovaPoshta\classes\DocumentGenerator;
+use plugins\NovaPoshta\classes\DatabaseSync;
 use plugins\NovaPoshta\classes\NovaPoshtaApi;
 
 define('NOVA_POSHTA_SHIPPING_PLUGIN_DIR', dirname(__FILE__) . '/');
@@ -33,6 +33,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
      *
      * @property wpdb db
      * @property NovaPoshtaApi api
+     * @property Options options
      */
     class NovaPoshta extends Base
     {
@@ -45,8 +46,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             register_activation_hook(__FILE__, array($this, 'activatePlugin'));
             register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
             add_action('plugins_loaded', array($this, 'loadPluginDomain'));
-//            add_action('init', array(DocumentGenerator::instance(), 'init'));
-//            add_action('init', array(DatabaseSync::instance(), 'synchroniseLocations'));
+            add_action('admin_init', array(DatabaseSync::instance(), 'synchroniseLocations'));
         }
 
         /**
@@ -55,6 +55,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         public function activatePlugin()
         {
             Database::instance()->createTables();
+            DatabaseSync::instance()->synchroniseLocations();
         }
 
         /**
@@ -63,6 +64,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         public function deactivatePlugin()
         {
             Database::instance()->dropTables();
+            Options::instance()->clearOptions();
         }
 
         /**
@@ -72,6 +74,34 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         public function loadPluginDomain()
         {
             load_plugin_textdomain(NOVA_POSHTA_DOMAIN, false, './woocommerce-nova-poshta-shipping/i18n');
+        }
+
+        /**
+         * @return Options
+         */
+        protected function getOptions()
+        {
+            $this->options = Options::instance();
+            return $this->options;
+        }
+
+        /**
+         * @return wpdb
+         */
+        protected function getDb()
+        {
+            global $wpdb;
+            $this->db = $wpdb;
+            return $this->db;
+        }
+
+        /**
+         * @return NovaPoshtaApi
+         */
+        protected function getApi()
+        {
+            $this->api = NovaPoshtaApi::instance();
+            return $this->api;
         }
 
         /**
@@ -95,25 +125,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
          */
         private function __construct()
         {
-        }
-
-        /**
-         * @return wpdb
-         */
-        protected function getDb()
-        {
-            global $wpdb;
-            $this->db = $wpdb;
-            return $this->db;
-        }
-
-        /**
-         * @return NovaPoshtaApi
-         */
-        protected function getApi()
-        {
-            $this->api = NovaPoshtaApi::instance();
-            return $this->api;
         }
 
         /**

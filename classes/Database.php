@@ -37,12 +37,10 @@ class Database extends Base
         $this->createTableRegions();
         $this->createTableCities();
         $this->createTableWarehouses();
-        $this->createTableLocationsSynchronisation();
     }
 
     public function dropTables()
     {
-        $this->dropTableLocationsSynchronisation();
         $this->dropTableWarehouses();
         $this->dropTableCities();
         $this->dropTableRegions();
@@ -102,20 +100,6 @@ QUERY;
         $this->db->query($query);
     }
 
-    private function createTableLocationsSynchronisation()
-    {
-        $table = DatabaseSync::table();
-        $query = <<<QUERY
-            CREATE TABLE IF NOT EXISTS {$table} (
-                `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-                `table_name` VARCHAR(255) NOT NULL,
-                `updated_at` INT(10) UNSIGNED NOT NULL,
-                PRIMARY KEY `id` (`id`)
-            )ENGINE=INNODB
-QUERY;
-        $this->db->query($query);
-    }
-
     private function dropTableRegions()
     {
         $this->dropTableByName(Region::table());
@@ -129,11 +113,6 @@ QUERY;
     private function dropTableWarehouses()
     {
         $this->dropTableByName(Warehouse::table());
-    }
-
-    private function dropTableLocationsSynchronisation()
-    {
-        $this->dropTableByName(DatabaseSync::table());
     }
 
     private function dropTableByName($table)

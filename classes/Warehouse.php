@@ -14,6 +14,6 @@ class Warehouse extends Location
      */
     public static function table()
     {
-        return NP()->db->prefix . 'nova_poshta_warehouses';
+        return NP()->db->prefix . 'nova_poshta_warehouse';
     }
 }
