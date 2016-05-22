@@ -6,7 +6,7 @@ namespace plugins\NovaPoshta\classes\base;
  * @package plugins\NovaPoshta\classes\base
  *
  * @property int locationsLastUpdateDate
- * @property string regionsHash
+ * @property string areasHash
  * @property string citiesHash
  * @property string warehousesHash
  *
@@ -34,19 +34,19 @@ class Options extends Base
     /**
      * @return string
      */
-    public function getRegionsHash()
+    public function getAreasHash()
     {
-        $this->regionsHash = $this->getOption('regions_hash') ?: '';
-        return $this->regionsHash;
+        $this->areasHash = $this->getOption('areas_hash') ?: '';
+        return $this->areasHash;
     }
 
     /**
-     * @param string $regionsHash
+     * @param string $value
      */
-    public function setRegionsHash($regionsHash)
+    public function setAreasHash($value)
     {
-        $this->setOption('regions_hash', $regionsHash);
-        $this->regionsHash = $regionsHash;
+        $this->setOption('areas_hash', $value);
+        $this->areasHash = $value;
     }
 
     /**

@@ -9,7 +9,7 @@ use wpdb;
  * @package plugins\NovaPoshta\classes
  * @property int interval
  * @property wpdb db
- * @property string regionsHash
+ * @property string $areasHash
  * @property string citiesHash
  * @property string warehousesHash
  * @property int $locationsLastUpdateDate
@@ -17,17 +17,19 @@ use wpdb;
  */
 class DatabaseSync extends Base
 {
-    public static function table()
-    {
-        return NP()->db->prefix . 'nova_poshta_locations_synchronisation';
-    }
 
+    /**
+     * Synchronize Nova Poshta areas, cities and warehouses
+     * Synchronization every $this->interval but before insert
+     * data to table check location has in order to identify any
+     * changes so insertion will appear on in case of hash mismatch
+     */
     public function synchroniseLocations()
     {
         if ($this->requiresUpdate()) {
             $this->db->query('START TRANSACTION');
 
-            $this->updateRegions();
+            $this->updateAreas();
             $this->updateCities();
             $this->updateWarehouses();
             $this->setLocationsLastUpdateDate($this->updatedAt);
@@ -38,8 +40,6 @@ class DatabaseSync extends Base
                 $this->db->query('ROLLBACK');
             }
         }
-
-
     }
 
     /**
@@ -51,24 +51,24 @@ class DatabaseSync extends Base
     }
 
     /**
-     * Update content of table regions
+     * Update content of table nova_poshta_area
      */
-    private function updateRegions()
+    private function updateAreas()
     {
         $table = Area::table();
-        $regions = NP()->api->getAreas();
-        $regionsHashOld = $this->regionsHash;
-        $regionsHashNew = md5(serialize($regions));
+        $areas = NP()->api->getAreas();
+        $areasHashOld = $this->areasHash;
+        $areasHashNew = md5(serialize($areas));
         $updatedAt = $this->updatedAt;
 
 
-        if ($regionsHashNew !== $regionsHashOld) {
+        if ($areasHashNew !== $areasHashOld) {
             $insert = array();
-            foreach ($regions as $region) {
+            foreach ($areas as $area) {
                 $insert[] = $this->db->prepare(
                     "('%s', '%s', %d)",
-                    $region['Ref'],
-                    $region['Description'],
+                    $area['Ref'],
+                    $area['Description'],
                     $updatedAt
                 );
             }
@@ -81,12 +81,15 @@ class DatabaseSync extends Base
 
             $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d", $updatedAt);
 
-            $this->setRegionsHash($regionsHashNew);
+            $this->setAreasHash($areasHashNew);
             $this->db->query($queryInsert);
             $this->db->query($queryDelete);
         }
     }
 
+    /**
+     * Update content of table nova_poshta_city
+     */
     private function updateCities()
     {
         $cities = NP()->api->getCities();
@@ -98,13 +101,13 @@ class DatabaseSync extends Base
 
         if ($citiesHashNew !== $citiesHashOld) {
             $insert = array();
-            foreach ($cities as $region) {
+            foreach ($cities as $city) {
                 $insert[] = $this->db->prepare(
                     "('%s', '%s', '%s', '%s', %d)",
-                    $region['Ref'],
-                    $region['Description'],
-                    $region['DescriptionRu'],
-                    $region['Area'],
+                    $city['Ref'],
+                    $city['Description'],
+                    $city['DescriptionRu'],
+                    $city['Area'],
                     $updatedAt
                 );
             }
@@ -125,6 +128,9 @@ class DatabaseSync extends Base
         }
     }
 
+    /**
+     * Update content of table nova_poshta_warehouse
+     */
     private function updateWarehouses()
     {
         $warehouses = NP()->api->getWarehouses();
@@ -135,14 +141,14 @@ class DatabaseSync extends Base
 
         if ($warehousesHashNew !== $warehousesHashOld) {
             $insert = array();
-            foreach ($warehouses as $region) {
+            foreach ($warehouses as $warehouse) {
                 $insert[] = $this->db->prepare(
                     "('%s', '%s', '%s', '%s', '%s', %d)",
-                    $region['Ref'],
-                    $region['Description'],
-                    $region['DescriptionRu'],
-                    $region['CityRef'],
-                    $region['CityDescription'],
+                    $warehouse['Ref'],
+                    $warehouse['Description'],
+                    $warehouse['DescriptionRu'],
+                    $warehouse['CityRef'],
+                    $warehouse['CityDescription'],
                     $updatedAt
                 );
             }
@@ -200,21 +206,30 @@ class DatabaseSync extends Base
     }
 
     /**
-     * @return string
+     * @param int $value
      */
-    protected function getRegionsHash()
+    private function setLocationsLastUpdateDate($value)
     {
-        $this->regionsHash = NP()->options->regionsHash;
-        return $this->regionsHash;
+        NP()->options->setLocationsLastUpdateDate($value);
+        $this->locationsLastUpdateDate = $value;
     }
 
     /**
-     * @param string $regionsHash
+     * @return string
      */
-    public function setRegionsHash($regionsHash)
+    protected function getAreasHash()
     {
-        NP()->options->setRegionsHash($regionsHash);
-        $this->regionsHash = $regionsHash;
+        $this->areasHash = NP()->options->areasHash;
+        return $this->areasHash;
+    }
+
+    /**
+     * @param string $hash
+     */
+    public function setAreasHash($hash)
+    {
+        NP()->options->setAreasHash($hash);
+        $this->areasHash = $hash;
     }
 
     /**
@@ -227,12 +242,12 @@ class DatabaseSync extends Base
     }
 
     /**
-     * @param string $citiesHash
+     * @param string $hash
      */
-    public function setCitiesHash($citiesHash)
+    public function setCitiesHash($hash)
     {
-        NP()->options->setCitiesHash($citiesHash);
-        $this->citiesHash = $citiesHash;
+        NP()->options->setCitiesHash($hash);
+        $this->citiesHash = $hash;
     }
 
     /**
@@ -245,18 +260,12 @@ class DatabaseSync extends Base
     }
 
     /**
-     * @param string $warehousesHash
+     * @param string $hash
      */
-    public function setWarehousesHash($warehousesHash)
+    public function setWarehousesHash($hash)
     {
-        NP()->options->setWarehousesHash($warehousesHash);
-        $this->warehousesHash = $warehousesHash;
-    }
-
-    private function setLocationsLastUpdateDate($value)
-    {
-        NP()->options->setLocationsLastUpdateDate($value);
-        $this->locationsLastUpdateDate = $value;
+        NP()->options->setWarehousesHash($hash);
+        $this->warehousesHash = $hash;
     }
 
     /**
