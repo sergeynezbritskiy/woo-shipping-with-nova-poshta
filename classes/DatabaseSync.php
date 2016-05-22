@@ -171,15 +171,6 @@ class DatabaseSync extends Base
     }
 
     /**
-     * @return int
-     */
-    public function getLocationsLastUpdateDate()
-    {
-        $this->locationsLastUpdateDate = NP()->options->locationsLastUpdateDate;
-        return $this->locationsLastUpdateDate;
-    }
-
-    /**
      * @return wpdb
      */
     protected function getDb()
@@ -191,18 +182,10 @@ class DatabaseSync extends Base
     /**
      * @return int
      */
-    protected function getUpdatedAt()
+    protected function getLocationsLastUpdateDate()
     {
-        $this->updatedAt = time();
-        return $this->updatedAt;
-    }
-
-    /**
-     * @return int
-     */
-    protected function getLocationLastUpdateDate()
-    {
-        return NP()->options->locationsLastUpdateDate;
+        $this->locationsLastUpdateDate = NP()->options->locationsLastUpdateDate;
+        return $this->locationsLastUpdateDate;
     }
 
     /**
@@ -212,6 +195,15 @@ class DatabaseSync extends Base
     {
         NP()->options->setLocationsLastUpdateDate($value);
         $this->locationsLastUpdateDate = $value;
+    }
+
+    /**
+     * @return int
+     */
+    protected function getUpdatedAt()
+    {
+        $this->updatedAt = time();
+        return $this->updatedAt;
     }
 
     /**
@@ -226,7 +218,7 @@ class DatabaseSync extends Base
     /**
      * @param string $hash
      */
-    public function setAreasHash($hash)
+    protected function setAreasHash($hash)
     {
         NP()->options->setAreasHash($hash);
         $this->areasHash = $hash;
@@ -235,7 +227,7 @@ class DatabaseSync extends Base
     /**
      * @return string
      */
-    public function getCitiesHash()
+    protected function getCitiesHash()
     {
         $this->citiesHash = NP()->options->citiesHash;
         return $this->citiesHash;
@@ -244,7 +236,7 @@ class DatabaseSync extends Base
     /**
      * @param string $hash
      */
-    public function setCitiesHash($hash)
+    protected function setCitiesHash($hash)
     {
         NP()->options->setCitiesHash($hash);
         $this->citiesHash = $hash;
@@ -253,7 +245,7 @@ class DatabaseSync extends Base
     /**
      * @return string
      */
-    public function getWarehousesHash()
+    protected function getWarehousesHash()
     {
         $this->warehousesHash = NP()->options->getWarehousesHash();
         return $this->warehousesHash;
@@ -262,7 +254,7 @@ class DatabaseSync extends Base
     /**
      * @param string $hash
      */
-    public function setWarehousesHash($hash)
+    protected function setWarehousesHash($hash)
     {
         NP()->options->setWarehousesHash($hash);
         $this->warehousesHash = $hash;
