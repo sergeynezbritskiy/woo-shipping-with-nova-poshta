@@ -76,7 +76,7 @@ class DocumentGenerator extends Base
         $data = $_POST['nova_poshta'];
         $sender = $this->sender;
         $orderId = $data['order_id'];
-        $recipientRegion = new Region($data['billing_state']);
+        $recipientRegion = new Area($data['billing_state']);
         $recipientCity = new City($data['billing_city']);
         $recipientWarehouse = new Warehouse($data['billing_address_1']);
 

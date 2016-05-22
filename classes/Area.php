@@ -6,7 +6,7 @@ namespace plugins\NovaPoshta\classes;
  * Class Area
  * @package plugins\NovaPoshta\classes
  */
-class Region extends Location
+class Area extends Location
 {
 
     /**
@@ -14,6 +14,6 @@ class Region extends Location
      */
     public static function table()
     {
-        return NP()->db->prefix . 'nova_poshta_region';
+        return NP()->db->prefix . 'nova_poshta_area';
     }
 }

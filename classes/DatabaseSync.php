@@ -55,7 +55,7 @@ class DatabaseSync extends Base
      */
     private function updateRegions()
     {
-        $table = Region::table();
+        $table = Area::table();
         $regions = NP()->api->getAreas();
         $regionsHashOld = $this->regionsHash;
         $regionsHashNew = md5(serialize($regions));
@@ -108,13 +108,13 @@ class DatabaseSync extends Base
                     $updatedAt
                 );
             }
-            $queryInsert = "INSERT INTO $table (`ref`, `description`, `description_ru`, `region_ref`, `updated_at`) VALUES ";
+            $queryInsert = "INSERT INTO $table (`ref`, `description`, `description_ru`, `area_ref`, `updated_at`) VALUES ";
             $queryInsert .= implode(",", $insert);
             $queryInsert .= " ON DUPLICATE KEY UPDATE 
             `ref` = VALUES(`ref`), 
             `description` = VALUES(`description`), 
             `description_ru`=VALUES(`description_ru`), 
-            `region_ref`=VALUES(`region_ref`), 
+            `area_ref`=VALUES(`area_ref`), 
             `updated_at` = VALUES(`updated_at`)";
 
             $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d", $updatedAt);

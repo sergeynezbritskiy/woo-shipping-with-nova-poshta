@@ -48,7 +48,7 @@ class Database extends Base
 
     private function createTableRegions()
     {
-        $table = Region::table();
+        $table = Area::table();
         $query = <<<QUERY
             CREATE TABLE IF NOT EXISTS {$table} (
                 `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -72,7 +72,7 @@ QUERY;
                 `ref` VARCHAR(50) NOT NULL,
                 `description` TINYTEXT NOT NULL,
                 `description_ru` TINYTEXT,
-                `region_ref` VARCHAR(50) NOT NULL,
+                `area_ref` VARCHAR(50) NOT NULL,
                 `updated_at` INT(10) UNSIGNED NOT NULL,
                 PRIMARY KEY `id` (`id`),
                 UNIQUE KEY `uk_ref` (`ref`)
@@ -102,7 +102,7 @@ QUERY;
 
     private function dropTableRegions()
     {
-        $this->dropTableByName(Region::table());
+        $this->dropTableByName(Area::table());
     }
 
     private function dropTableCities()
