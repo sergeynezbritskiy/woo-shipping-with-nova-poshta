@@ -37,6 +37,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
      */
     class NovaPoshta extends Base
     {
+        const LOCALE_RU = 'ru_RU';
 
         /**
          * Register main plugin hooks
@@ -94,7 +95,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         /**
          * @return Options
          */
-        protected function getOptions()
+        public function getOptions()
         {
             $this->options = Options::instance();
             return $this->options;
@@ -136,6 +137,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         }
 
         /**
+         * NovaPoshta constructor.
+         * 
          * @access private
          */
         private function __construct()

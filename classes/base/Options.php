@@ -9,10 +9,20 @@ namespace plugins\NovaPoshta\classes\base;
  * @property string areasHash
  * @property string citiesHash
  * @property string warehousesHash
+ * @property array shippingMethodSettings
+ * @property string senderArea
+ * @property string senderCity
+ * @property string senderWarehouse
+ * @property string apiKey
  *
  */
 class Options extends Base
 {
+    const OPTION_KEY_AREA = 'area';
+    const OPTION_KEY_CITY = 'city';
+    const OPTION_KEY_WAREHOUSE = 'warehouse';
+    const OPTION_KEY_API_KEY = 'api_key';
+
     /**
      * @return int
      */
@@ -86,6 +96,51 @@ class Options extends Base
     }
 
     /**
+     * @return array
+     */
+    protected function getShippingMethodSettings()
+    {
+        $this->shippingMethodSettings = get_site_option('woocommerce_nova_poshta_shipping_method_settings');
+        return $this->shippingMethodSettings;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSenderArea()
+    {
+        $this->senderArea = $this->shippingMethodSettings[self::OPTION_KEY_AREA];
+        return $this->senderArea;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSenderCity()
+    {
+        $this->senderCity = $this->shippingMethodSettings[self::OPTION_KEY_CITY];
+        return $this->senderCity;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSenderWarehouse()
+    {
+        $this->senderWarehouse = $this->shippingMethodSettings[self::OPTION_KEY_WAREHOUSE];
+        return $this->senderWarehouse;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getApiKey()
+    {
+        $this->apiKey = $this->shippingMethodSettings[self::OPTION_KEY_API_KEY];
+        return $this->apiKey;
+    }
+
+    /**
      * Delete all plugin specific options from wp_options table
      */
     public function clearOptions()
@@ -131,6 +186,8 @@ class Options extends Base
     }
 
     /**
+     * Options constructor.
+     *
      * @access private
      */
     private function __construct()

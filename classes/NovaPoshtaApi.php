@@ -10,7 +10,7 @@ use plugins\NovaPoshta\classes\base\Base;
  * Class Api
  * @package plugins\NovaPoshta\classes
  * @property string apiKey
- * @property-private api
+ * @property NovaPoshtaApi2 api
  * @method getAreas()
  * @method getCities()
  * @method getWarehouses($city = null)
@@ -27,12 +27,15 @@ class NovaPoshtaApi extends Base
      */
     protected function getApiKey()
     {
-        //TODO get api key from settings
-//        $options = get_site_option('woocommerce_nova_poshta_shipping_method_settings');
-        $this->apiKey = 'e21262024d80bee8b4b94768a19d88e7';//$options['api_key'];
+        $this->apiKey = NP()->options->apiKey;
         return $this->apiKey;
     }
 
+    /**
+     * @param string $ref
+     * @param string $type
+     * @return string
+     */
     public function getDocumentLink($ref, $type = 'pdf')
     {
         return sprintf("https://my.novaposhta.ua/orders/printDocument/orders[]/$ref/type/$type/apiKey/{$this->apiKey}");
@@ -57,6 +60,9 @@ class NovaPoshtaApi extends Base
      */
     private static $_instance;
 
+    /**
+     * @return NovaPoshtaApi
+     */
     public static function instance()
     {
         if (self::$_instance == null) {
@@ -65,11 +71,19 @@ class NovaPoshtaApi extends Base
         return self::$_instance;
     }
 
+    /**
+     * NovaPoshtaApi constructor.
+     * 
+     * @access private
+     */
     private function __construct()
     {
         $this->api = new NovaPoshtaApi2($this->apiKey, 'ru', true);
     }
 
+    /**
+     * @access private
+     */
     private function __clone()
     {
     }
