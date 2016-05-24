@@ -163,5 +163,3 @@ function NP()
 {
     return NovaPoshta::instance();
 }
-
-
