@@ -31,4 +31,30 @@ class Warehouse extends Location
         }
         return $cities;
     }
+
+    /**
+     * @param $cityRef
+     * @return array
+     */
+    public static function getWarehousesListByCityRef($cityRef)
+    {
+        $result = array('' => __('Choose an option', NOVA_POSHTA_DOMAIN));
+        $warehouses = self::findByCityRef($cityRef);
+        /** @var Warehouse $warehouse */
+        foreach ($warehouses as $warehouse) {
+
+            $result[$warehouse->ref] = $warehouse->description;
+        }
+        return $result;
+    }
+
+    /**
+     * @return array
+     */
+    public static function ajaxGetWarehousesListByCityRef()
+    {
+        $cityRef = $_POST['city_ref'];
+        echo json_encode(self::getWarehousesListByCityRef($cityRef));
+        exit;
+    }
 }

@@ -8,6 +8,7 @@ Author: Sergey Nezbritskiy
 Author URI: http://sergey-nezbritskiy.com
 */
 
+use plugins\NovaPoshta\classes\AjaxRoute;
 use plugins\NovaPoshta\classes\base\Base;
 use plugins\NovaPoshta\classes\base\Options;
 use plugins\NovaPoshta\classes\Database;
@@ -46,8 +47,9 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         {
             register_activation_hook(__FILE__, array($this, 'activatePlugin'));
             register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
-            add_action('plugins_loaded', array($this, 'loadPluginDomain'));
+            add_action('init', array(AjaxRoute::class, 'init'));
             add_action('admin_init', array(DatabaseSync::instance(), 'synchroniseLocations'));
+            add_action('plugins_loaded', array($this, 'loadPluginDomain'));
             add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
             add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
         }
@@ -138,7 +140,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
         /**
          * NovaPoshta constructor.
-         * 
+         *
          * @access private
          */
         private function __construct()

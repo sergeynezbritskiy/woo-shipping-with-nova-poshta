@@ -31,4 +31,28 @@ class City extends Location
         return $cities;
     }
 
+    /**
+     * @param string $areaRef
+     * @return array
+     */
+    public static function getCitiesListByAreaRef($areaRef)
+    {
+        $result = array('' => __('Choose an option', NOVA_POSHTA_DOMAIN));
+        $cities = City::findByAreaRef($areaRef);
+        /** @var City $city */
+        foreach ($cities as $city) {
+            $result[$city->ref] = $city->description;
+        }
+        return $result;
+    }
+
+    /**
+     * @return array
+     */
+    public static function ajaxGetCitiesListByAreaRef()
+    {
+        $areaRef = $_POST['area_ref'];
+        echo json_encode(self::getCitiesListByAreaRef($areaRef));
+        exit;
+    }
 }

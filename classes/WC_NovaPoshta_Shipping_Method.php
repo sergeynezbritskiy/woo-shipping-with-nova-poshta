@@ -1,4 +1,5 @@
 <?php
+use plugins\NovaPoshta\classes\AjaxRoute;
 use plugins\NovaPoshta\classes\Area;
 use plugins\NovaPoshta\classes\base\Options;
 use plugins\NovaPoshta\classes\City;
@@ -39,12 +40,14 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         $this->init_settings();
         // Save settings in admin if you have any defined
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
+
+        add_action('admin_enqueue_scripts', array($this, 'scripts'));
     }
 
     /**
      * Initialise Gateway Settings Form Fields
      */
-    function init_form_fields()
+    public function init_form_fields()
     {
         $this->form_fields = array(
             'enabled' => array(
@@ -71,64 +74,63 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 'type' => 'select',
                 'description' => __('Specify the area, from where you are sending goods. (After save API key)', NOVA_POSHTA_DOMAIN),
                 'default' => '',
-                'options' => $this->getAreasList(),
+                'options' => Area::getAreasList(),
             ),
             Options::OPTION_KEY_CITY => array(
                 'title' => __('City', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'description' => __('Specify the city, from where you are sending goods. (After save API key)', NOVA_POSHTA_DOMAIN),
                 'default' => '',
-                'options' => $this->getCitiesList(),
+                'options' => City::getCitiesListByAreaRef(NP()->options->senderArea),
             ),
             Options::OPTION_KEY_WAREHOUSE => array(
                 'title' => __('Warehouse (Number)', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'description' => __('Specify the warehouse, from where you are sending goods. (After save API key)', NOVA_POSHTA_DOMAIN),
-                'options' => $this->getWarehousesList(),
+                'options' => Warehouse::getWarehousesListByCityRef(NP()->options->senderCity),
             ),
         );
     }
 
     /**
-     * @return array
+     * calculate_shipping function.
+     *
+     * @access public
+     * @return void
      */
-    private function getAreasList()
+    public function calculate_shipping()
     {
-        $result = array('' => __('Choose an option', NOVA_POSHTA_DOMAIN));
-        $areas = Area::findAll();
-        /** @var Area $area */
-        foreach ($areas as $area) {
-            $result[$area->ref] = $area->description;
-        }
-        return $result;
+
+        $rate = array(
+            'id' => $this->id,
+            'label' => $this->title,
+            'cost' => 0,
+            'calc_tax' => 'per_item'
+        );
+
+        // Register the rate
+        $this->add_rate($rate);
     }
 
     /**
-     * @return array
+     * Enqueue all required scripts
      */
-    private function getCitiesList()
+    public function scripts()
     {
-        $result = array('' => __('Choose an option', NOVA_POSHTA_DOMAIN));
-        $cities = City::findByAreaRef(NP()->options->senderArea);
-        /** @var City $city */
-        foreach ($cities as $city) {
-            $result[$city->ref] = $city->description;
-        }
-        return $result;
-    }
+        wp_register_script(
+            'nova-poshta-js',
+            NOVA_POSHTA_SHIPPING_PLUGIN_URL . '/assets/js/nova-poshta.js',
+            ['jquery'],
+            filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'assets/js/nova-poshta.js')
+        );
 
-    /**
-     * @return array
-     */
-    private function getWarehousesList()
-    {
-        $result = array('' => __('Choose an option', NOVA_POSHTA_DOMAIN));
-        $warehouses = Warehouse::findByCityRef(NP()->options->senderCity);
-        /** @var Warehouse $warehouse */
-        foreach ($warehouses as $warehouse) {
+        wp_localize_script('nova-poshta-js', 'NovaPoshtaHelper', [
+            'ajaxUrl' => admin_url('admin-ajax.php', 'relative'),
+            'chooseAnOptionText' => __('Choose an option', NOVA_POSHTA_DOMAIN),
+            'getCitiesAction' => AjaxRoute::GET_CITIES_ROUTE,
+            'getWarehousesAction' => AjaxRoute::GET_WAREHOUSES_ROUTE,
+        ]);
 
-            $result[$warehouse->ref] = $warehouse->description;
-        }
-        return $result;
+        wp_enqueue_script('nova-poshta-js');
     }
 }
