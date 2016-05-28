@@ -8,9 +8,9 @@ jQuery(document).ready(function ($) {
 
         init: function () {
 
-            this.areaSelect = $('#woocommerce_nova_poshta_shipping_method_area');
-            this.citySelect = $('#woocommerce_nova_poshta_shipping_method_city');
-            this.warehouseSelect = $('#woocommerce_nova_poshta_shipping_method_warehouse');
+            this.areaSelect = $('#woocommerce_nova_poshta_shipping_method_area, #billing_state');
+            this.citySelect = $('#woocommerce_nova_poshta_shipping_method_city, #billing_city');
+            this.warehouseSelect = $('#woocommerce_nova_poshta_shipping_method_warehouse, #billing_address_1');
 
             this.areaSelect.on('change', function () {
                 var areaRef = this.value;

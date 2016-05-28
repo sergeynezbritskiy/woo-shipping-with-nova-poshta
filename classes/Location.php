@@ -54,6 +54,17 @@ abstract class Location extends Base
     }
 
     /**
+     * @param $state
+     * @return Area
+     */
+    public static function findByRef($state)
+    {
+        $query = NP()->db->prepare("SELECT * FROM " . static::table() . " WHERE Ref = %s", $state);
+        $result = NP()->db->get_row($query);
+        return new static($result);
+    }
+
+    /**
      * @return mixed
      */
     protected function getLocale()

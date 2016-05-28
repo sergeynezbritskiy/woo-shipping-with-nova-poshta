@@ -50,12 +50,12 @@ class AjaxRoute
      */
     public function handleRequest()
     {
-//        add_action('wp_ajax_' . $this->route, $this->handler);
-//        add_action('wp_nopriv_ajax_' . $this->route, $this->handler);
-//
-//        if (isset($_REQUEST['action']) && $_REQUEST['action'] == $this->route) {
-//            do_action('wp_ajax_' . $_REQUEST['action']);
-//            do_action('wp_ajax_nopriv_' . $_REQUEST['action']);
-//        }
+        add_action('wp_ajax_' . $this->route, $this->handler);
+        add_action('wp_nopriv_ajax_' . $this->route, $this->handler);
+
+        if (isset($_REQUEST['action']) && $_REQUEST['action'] == $this->route) {
+            do_action('wp_ajax_' . $_REQUEST['action']);
+            do_action('wp_ajax_nopriv_' . $_REQUEST['action']);
+        }
     }
 }

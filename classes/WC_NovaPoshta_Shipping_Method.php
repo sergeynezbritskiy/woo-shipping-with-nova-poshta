@@ -1,5 +1,4 @@
 <?php
-use plugins\NovaPoshta\classes\AjaxRoute;
 use plugins\NovaPoshta\classes\Area;
 use plugins\NovaPoshta\classes\base\Options;
 use plugins\NovaPoshta\classes\City;
@@ -41,7 +40,6 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         // Save settings in admin if you have any defined
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
 
-        add_action('admin_enqueue_scripts', array($this, 'scripts'));
     }
 
     /**
@@ -100,7 +98,6 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
      */
     public function calculate_shipping()
     {
-
         $rate = array(
             'id' => $this->id,
             'label' => $this->title,
@@ -110,27 +107,5 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
 
         // Register the rate
         $this->add_rate($rate);
-    }
-
-    /**
-     * Enqueue all required scripts
-     */
-    public function scripts()
-    {
-        wp_register_script(
-            'nova-poshta-js',
-            NOVA_POSHTA_SHIPPING_PLUGIN_URL . '/assets/js/nova-poshta.js',
-            ['jquery'],
-            filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'assets/js/nova-poshta.js')
-        );
-
-        wp_localize_script('nova-poshta-js', 'NovaPoshtaHelper', [
-            'ajaxUrl' => admin_url('admin-ajax.php', 'relative'),
-            'chooseAnOptionText' => __('Choose an option', NOVA_POSHTA_DOMAIN),
-            'getCitiesAction' => AjaxRoute::GET_CITIES_ROUTE,
-            'getWarehousesAction' => AjaxRoute::GET_WAREHOUSES_ROUTE,
-        ]);
-
-        wp_enqueue_script('nova-poshta-js');
     }
 }
