@@ -3,12 +3,16 @@ jQuery(document).ready(function ($) {
     var NovaPoshta = {
 
         areaSelect: null,
+        areaInputName: null,
+        areaInputKey: null,
         citySelect: null,
         warehouseSelect: null,
 
         init: function () {
 
-            this.areaSelect = $('#woocommerce_nova_poshta_shipping_method_area, #billing_state');
+            this.areaSelect = $('#billing_state');
+            this.areaInputName = $('#woocommerce_nova_poshta_shipping_method_area_name');
+            this.areaInputKey = $('#woocommerce_nova_poshta_shipping_method_area');
             this.citySelect = $('#woocommerce_nova_poshta_shipping_method_city, #billing_city');
             this.warehouseSelect = $('#woocommerce_nova_poshta_shipping_method_warehouse, #billing_address_1');
 
@@ -79,6 +83,37 @@ jQuery(document).ready(function ($) {
                         console.log('Error.');
                     }
                 });
+            });
+
+            this.areaInputName.autocomplete({
+                source: function (request, response) {
+                    jQuery.ajax({
+                        type: 'POST',
+                        url: ajaxurl,
+                        data: {
+                            action: NovaPoshtaHelper.getAreasBySuggestionAction,
+                            name: request.term
+                        },
+                        success: function (json) {
+                            var data = JSON.parse(json);
+                            response(jQuery.map(data, function (item) {
+                                return {
+                                    label: item.description,
+                                    value: item.ref
+                                }
+                            }));
+                        }
+                    })
+                },
+                focus: function( event, ui ) {
+                    NovaPoshta.areaInputName.val(ui.item.label);
+                    return false;
+                },
+                select: function (event, ui) {
+                    NovaPoshta.areaInputName.val(ui.item.label);
+                    NovaPoshta.areaInputKey.val(ui.item.value);
+                    return false;
+                }
             });
         }
 

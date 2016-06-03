@@ -18,6 +18,7 @@ namespace plugins\NovaPoshta\classes\base;
  */
 class Options extends Base
 {
+    const OPTION_KEY_AREA_NAME = 'area_name';
     const OPTION_KEY_AREA = 'area';
     const OPTION_KEY_CITY = 'city';
     const OPTION_KEY_WAREHOUSE = 'warehouse';

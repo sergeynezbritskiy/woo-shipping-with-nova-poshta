@@ -93,13 +93,14 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             wp_register_script(
                 'nova-poshta-js',
                 NOVA_POSHTA_SHIPPING_PLUGIN_URL . '/assets/js/nova-poshta.js',
-                ['jquery'],
+                ['jquery-ui-autocomplete'],
                 filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'assets/js/nova-poshta.js')
             );
 
             wp_localize_script('nova-poshta-js', 'NovaPoshtaHelper', [
                 'ajaxUrl' => admin_url('admin-ajax.php', 'relative'),
                 'chooseAnOptionText' => __('Choose an option', NOVA_POSHTA_DOMAIN),
+                'getAreasBySuggestionAction' => AjaxRoute::GET_AREAS_BY_SUGGESTION,
                 'getCitiesAction' => AjaxRoute::GET_CITIES_ROUTE,
                 'getWarehousesAction' => AjaxRoute::GET_WAREHOUSES_ROUTE,
             ]);

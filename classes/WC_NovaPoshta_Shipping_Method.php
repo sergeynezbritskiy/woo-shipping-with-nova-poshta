@@ -67,12 +67,15 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 'description' => __('Get your API Key. <a href="https://my.novaposhta.ua/settings/index#apikeys">My Account (Nova Poshta)</a>', NOVA_POSHTA_DOMAIN),
                 'default' => ''
             ),
-            Options::OPTION_KEY_AREA => array(
+            Options::OPTION_KEY_AREA_NAME => array(
                 'title' => __('Area', NOVA_POSHTA_DOMAIN),
-                'type' => 'select',
+                'type' => 'text',
                 'description' => __('Specify the area, from where you are sending goods. (After save API key)', NOVA_POSHTA_DOMAIN),
                 'default' => '',
-                'options' => Area::getAreasList(),
+            ),
+            Options::OPTION_KEY_AREA => array(
+                'type' => 'hidden',
+                'default' => '',
             ),
             Options::OPTION_KEY_CITY => array(
                 'title' => __('City', NOVA_POSHTA_DOMAIN),

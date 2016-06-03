@@ -30,4 +30,16 @@ class Area extends Location
         }
         return $result;
     }
+
+    public static function ajaxGetAreasBySuggestion()
+    {
+        $name = $_POST['name'];
+        $areas = Area::findByName($name);
+        foreach ($areas as & $area) {
+            $area->getDescription();
+            $area->getRef();
+        }
+        echo json_encode($areas);
+        exit;
+    }
 }

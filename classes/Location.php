@@ -40,7 +40,7 @@ abstract class Location extends Base
     }
 
     /**
-     * @return array
+     * @return Location[]
      */
     public static function findAll()
     {
@@ -55,13 +55,29 @@ abstract class Location extends Base
 
     /**
      * @param $state
-     * @return Area
+     * @return Location
      */
     public static function findByRef($state)
     {
         $query = NP()->db->prepare("SELECT * FROM " . static::table() . " WHERE Ref = %s", $state);
         $result = NP()->db->get_row($query);
         return new static($result);
+    }
+
+    /**
+     * @param $name
+     * @return Location[]
+     */
+    public static function findByName($name)
+    {
+        $query = "SELECT * FROM " . static::table() . " WHERE `description` LIKE CONCAT('%', '". $name ."', '%') OR `description_ru` LIKE CONCAT('%', '". $name ."', '%')";
+       
+        $result = NP()->db->get_results($query);
+        $locations = array();
+        foreach ($result as $item) {
+            $locations[] = new static($item);
+        }
+        return $locations;
     }
 
     /**
