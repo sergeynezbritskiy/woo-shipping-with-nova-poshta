@@ -77,18 +77,24 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 'type' => 'hidden',
                 'default' => '',
             ),
-            Options::OPTION_KEY_CITY => array(
+            Options::OPTION_KEY_CITY_NAME => array(
                 'title' => __('City', NOVA_POSHTA_DOMAIN),
-                'type' => 'select',
+                'type' => 'input',
                 'description' => __('Specify the city, from where you are sending goods. (After save API key)', NOVA_POSHTA_DOMAIN),
                 'default' => '',
-                'options' => City::getCitiesListByAreaRef(NP()->options->senderArea),
+            ),
+            Options::OPTION_KEY_CITY => array(
+                'type' => 'hidden',
+                'default' => '',
+            ),
+            Options::OPTION_KEY_WAREHOUSE_NAME => array(
+                'title' => __('Warehouse (Number)', NOVA_POSHTA_DOMAIN),
+                'type' => 'input',
+                'description' => __('Specify the warehouse, from where you are sending goods. (After save API key)', NOVA_POSHTA_DOMAIN),
             ),
             Options::OPTION_KEY_WAREHOUSE => array(
-                'title' => __('Warehouse (Number)', NOVA_POSHTA_DOMAIN),
-                'type' => 'select',
-                'description' => __('Specify the warehouse, from where you are sending goods. (After save API key)', NOVA_POSHTA_DOMAIN),
-                'options' => Warehouse::getWarehousesListByCityRef(NP()->options->senderCity),
+                'type' => 'hidden',
+                'default' => '',
             ),
         );
     }

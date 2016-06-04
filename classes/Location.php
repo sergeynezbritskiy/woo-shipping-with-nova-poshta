@@ -45,12 +45,7 @@ abstract class Location extends Base
     public static function findAll()
     {
         $query = "SELECT * FROM " . static::table();
-        $result = NP()->db->get_results($query);
-        $locations = array();
-        foreach ($result as $items) {
-            $locations[] = new static($items);
-        }
-        return $locations;
+        return self::findByQuery($query);
     }
 
     /**
@@ -70,8 +65,17 @@ abstract class Location extends Base
      */
     public static function findByName($name)
     {
-        $query = "SELECT * FROM " . static::table() . " WHERE `description` LIKE CONCAT('%', '". $name ."', '%') OR `description_ru` LIKE CONCAT('%', '". $name ."', '%')";
-       
+        $query = "SELECT * FROM " . static::table()
+            . " WHERE `description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%')";
+        return self::findByQuery($query);
+    }
+
+    /**
+     * @param string $query
+     * @return Location[]
+     */
+    public static function findByQuery($query)
+    {
         $result = NP()->db->get_results($query);
         $locations = array();
         foreach ($result as $item) {

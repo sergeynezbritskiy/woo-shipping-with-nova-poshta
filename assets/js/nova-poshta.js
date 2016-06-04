@@ -6,15 +6,23 @@ jQuery(document).ready(function ($) {
         areaInputName: null,
         areaInputKey: null,
         citySelect: null,
+        cityInputName: null,
+        cityInputKey: null,
         warehouseSelect: null,
+        warehouseInputName: null,
+        warehouseInputKey: null,
 
         init: function () {
 
             this.areaSelect = $('#billing_state');
+            this.citySelect = $('#billing_city');
+            this.warehouseSelect = $('#billing_address_1');
             this.areaInputName = $('#woocommerce_nova_poshta_shipping_method_area_name');
             this.areaInputKey = $('#woocommerce_nova_poshta_shipping_method_area');
-            this.citySelect = $('#woocommerce_nova_poshta_shipping_method_city, #billing_city');
-            this.warehouseSelect = $('#woocommerce_nova_poshta_shipping_method_warehouse, #billing_address_1');
+            this.cityInputName = $('#woocommerce_nova_poshta_shipping_method_city_name');
+            this.cityInputKey = $('#woocommerce_nova_poshta_shipping_method_city');
+            this.warehouseInputName = $('#woocommerce_nova_poshta_shipping_method_warehouse_name');
+            this.warehouseInputKey = $('#woocommerce_nova_poshta_shipping_method_warehouse');
 
             this.areaSelect.on('change', function () {
                 var areaRef = this.value;
@@ -105,13 +113,77 @@ jQuery(document).ready(function ($) {
                         }
                     })
                 },
-                focus: function( event, ui ) {
+                focus: function (event, ui) {
                     NovaPoshta.areaInputName.val(ui.item.label);
                     return false;
                 },
                 select: function (event, ui) {
                     NovaPoshta.areaInputName.val(ui.item.label);
                     NovaPoshta.areaInputKey.val(ui.item.value);
+                    return false;
+                }
+            });
+
+            this.cityInputName.autocomplete({
+                source: function (request, response) {
+                    jQuery.ajax({
+                        type: 'POST',
+                        url: ajaxurl,
+                        data: {
+                            action: NovaPoshtaHelper.getCitiesBySuggestionAction,
+                            name: request.term,
+                            area_ref: NovaPoshta.areaInputKey.val()
+                        },
+                        success: function (json) {
+                            var data = JSON.parse(json);
+                            response(jQuery.map(data, function (item) {
+                                return {
+                                    label: item.description,
+                                    value: item.ref
+                                }
+                            }));
+                        }
+                    })
+                },
+                focus: function (event, ui) {
+                    NovaPoshta.cityInputName.val(ui.item.label);
+                    return false;
+                },
+                select: function (event, ui) {
+                    NovaPoshta.cityInputName.val(ui.item.label);
+                    NovaPoshta.cityInputKey.val(ui.item.value);
+                    return false;
+                }
+            });
+
+            this.warehouseInputName.autocomplete({
+                source: function (request, response) {
+                    jQuery.ajax({
+                        type: 'POST',
+                        url: ajaxurl,
+                        data: {
+                            action: NovaPoshtaHelper.getWarehousesBySuggestionAction,
+                            name: request.term,
+                            city_ref: NovaPoshta.cityInputKey.val()
+                        },
+                        success: function (json) {
+                            var data = JSON.parse(json);
+                            response(jQuery.map(data, function (item) {
+                                return {
+                                    label: item.description,
+                                    value: item.ref
+                                }
+                            }));
+                        }
+                    })
+                },
+                focus: function (event, ui) {
+                    NovaPoshta.warehouseInputName.val(ui.item.label);
+                    return false;
+                },
+                select: function (event, ui) {
+                    NovaPoshta.warehouseInputName.val(ui.item.label);
+                    NovaPoshta.warehouseInputKey.val(ui.item.value);
                     return false;
                 }
             });

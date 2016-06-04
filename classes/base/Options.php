@@ -20,7 +20,9 @@ class Options extends Base
 {
     const OPTION_KEY_AREA_NAME = 'area_name';
     const OPTION_KEY_AREA = 'area';
+    const OPTION_KEY_CITY_NAME = 'city_name';
     const OPTION_KEY_CITY = 'city';
+    const OPTION_KEY_WAREHOUSE_NAME = 'warehouse_name';
     const OPTION_KEY_WAREHOUSE = 'warehouse';
     const OPTION_KEY_API_KEY = 'api_key';
 
@@ -119,7 +121,7 @@ class Options extends Base
      */
     protected function getSenderCity()
     {
-        $this->senderCity = $this->shippingMethodSettings[self::OPTION_KEY_CITY];
+        $this->senderCity = $this->shippingMethodSettings[self::OPTION_KEY_CITY_NAME];
         return $this->senderCity;
     }
 

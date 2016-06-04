@@ -57,4 +57,28 @@ class Warehouse extends Location
         echo json_encode(self::getWarehousesListByCityRef($cityRef));
         exit;
     }
+
+    public static function ajaxGetWarehousesBySuggestion()
+    {
+        $cityRef = $_POST['city_ref'];
+        $name = $_POST['name'];
+        $warehouses = self::findByCityRefAndName($name, $cityRef);
+        foreach ($warehouses as $warehouse) {
+            $warehouse->getRef();
+            $warehouse->getDescription();
+        }
+        echo json_encode($warehouses);
+        exit;
+    }
+
+    /**
+     * @param $name
+     * @param $cityRef
+     * @return Warehouse[]
+     */
+    private static function findByCityRefAndName($name, $cityRef)
+    {
+        $query = "SELECT * FROM " . self::table() . " WHERE `city_ref` = '" . $cityRef . "' AND (`description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%'))";
+        return self::findByQuery($query);
+    }
 }

@@ -101,6 +101,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'ajaxUrl' => admin_url('admin-ajax.php', 'relative'),
                 'chooseAnOptionText' => __('Choose an option', NOVA_POSHTA_DOMAIN),
                 'getAreasBySuggestionAction' => AjaxRoute::GET_AREAS_BY_SUGGESTION,
+                'getCitiesBySuggestionAction' => AjaxRoute::GET_CITIES_BY_SUGGESTION,
+                'getWarehousesBySuggestionAction' => AjaxRoute::GET_WAREHOUSES_BY_SUGGESTION,
                 'getCitiesAction' => AjaxRoute::GET_CITIES_ROUTE,
                 'getWarehousesAction' => AjaxRoute::GET_WAREHOUSES_ROUTE,
             ]);

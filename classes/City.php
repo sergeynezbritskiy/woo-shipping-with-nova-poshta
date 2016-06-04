@@ -23,12 +23,7 @@ class City extends Location
     public static function findByAreaRef($area)
     {
         $query = NP()->db->prepare("SELECT * FROM " . self::table() . " WHERE `area_ref` = '%s'", $area);
-        $result = NP()->db->get_results($query);
-        $cities = array();
-        foreach ($result as $items) {
-            $cities[] = new City($items);
-        }
-        return $cities;
+        return self::findByQuery($query);
     }
 
     /**
@@ -53,6 +48,30 @@ class City extends Location
     {
         $areaRef = $_POST['area_ref'];
         echo json_encode(self::getCitiesListByAreaRef($areaRef));
+        exit;
+    }
+
+    /**
+     * @param string $name
+     * @param string $areaRef
+     * @return Location[]
+     */
+    private static function findByAreaRefAndName($name, $areaRef)
+    {
+        $query = "SELECT * FROM " . self::table() . " WHERE `area_ref` = '" . $areaRef . "' AND (`description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%'))";
+        return self::findByQuery($query);
+    }
+
+    public static function ajaxGetCitiesBySuggestion()
+    {
+        $areaRef = $_POST['area_ref'];
+        $name = $_POST['name'];
+        $cities = self::findByAreaRefAndName($name, $areaRef);
+        foreach ($cities as $city) {
+            $city->getRef();
+            $city->getDescription();
+        }
+        echo json_encode($cities);
         exit;
     }
 }
