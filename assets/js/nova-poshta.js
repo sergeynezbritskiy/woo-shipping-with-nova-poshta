@@ -120,6 +120,8 @@ jQuery(document).ready(function ($) {
                 select: function (event, ui) {
                     NovaPoshta.areaInputName.val(ui.item.label);
                     NovaPoshta.areaInputKey.val(ui.item.value);
+                    NovaPoshta.clearCity();
+                    NovaPoshta.clearWarehouse();
                     return false;
                 }
             });
@@ -152,6 +154,7 @@ jQuery(document).ready(function ($) {
                 select: function (event, ui) {
                     NovaPoshta.cityInputName.val(ui.item.label);
                     NovaPoshta.cityInputKey.val(ui.item.value);
+                    NovaPoshta.clearWarehouse();
                     return false;
                 }
             });
@@ -187,6 +190,16 @@ jQuery(document).ready(function ($) {
                     return false;
                 }
             });
+        },
+
+        clearCity: function () {
+            this.cityInputName.val('');
+            this.cityInputKey.val('');
+        },
+
+        clearWarehouse: function () {
+            this.warehouseInputName.val('');
+            this.warehouseInputKey.val('');
         }
 
     };
