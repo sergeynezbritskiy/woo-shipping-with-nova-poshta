@@ -16,6 +16,7 @@
  */
 
 use plugins\NovaPoshta\classes\Area;
+use plugins\NovaPoshta\classes\base\OptionsHelper;
 use plugins\NovaPoshta\classes\City;
 use plugins\NovaPoshta\classes\Warehouse;
 
@@ -54,7 +55,7 @@ if (!defined('ABSPATH')) {
                 'type' => 'select',
                 'required' => true,
                 'label' => __('Region', NOVA_POSHTA_DOMAIN),
-                'options' => Area::getAreasList(),
+                'options' => OptionsHelper::getList(Area::findAll()),
             ), $city); ?>
 
         <?php elseif ($fieldKey === 'billing_city') : ?>
@@ -63,7 +64,7 @@ if (!defined('ABSPATH')) {
                 'type' => 'select',
                 'required' => true,
                 'label' => __('City', NOVA_POSHTA_DOMAIN),
-                'options' => City::getCitiesListByAreaRef($area),
+                'options' => OptionsHelper::getList(City::findByAreaRef($area)),
             ), $city); ?>
 
         <?php elseif ($fieldKey === 'billing_address_1') : ?>
@@ -72,7 +73,7 @@ if (!defined('ABSPATH')) {
                 'type' => 'select',
                 'required' => true,
                 'label' => __('Warehouse', NOVA_POSHTA_DOMAIN),
-                'options' => Warehouse::getWarehousesListByCityRef($city),
+                'options' => OptionsHelper::getList(Warehouse::findByCityRef($city)),
             ), $warehouse); ?>
 
         <?php else : ?>

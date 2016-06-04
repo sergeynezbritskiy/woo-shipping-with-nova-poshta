@@ -2,6 +2,8 @@
 
 namespace plugins\NovaPoshta\classes;
 
+use plugins\NovaPoshta\classes\base\OptionsHelper;
+
 /**
  * Class Warehouse
  * @package plugins\NovaPoshta\classes
@@ -24,28 +26,18 @@ class Warehouse extends Location
     public static function findByCityRef($cityRef)
     {
         $query = NP()->db->prepare("SELECT * FROM " . self::table() . " WHERE `city_ref` = '%s'", $cityRef);
-        $result = NP()->db->get_results($query);
-        $cities = array();
-        foreach ($result as $items) {
-            $cities[] = new Warehouse($items);
-        }
-        return $cities;
+        return self::findByQuery($query);
     }
 
     /**
+     * @param $name
      * @param $cityRef
-     * @return array
+     * @return Warehouse[]
      */
-    public static function getWarehousesListByCityRef($cityRef)
+    public static function findByCityRefAndName($name, $cityRef)
     {
-        $result = array('' => __('Choose an option', NOVA_POSHTA_DOMAIN));
-        $warehouses = self::findByCityRef($cityRef);
-        /** @var Warehouse $warehouse */
-        foreach ($warehouses as $warehouse) {
-
-            $result[$warehouse->ref] = $warehouse->description;
-        }
-        return $result;
+        $query = "SELECT * FROM " . self::table() . " WHERE `city_ref` = '" . $cityRef . "' AND (`description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%'))";
+        return self::findByQuery($query);
     }
 
     /**
@@ -54,10 +46,15 @@ class Warehouse extends Location
     public static function ajaxGetWarehousesListByCityRef()
     {
         $cityRef = $_POST['city_ref'];
-        echo json_encode(self::getWarehousesListByCityRef($cityRef));
+        $warehouses = Warehouse::findByCityRef($cityRef);
+        $options = OptionsHelper::getList($warehouses);
+        echo json_encode($options);
         exit;
     }
 
+    /**
+     * Get  warehouses list by name suggestion for current city
+     */
     public static function ajaxGetWarehousesBySuggestion()
     {
         $cityRef = $_POST['city_ref'];
@@ -69,16 +66,5 @@ class Warehouse extends Location
         }
         echo json_encode($warehouses);
         exit;
-    }
-
-    /**
-     * @param $name
-     * @param $cityRef
-     * @return Warehouse[]
-     */
-    private static function findByCityRefAndName($name, $cityRef)
-    {
-        $query = "SELECT * FROM " . self::table() . " WHERE `city_ref` = '" . $cityRef . "' AND (`description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%'))";
-        return self::findByQuery($query);
     }
 }

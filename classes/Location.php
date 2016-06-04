@@ -17,7 +17,6 @@ use stdClass;
  */
 abstract class Location extends Base
 {
-
     /**
      * Location constructor.
      * @param $ref
@@ -49,12 +48,12 @@ abstract class Location extends Base
     }
 
     /**
-     * @param $state
+     * @param string $ref
      * @return Location
      */
-    public static function findByRef($state)
+    public static function findByRef($ref)
     {
-        $query = NP()->db->prepare("SELECT * FROM " . static::table() . " WHERE Ref = %s", $state);
+        $query = NP()->db->prepare("SELECT * FROM " . static::table() . " WHERE Ref = %s", $ref);
         $result = NP()->db->get_row($query);
         return new static($result);
     }
@@ -63,7 +62,7 @@ abstract class Location extends Base
      * @param $name
      * @return Location[]
      */
-    public static function findByName($name)
+    public static function findByNameSuggestion($name)
     {
         $query = "SELECT * FROM " . static::table()
             . " WHERE `description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%')";

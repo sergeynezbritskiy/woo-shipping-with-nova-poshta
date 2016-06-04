@@ -18,23 +18,12 @@ class Area extends Location
     }
 
     /**
-     * @return array
+     * Get areas by area name suggestion
      */
-    public static function getAreasList()
-    {
-        $result = array('' => __('Choose an option', NOVA_POSHTA_DOMAIN));
-        $areas = Area::findAll();
-        /** @var Area $area */
-        foreach ($areas as $area) {
-            $result[$area->ref] = $area->description;
-        }
-        return $result;
-    }
-
     public static function ajaxGetAreasBySuggestion()
     {
         $name = $_POST['name'];
-        $areas = Area::findByName($name);
+        $areas = Area::findByNameSuggestion($name);
         foreach ($areas as & $area) {
             $area->getDescription();
             $area->getRef();
