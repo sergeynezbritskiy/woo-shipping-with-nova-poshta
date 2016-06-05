@@ -57,7 +57,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_action('plugins_loaded', array($this, 'loadPluginDomain'));
             add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
             add_action('wp_enqueue_scripts', array($this, 'scripts'));
-            add_action('admin_enqueue_scripts', array($this, 'scripts'));
+            add_action('admin_enqueue_scripts', array($this, 'adminScripts'));
 
             add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
             add_filter('woocommerce_locate_template', array($this, 'locateTemplate'), 1, 3);
@@ -93,11 +93,38 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             wp_register_script(
                 'nova-poshta-js',
                 NOVA_POSHTA_SHIPPING_PLUGIN_URL . '/assets/js/nova-poshta.js',
-                ['jquery-ui-autocomplete'],
+                ['jquery'],
                 filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'assets/js/nova-poshta.js')
             );
 
-            wp_localize_script('nova-poshta-js', 'NovaPoshtaHelper', [
+            $this->localizeHelper('nova-poshta-js');
+
+            wp_enqueue_script('nova-poshta-js');
+        }
+
+        /**
+         * Enqueue all required scripts for admin panel
+         */
+        public function adminScripts()
+        {
+            wp_register_script(
+                'nova-poshta-admin-js',
+                NOVA_POSHTA_SHIPPING_PLUGIN_URL . '/assets/js/nova-poshta-admin.js',
+                ['jquery-ui-autocomplete'],
+                filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'assets/js/nova-poshta-admin.js')
+            );
+
+            $this->localizeHelper('nova-poshta-admin-js');
+
+            wp_enqueue_script('nova-poshta-admin-js');
+        }
+
+        /**
+         * @param string $handle
+         */
+        public function localizeHelper($handle)
+        {
+            wp_localize_script($handle, 'NovaPoshtaHelper', [
                 'ajaxUrl' => admin_url('admin-ajax.php', 'relative'),
                 'chooseAnOptionText' => __('Choose an option', NOVA_POSHTA_DOMAIN),
                 'getAreasBySuggestionAction' => AjaxRoute::GET_AREAS_BY_SUGGESTION,
@@ -106,8 +133,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'getCitiesAction' => AjaxRoute::GET_CITIES_ROUTE,
                 'getWarehousesAction' => AjaxRoute::GET_WAREHOUSES_ROUTE,
             ]);
-
-            wp_enqueue_script('nova-poshta-js');
         }
 
         /**
