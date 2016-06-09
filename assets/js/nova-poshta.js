@@ -5,12 +5,18 @@ jQuery(document).ready(function ($) {
         areaSelect: null,
         citySelect: null,
         warehouseSelect: null,
+        shippingMethod: null,
 
         init: function () {
 
-            this.areaSelect = $('#billing_state');
-            this.citySelect = $('#billing_city');
-            this.warehouseSelect = $('#billing_address_1');
+            this.areaSelect = $('#nova_poshta_region');
+            this.citySelect = $('#nova_poshta_city');
+            this.warehouseSelect = $('#nova_poshta_warehouse');
+            this.shippingMethod = $("select.shipping_method, input[name^=shipping_method][type=radio], input[name^=shipping_method][type=hidden]");
+
+            // NovaPoshta.handleShippingMethodChange();
+
+            this.shippingMethod.on('change', NovaPoshta.handleShippingMethodChange());
 
             this.areaSelect.on('change', function () {
                 var areaRef = this.value;
@@ -80,6 +86,34 @@ jQuery(document).ready(function ($) {
                     }
                 });
             });
+
+        },
+
+        /**
+         * @returns {boolean}
+         */
+        ensureNovaPoshta: function () {
+            var value = $('input.shipping_method').val();
+            console.log(value);
+            return (value === 'nova_poshta_shipping_method');
+        },
+
+        enableNovaPoshtaOptions: function () {
+            //TODO hide all options
+            //display nova poshta options
+        },
+
+        disableNovaPoshtaOptions: function () {
+            //TODO hide nova poshta options
+            //display all options
+        },
+
+        handleShippingMethodChange: function () {
+            if (NovaPoshta.ensureNovaPoshta()) {
+                NovaPoshta.enableNovaPoshtaOptions();
+            } else {
+                NovaPoshta.disableNovaPoshtaOptions();
+            }
 
         }
 
