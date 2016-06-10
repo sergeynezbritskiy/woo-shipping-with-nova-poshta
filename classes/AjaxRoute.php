@@ -16,12 +16,12 @@ class AjaxRoute
     const GET_WAREHOUSES_BY_NAME_SUGGESTION = 'get_warehouses_by_suggestion';
 
     public static $handlers = array(
-        self::GET_CITIES_ROUTE => array(City::class, 'ajaxGetCitiesListByAreaRef'),
-        self::GET_WAREHOUSES_ROUTE => array(Warehouse::class, 'ajaxGetWarehousesListByCityRef'),
+        self::GET_CITIES_ROUTE => array(City::class, 'ajaxGetAreasListByParentAreaRef'),
+        self::GET_WAREHOUSES_ROUTE => array(Warehouse::class, 'ajaxGetAreasListByParentAreaRef'),
 
-        self::GET_REGIONS_BY_NAME_SUGGESTION => array(Region::class, 'ajaxGetRegionsByNameSuggestion'),
-        self::GET_CITIES_BY_NAME_SUGGESTION => array(City::class, 'ajaxGetCitiesByNameSuggestion'),
-        self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array(Warehouse::class, 'ajaxGetWarehousesByNameSuggestion'),
+        self::GET_REGIONS_BY_NAME_SUGGESTION => array(Region::class, 'ajaxGetAreasByNameSuggestion'),
+        self::GET_CITIES_BY_NAME_SUGGESTION => array(City::class, 'ajaxGetAreasByNameSuggestion'),
+        self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array(Warehouse::class, 'ajaxGetAreasByNameSuggestion'),
     );
 
     public static function init()

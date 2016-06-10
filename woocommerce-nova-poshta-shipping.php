@@ -77,9 +77,9 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
          */
         function updateOrderMeta($orderId)
         {
-            $regionKey = Region::areaType();
-            $cityKey = City::areaType();
-            $warehouseKey = Warehouse::areaType();
+            $regionKey = Region::key();
+            $cityKey = City::key();
+            $warehouseKey = Warehouse::key();
             if (!empty($_POST[$regionKey])) {
                 $regionRef = sanitize_text_field($_POST[$regionKey]);
                 $area = new Region($regionRef);
@@ -108,13 +108,13 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         {
 
             // Check if set, if its not set add an error.
-            if (!$_POST[Region::areaType()]) {
+            if (!$_POST[Region::key()]) {
                 wc_add_notice(__('Please enter something into field Region.'), 'error');
             }
-            if (!$_POST[City::areaType()]) {
+            if (!$_POST[City::key()]) {
                 wc_add_notice(__('Please enter something into field City.'), 'error');
             }
-            if (!$_POST[Warehouse::areaType()]) {
+            if (!$_POST[Warehouse::key()]) {
                 wc_add_notice(__('Please enter something into field Warehouse.'), 'error');
             }
         }
@@ -124,7 +124,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             $area = '';
             $city = '';
 
-            $fields['billing'][Region::areaType()] = [
+            $fields['billing'][Region::key()] = [
                 'label' => __('Region', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => true,
@@ -132,7 +132,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'class' => array(),
                 'custom_attributes' => array(),
             ];
-            $fields['billing'][City::areaType()] = [
+            $fields['billing'][City::key()] = [
                 'label' => __('City', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => true,
@@ -140,7 +140,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'class' => array(),
                 'custom_attributes' => array(),
             ];
-            $fields['billing'][Warehouse::areaType()] = [
+            $fields['billing'][Warehouse::key()] = [
                 'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => true,

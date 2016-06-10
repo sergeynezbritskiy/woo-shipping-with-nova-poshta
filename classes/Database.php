@@ -45,9 +45,9 @@ class Database extends Base
     private function createTableAreas()
     {
         $table = Area::table();
-        $region = Area::REGION_KEY;
-        $city = Area::CITY_KEY;
-        $warehouse = Area::WAREHOUSE_KEY;
+        $region = Area::KEY_REGION;
+        $city = Area::KEY_CITY;
+        $warehouse = Area::KEY_WAREHOUSE;
 
         $query = <<<QUERY
             CREATE TABLE IF NOT EXISTS {$table} (

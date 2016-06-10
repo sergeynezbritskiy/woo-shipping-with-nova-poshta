@@ -59,7 +59,7 @@ jQuery(document).ready(function ($) {
                         data: {
                             action: NovaPoshtaHelper.getCitiesByNameSuggestionAction,
                             name: request.term,
-                            area_ref: NovaPoshtaAdmin.areaInputKey.val()
+                            parent_area_ref: NovaPoshtaAdmin.areaInputKey.val()
                         },
                         success: function (json) {
                             var data = JSON.parse(json);
@@ -92,7 +92,7 @@ jQuery(document).ready(function ($) {
                         data: {
                             action: NovaPoshtaHelper.getWarehousesBySuggestionAction,
                             name: request.term,
-                            city_ref: NovaPoshtaAdmin.cityInputKey.val()
+                            parent_area_ref: NovaPoshtaAdmin.cityInputKey.val()
                         },
                         success: function (json) {
                             var data = JSON.parse(json);

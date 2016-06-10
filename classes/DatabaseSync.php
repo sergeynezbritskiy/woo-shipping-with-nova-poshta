@@ -63,7 +63,7 @@ class DatabaseSync extends Base
 
 
         if ($areasHashNew !== $areasHashOld) {
-            $type = Area::REGION_KEY;
+            $type = Area::KEY_REGION;
             $insert = array();
             foreach ($areas as $area) {
                 $insert[] = $this->db->prepare(
@@ -95,7 +95,7 @@ class DatabaseSync extends Base
      */
     private function updateCities()
     {
-        $type = Area::CITY_KEY;
+        $type = Area::KEY_CITY;
         $cities = NP()->api->getCities();
         $table = Area::table();
         $citiesHashOld = $this->citiesHash;
@@ -139,7 +139,7 @@ class DatabaseSync extends Base
      */
     private function updateWarehouses()
     {
-        $type = Area::WAREHOUSE_KEY;
+        $type = Area::KEY_WAREHOUSE;
         $warehouses = NP()->api->getWarehouses();
         $table = Area::table();
         $warehousesHashOld = $this->warehousesHash;

@@ -25,7 +25,7 @@ jQuery(document).ready(function ($) {
                     method: "POST",
                     data: {
                         'action': NovaPoshtaHelper.getCitiesAction,
-                        'area_ref': areaRef
+                        'parent_area_ref': areaRef
                     },
                     success: function (json) {
                         try {
@@ -60,7 +60,7 @@ jQuery(document).ready(function ($) {
                     method: "POST",
                     data: {
                         'action': NovaPoshtaHelper.getWarehousesAction,
-                        'city_ref': cityRef
+                        'parent_area_ref': cityRef
                     },
                     success: function (json) {
                         try {
