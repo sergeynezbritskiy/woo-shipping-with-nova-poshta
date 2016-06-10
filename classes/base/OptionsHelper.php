@@ -1,6 +1,6 @@
 <?php
 namespace plugins\NovaPoshta\classes\base;
-use plugins\NovaPoshta\classes\Location;
+use plugins\NovaPoshta\classes\Area;
 
 /**
  * Class OptionsHelper
@@ -9,7 +9,7 @@ use plugins\NovaPoshta\classes\Location;
 class OptionsHelper
 {
     /**
-     * @param Location[] $locations
+     * @param Area[] $locations
      * @return array
      */
     public static function getList($locations)

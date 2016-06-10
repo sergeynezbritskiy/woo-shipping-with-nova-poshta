@@ -17,7 +17,7 @@ class AjaxRoute
     public static $handlers = array(
         self::GET_CITIES_ROUTE => array(City::class, 'ajaxGetCitiesListByAreaRef'),
         self::GET_WAREHOUSES_ROUTE => array(Warehouse::class, 'ajaxGetWarehousesListByCityRef'),
-        self::GET_AREAS_BY_SUGGESTION => array(Area::class, 'ajaxGetAreasBySuggestion'),
+        self::GET_AREAS_BY_SUGGESTION => array(Region::class, 'ajaxGetAreasBySuggestion'),
         self::GET_CITIES_BY_SUGGESTION => array(City::class, 'ajaxGetCitiesBySuggestion'),
         self::GET_WAREHOUSES_BY_SUGGESTION => array(Warehouse::class, 'ajaxGetWarehousesBySuggestion'),
     );

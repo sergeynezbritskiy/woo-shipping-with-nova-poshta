@@ -15,7 +15,7 @@
  * @version 2.1.2
  */
 
-use plugins\NovaPoshta\classes\Area;
+use plugins\NovaPoshta\classes\Region;
 use plugins\NovaPoshta\classes\base\OptionsHelper;
 use plugins\NovaPoshta\classes\City;
 use plugins\NovaPoshta\classes\Warehouse;

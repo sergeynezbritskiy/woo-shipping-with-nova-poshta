@@ -55,7 +55,7 @@ class DatabaseSync extends Base
      */
     private function updateAreas()
     {
-        $table = Area::table();
+        $table = Region::table();
         $areas = NP()->api->getAreas();
         $areasHashOld = $this->areasHash;
         $areasHashNew = md5(serialize($areas));

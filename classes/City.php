@@ -7,7 +7,7 @@ use plugins\NovaPoshta\classes\base\OptionsHelper;
  * Class City
  * @package plugins\NovaPoshta\classes
  */
-class City extends Location
+class City extends Area
 {
     /**
      * @var string

@@ -1,5 +1,5 @@
 <?php
-use plugins\NovaPoshta\classes\Area;
+use plugins\NovaPoshta\classes\Region;
 use plugins\NovaPoshta\classes\base\Options;
 use plugins\NovaPoshta\classes\City;
 use plugins\NovaPoshta\classes\Warehouse;

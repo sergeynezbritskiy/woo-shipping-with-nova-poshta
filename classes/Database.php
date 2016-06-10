@@ -34,6 +34,7 @@ class Database extends Base
 
     public function createTables()
     {
+        $this->createTableAreas();
         $this->createTableRegions();
         $this->createTableCities();
         $this->createTableWarehouses();
@@ -46,9 +47,28 @@ class Database extends Base
         $this->dropTableRegions();
     }
 
-    private function createTableRegions()
+    private function createTableAreas()
     {
         $table = Area::table();
+        $query = <<<QUERY
+            CREATE TABLE IF NOT EXISTS {$table} (
+                `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `ref` VARCHAR(50) NOT NULL,
+                `description` TINYTEXT NOT NULL,
+                `description_ru` TINYTEXT,
+                `parent_area_ref` VARCHAR(50) NOT NULL,
+                `updated_at` INT(10) UNSIGNED NOT NULL,
+                `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY `id` (`id`),
+                UNIQUE KEY `uk_ref` (`ref`)
+            )ENGINE=INNODB
+QUERY;
+        $this->db->query($query);
+    }
+
+    private function createTableRegions()
+    {
+        $table = Region::table();
         $query = <<<QUERY
             CREATE TABLE IF NOT EXISTS {$table} (
                 `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -102,7 +122,7 @@ QUERY;
 
     private function dropTableRegions()
     {
-        $this->dropTableByName(Area::table());
+        $this->dropTableByName(Region::table());
     }
 
     private function dropTableCities()

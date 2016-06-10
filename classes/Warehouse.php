@@ -8,7 +8,7 @@ use plugins\NovaPoshta\classes\base\OptionsHelper;
  * Class Warehouse
  * @package plugins\NovaPoshta\classes
  */
-class Warehouse extends Location
+class Warehouse extends Area
 {
     /**
      * @var string

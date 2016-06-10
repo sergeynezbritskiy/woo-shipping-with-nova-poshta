@@ -9,7 +9,7 @@ Author URI: http://sergey-nezbritskiy.com
 */
 
 use plugins\NovaPoshta\classes\AjaxRoute;
-use plugins\NovaPoshta\classes\Area;
+use plugins\NovaPoshta\classes\Region;
 use plugins\NovaPoshta\classes\base\Base;
 use plugins\NovaPoshta\classes\base\Options;
 use plugins\NovaPoshta\classes\base\OptionsHelper;
@@ -77,12 +77,12 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
          */
         function updateOrderMeta($orderId)
         {
-            $regionKey = Area::$key;
+            $regionKey = Region::$key;
             $cityKey = City::$key;
             $warehouseKey = Warehouse::$key;
             if (!empty($_POST[$regionKey])) {
                 $regionRef = sanitize_text_field($_POST[$regionKey]);
-                $area = new Area($regionRef);
+                $area = new Region($regionRef);
                 update_post_meta($orderId, '_billing_' . $regionKey, $area->ref);
                 update_post_meta($orderId, '_billing_state', $area->description);
 
@@ -108,7 +108,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         {
 
             // Check if set, if its not set add an error.
-            if (!$_POST[Area::$key]) {
+            if (!$_POST[Region::$key]) {
                 wc_add_notice(__('Please enter something into field Region.'), 'error');
             }
             if (!$_POST[City::$key]) {
@@ -124,11 +124,11 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             $area = '';
             $city = '';
 
-            $fields['billing'][Area::$key] = [
+            $fields['billing'][Region::$key] = [
                 'label' => __('Region', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => true,
-                'options' => OptionsHelper::getList(Area::findAll()),
+                'options' => OptionsHelper::getList(Region::findAll()),
                 'class' => array(),
                 'custom_attributes' => array(),
             ];
@@ -158,7 +158,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
          */
         public function filterWoocommerceOrderFormattedBillingAddress($instance)
         {
-            $state = Area::findByRef($instance['state']);
+            $state = Region::findByRef($instance['state']);
             $instance['state'] = $state->description;
 
             $city = City::findByRef($instance['city']);
