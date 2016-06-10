@@ -17,7 +17,11 @@ use stdClass;
  */
 abstract class Area extends Base
 {
-    public static $key = 'nova_poshta_area';
+
+    const REGION_KEY = 'nova_poshta_region';
+    const CITY_KEY = 'nova_poshta_city';
+    const WAREHOUSE_KEY = 'nova_poshta_warehouse';
+
     /**
      * Location constructor.
      * @param $ref
@@ -36,7 +40,7 @@ abstract class Area extends Base
      */
     public static function table()
     {
-        return NP()->db->prefix . self::$key;
+        return NP()->db->prefix . 'nova_poshta_area';
     }
 
     /**

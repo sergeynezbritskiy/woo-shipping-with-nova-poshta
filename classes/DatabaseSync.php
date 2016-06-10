@@ -55,7 +55,7 @@ class DatabaseSync extends Base
      */
     private function updateAreas()
     {
-        $table = Region::table();
+        $table = Area::table();
         $areas = NP()->api->getAreas();
         $areasHashOld = $this->areasHash;
         $areasHashNew = md5(serialize($areas));
@@ -63,23 +63,26 @@ class DatabaseSync extends Base
 
 
         if ($areasHashNew !== $areasHashOld) {
+            $type = Area::REGION_KEY;
             $insert = array();
             foreach ($areas as $area) {
                 $insert[] = $this->db->prepare(
-                    "('%s', '%s', %d)",
+                    "('%s', '%s', '%s', %d)",
+                    $type,
                     $area['Ref'],
                     $area['Description'],
                     $updatedAt
                 );
             }
-            $queryInsert = "INSERT INTO $table (`ref`, `description`, `updated_at`) VALUES ";
+            $queryInsert = "INSERT INTO $table (`area_type`, `ref`, `description`, `updated_at`) VALUES ";
             $queryInsert .= implode(",", $insert);
             $queryInsert .= " ON DUPLICATE KEY UPDATE 
+            `area_type` = '$type',
             `ref` = VALUES(`ref`), 
             `description` = VALUES(`description`), 
             `updated_at` = VALUES(`updated_at`)";
 
-            $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d", $updatedAt);
+            $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d AND `area_type` = %s", $updatedAt, $type);
 
             $this->setAreasHash($areasHashNew);
             $this->db->query($queryInsert);
@@ -92,8 +95,9 @@ class DatabaseSync extends Base
      */
     private function updateCities()
     {
+        $type = Area::CITY_KEY;
         $cities = NP()->api->getCities();
-        $table = City::table();
+        $table = Area::table();
         $citiesHashOld = $this->citiesHash;
         $citiesHashNew = md5(serialize($cities));
         $updatedAt = $this->updatedAt;
@@ -103,7 +107,8 @@ class DatabaseSync extends Base
             $insert = array();
             foreach ($cities as $city) {
                 $insert[] = $this->db->prepare(
-                    "('%s', '%s', '%s', '%s', %d)",
+                    "('%s', '%s', '%s', '%s', '%s', %d)",
+                    $type,
                     $city['Ref'],
                     $city['Description'],
                     $city['DescriptionRu'],
@@ -111,16 +116,17 @@ class DatabaseSync extends Base
                     $updatedAt
                 );
             }
-            $queryInsert = "INSERT INTO $table (`ref`, `description`, `description_ru`, `area_ref`, `updated_at`) VALUES ";
+            $queryInsert = "INSERT INTO $table (`area_type`, `ref`, `description`, `description_ru`, `parent_area_ref`, `updated_at`) VALUES ";
             $queryInsert .= implode(",", $insert);
             $queryInsert .= " ON DUPLICATE KEY UPDATE 
-            `ref` = VALUES(`ref`), 
-            `description` = VALUES(`description`), 
-            `description_ru`=VALUES(`description_ru`), 
-            `area_ref`=VALUES(`area_ref`), 
+            `area_type` = '$type',
+            `ref` = VALUES(`ref`),
+            `description` = VALUES(`description`),
+            `description_ru`=VALUES(`description_ru`),
+            `parent_area_ref`=VALUES(`parent_area_ref`),
             `updated_at` = VALUES(`updated_at`)";
 
-            $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d", $updatedAt);
+            $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d AND `area_type` = %s", $updatedAt, $type);
 
             $this->setCitiesHash($citiesHashNew);
             $this->db->query($queryInsert);
@@ -133,8 +139,9 @@ class DatabaseSync extends Base
      */
     private function updateWarehouses()
     {
+        $type = Area::WAREHOUSE_KEY;
         $warehouses = NP()->api->getWarehouses();
-        $table = Warehouse::table();
+        $table = Area::table();
         $warehousesHashOld = $this->warehousesHash;
         $warehousesHashNew = md5(serialize($warehouses));
         $updatedAt = $this->updatedAt;
@@ -144,25 +151,25 @@ class DatabaseSync extends Base
             foreach ($warehouses as $warehouse) {
                 $insert[] = $this->db->prepare(
                     "('%s', '%s', '%s', '%s', '%s', %d)",
+                    $type,
                     $warehouse['Ref'],
                     $warehouse['Description'],
                     $warehouse['DescriptionRu'],
                     $warehouse['CityRef'],
-                    $warehouse['CityDescription'],
                     $updatedAt
                 );
             }
-            $queryInsert = "INSERT INTO $table (`ref`, `description`, `description_ru`, `city_ref`, `city_description`, `updated_at`) VALUES ";
+            $queryInsert = "INSERT INTO $table (`area_type`, `ref`, `description`, `description_ru`, `parent_area_ref`, `updated_at`) VALUES ";
             $queryInsert .= implode(",", $insert);
             $queryInsert .= " ON DUPLICATE KEY UPDATE 
+            `area_type` = '$type',
             `ref` = VALUES(`ref`), 
             `description` = VALUES(`description`), 
             `description_ru`=VALUES(`description_ru`), 
-            `city_ref`=VALUES(`city_ref`), 
-            `city_description` = VALUES(`city_description`), 
+            `parent_area_ref`=VALUES(`parent_area_ref`), 
             `updated_at` = VALUES(`updated_at`)";
 
-            $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d", $updatedAt);
+            $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d AND `area_type`=%s", $updatedAt, $type);
 
             $this->setWarehousesHash($warehousesHashNew);
             $this->db->query($queryInsert);

@@ -35,28 +35,28 @@ class Database extends Base
     public function createTables()
     {
         $this->createTableAreas();
-        $this->createTableRegions();
-        $this->createTableCities();
-        $this->createTableWarehouses();
     }
 
     public function dropTables()
     {
-        $this->dropTableWarehouses();
-        $this->dropTableCities();
-        $this->dropTableRegions();
+        $this->dropTableAreas();
     }
 
     private function createTableAreas()
     {
         $table = Area::table();
+        $region = Area::REGION_KEY;
+        $city = Area::CITY_KEY;
+        $warehouse = Area::WAREHOUSE_KEY;
+
         $query = <<<QUERY
             CREATE TABLE IF NOT EXISTS {$table} (
                 `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `ref` VARCHAR(50) NOT NULL,
+                `area_type` ENUM('$region','$city','$warehouse') NOT NULL,
                 `description` TINYTEXT NOT NULL,
                 `description_ru` TINYTEXT,
-                `parent_area_ref` VARCHAR(50) NOT NULL,
+                `parent_area_ref` VARCHAR(50) DEFAULT NULL,
                 `updated_at` INT(10) UNSIGNED NOT NULL,
                 `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY `id` (`id`),
@@ -66,73 +66,9 @@ QUERY;
         $this->db->query($query);
     }
 
-    private function createTableRegions()
+    private function dropTableAreas()
     {
-        $table = Region::table();
-        $query = <<<QUERY
-            CREATE TABLE IF NOT EXISTS {$table} (
-                `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-                `ref` VARCHAR(50) NOT NULL,
-                `description` tinytext NOT NULL,
-                `description_ru` tinytext,
-                `updated_at` INT(10) UNSIGNED NOT NULL,
-                PRIMARY KEY `id` (`id`),
-                UNIQUE KEY `uk_ref` (`ref`)
-            )ENGINE=INNODB
-QUERY;
-        $this->db->query($query);
-    }
-
-    private function createTableCities()
-    {
-        $table = City::table();
-        $query = <<<QUERY
-            CREATE TABLE IF NOT EXISTS {$table} (
-                `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-                `ref` VARCHAR(50) NOT NULL,
-                `description` TINYTEXT NOT NULL,
-                `description_ru` TINYTEXT,
-                `area_ref` VARCHAR(50) NOT NULL,
-                `updated_at` INT(10) UNSIGNED NOT NULL,
-                PRIMARY KEY `id` (`id`),
-                UNIQUE KEY `uk_ref` (`ref`)
-            )ENGINE=INNODB
-QUERY;
-        $this->db->query($query);
-    }
-
-    private function createTableWarehouses()
-    {
-        $table = Warehouse::table();
-        $query = <<<QUERY
-            CREATE TABLE IF NOT EXISTS {$table} (
-                `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-                `ref` VARCHAR(50) NOT NULL,
-                `description` TINYTEXT NOT NULL,
-                `description_ru` TINYTEXT,
-                `city_ref` VARCHAR(50) NOT NULL,
-                `city_description` TINYTEXT,
-                `updated_at` INT(10) UNSIGNED NOT NULL,
-                PRIMARY KEY `id` (`id`),
-                UNIQUE KEY `uk_ref` (`ref`)
-            )ENGINE=INNODB
-QUERY;
-        $this->db->query($query);
-    }
-
-    private function dropTableRegions()
-    {
-        $this->dropTableByName(Region::table());
-    }
-
-    private function dropTableCities()
-    {
-        $this->dropTableByName(City::table());
-    }
-
-    private function dropTableWarehouses()
-    {
-        $this->dropTableByName(Warehouse::table());
+        $this->dropTableByName(Area::table());
     }
 
     private function dropTableByName($table)
