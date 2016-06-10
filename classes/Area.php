@@ -80,15 +80,15 @@ abstract class Area extends Base
     public static function findByNameSuggestion($name, $parentRef = null)
     {
         $table = static::table();
-        $type = static::key();
-        $query = "SELECT * FROM $table WHERE "
-            . "(`description` LIKE CONCAT('%', '$name', '%') OR `description_ru` LIKE CONCAT('%', '$name', '%'))"
-            . " AND (`area_type`='$type')";
-        if (is_null($parentRef)) {
-            $query .= " AND (`parent_area_ref` IS NULL)";
-        } else {
-            $query .= " AND (`parent_area_ref` = '$parentRef')";
-        }
+        $a = '%';
+        $parentAreaCond = (is_null($parentRef)) ? " AND (`parent_area_ref` IS NULL)" : " AND (`parent_area_ref` = '$parentRef')";
+        $query = NP()->db->prepare(
+            "SELECT * FROM $table WHERE (`description` LIKE CONCAT(%s, %s, %s) OR `description_ru` LIKE CONCAT(%s, %s, %s)) AND (`area_type`=%s) 
+            $parentAreaCond",
+            $a, $name, $a,
+            $a, $name, $a,
+            static::key()
+        );
         return self::findByQuery($query);
     }
 
