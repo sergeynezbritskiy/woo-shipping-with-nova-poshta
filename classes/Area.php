@@ -8,13 +8,17 @@ namespace plugins\NovaPoshta\classes;
  */
 class Area extends Location
 {
+    /**
+     * @var string
+     */
+    public static $key = 'nova_poshta_area';
 
     /**
      * @return string
      */
     public static function table()
     {
-        return NP()->db->prefix . 'nova_poshta_area';
+        return NP()->db->prefix . self::$key;
     }
 
     /**

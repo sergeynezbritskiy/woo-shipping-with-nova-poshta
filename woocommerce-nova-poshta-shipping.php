@@ -53,19 +53,70 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             register_activation_hook(__FILE__, array($this, 'activatePlugin'));
             register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
 
+            add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
+            add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
+
             add_action('init', array(AjaxRoute::class, 'init'));
             add_action('admin_init', array(DatabaseSync::instance(), 'synchroniseLocations'));
             add_action('plugins_loaded', array($this, 'loadPluginDomain'));
-            add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
             add_action('wp_enqueue_scripts', array($this, 'scripts'));
             add_action('admin_enqueue_scripts', array($this, 'adminScripts'));
 
             add_filter('woocommerce_checkout_fields', array($this, 'addNewBillingFields'));
-            add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
-            add_filter('woocommerce_locate_template', array($this, 'locateTemplate'), 1, 3);
+            add_action('woocommerce_checkout_update_order_meta', array($this, 'updateOrderMeta'));
+            add_action('woocommerce_checkout_process', array($this, 'validateNewBillingFields'));
+//            add_filter('woocommerce_locate_template', array($this, 'locateTemplate'), 1, 3);
 //            add_filter("woocommerce_checkout_fields", array($this, 'changeFieldsOrder'));
-            add_filter('woocommerce_order_formatted_billing_address', array($this, 'filterWoocommerceOrderFormattedBillingAddress'), 10, 3);
-            add_filter('woocommerce_order_formatted_shipping_address', array($this, 'filterWoocommerceOrderFormattedBillingAddress'), 10, 3);
+//            add_filter('woocommerce_order_formatted_billing_address', array($this, 'filterWoocommerceOrderFormattedBillingAddress'), 10, 3);
+//            add_filter('woocommerce_order_formatted_shipping_address', array($this, 'filterWoocommerceOrderFormattedBillingAddress'), 10, 3);
+        }
+
+        /**
+         * Update the order meta with field value
+         * @param int $orderId
+         */
+        function updateOrderMeta($orderId)
+        {
+            $regionKey = Area::$key;
+            $cityKey = City::$key;
+            $warehouseKey = Warehouse::$key;
+            if (!empty($_POST[$regionKey])) {
+                $regionRef = sanitize_text_field($_POST[$regionKey]);
+                $area = new Area($regionRef);
+                update_post_meta($orderId, '_billing_' . $regionKey, $area->ref);
+                update_post_meta($orderId, '_billing_state', $area->description);
+
+            }
+            if (!empty($_POST[$cityKey])) {
+                $cityRef = sanitize_text_field($_POST[$cityKey]);
+                $city = new City($cityRef);
+                update_post_meta($orderId, '_billing_' . $cityKey, $city->ref);
+                update_post_meta($orderId, '_billing_city', $city->description);
+            }
+            if (!empty($_POST[$warehouseKey])) {
+                $warehouseRef = sanitize_text_field($_POST[$warehouseKey]);
+                $warehouse = new Warehouse($warehouseRef);
+                update_post_meta($orderId, '_billing_' . $warehouseKey, $warehouse->ref);
+                update_post_meta($orderId, '_billing_address_1', $warehouse->description);
+            }
+        }
+
+        /**
+         * Process the checkout
+         */
+        function validateNewBillingFields()
+        {
+
+            // Check if set, if its not set add an error.
+            if (!$_POST[Area::$key]) {
+                wc_add_notice(__('Please enter something into field Region.'), 'error');
+            }
+            if (!$_POST[City::$key]) {
+                wc_add_notice(__('Please enter something into field City.'), 'error');
+            }
+            if (!$_POST[Warehouse::$key]) {
+                wc_add_notice(__('Please enter something into field Warehouse.'), 'error');
+            }
         }
 
         public function addNewBillingFields($fields)
@@ -73,7 +124,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             $area = '';
             $city = '';
 
-            $fields['billing']['nova_poshta_region'] = [
+            $fields['billing'][Area::$key] = [
                 'label' => __('Region', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => true,
@@ -81,7 +132,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'class' => array(),
                 'custom_attributes' => array(),
             ];
-            $fields['billing']['nova_poshta_city'] = [
+            $fields['billing'][City::$key] = [
                 'label' => __('City', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => true,
@@ -89,7 +140,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'class' => array(),
                 'custom_attributes' => array(),
             ];
-            $fields['billing']['nova_poshta_warehouse'] = [
+            $fields['billing'][Warehouse::$key] = [
                 'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => true,
@@ -102,6 +153,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
         /**
          * @param array $instance
+         * @deprecated We use different fields for saving locations ref
          * @return array
          */
         public function filterWoocommerceOrderFormattedBillingAddress($instance)

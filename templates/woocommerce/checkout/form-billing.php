@@ -41,46 +41,9 @@ if (!defined('ABSPATH')) {
 
     <?php do_action('woocommerce_before_checkout_billing_form', $checkout); ?>
 
-    <?php
-    $area = $checkout->get_value('billing_state');
-    $city = $checkout->get_value('billing_city');
-    $warehouse = $checkout->get_value('billing_address_1');
-    ?>
-
     <?php foreach ($checkout->checkout_fields['billing'] as $fieldKey => $fieldName) : ?>
 
-        <?php if ($fieldKey === 'billing_state'): ?>
-
-            <?php woocommerce_form_field($fieldKey, array(
-                'type' => 'select',
-                'required' => true,
-                'label' => __('Region', NOVA_POSHTA_DOMAIN),
-                'options' => OptionsHelper::getList(Area::findAll()),
-            ), $city); ?>
-
-        <?php elseif ($fieldKey === 'billing_city') : ?>
-
-            <?php woocommerce_form_field($fieldKey, array(
-                'type' => 'select',
-                'required' => true,
-                'label' => __('City', NOVA_POSHTA_DOMAIN),
-                'options' => OptionsHelper::getList(City::findByAreaRef($area)),
-            ), $city); ?>
-
-        <?php elseif ($fieldKey === 'billing_address_1') : ?>
-
-            <?php woocommerce_form_field($fieldKey, array(
-                'type' => 'select',
-                'required' => true,
-                'label' => __('Warehouse', NOVA_POSHTA_DOMAIN),
-                'options' => OptionsHelper::getList(Warehouse::findByCityRef($city)),
-            ), $warehouse); ?>
-
-        <?php else : ?>
-
             <?php woocommerce_form_field($fieldKey, $fieldName, $checkout->get_value($fieldKey)); ?>
-
-        <?php endif; ?>
 
     <?php endforeach; ?>
 

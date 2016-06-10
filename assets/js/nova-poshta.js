@@ -9,7 +9,7 @@ jQuery(document).ready(function ($) {
 
         init: function () {
 
-            this.areaSelect = $('#nova_poshta_region');
+            this.areaSelect = $('#nova_poshta_area');
             this.citySelect = $('#nova_poshta_city');
             this.warehouseSelect = $('#nova_poshta_warehouse');
             this.shippingMethod = $("select.shipping_method, input[name^=shipping_method][type=radio], input[name^=shipping_method][type=hidden]");

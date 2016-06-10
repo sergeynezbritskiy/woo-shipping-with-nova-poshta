@@ -10,11 +10,16 @@ use plugins\NovaPoshta\classes\base\OptionsHelper;
 class City extends Location
 {
     /**
+     * @var string
+     */
+    public static $key = 'nova_poshta_city';
+
+    /**
      * @return string
      */
     public static function table()
     {
-        return NP()->db->prefix . 'nova_poshta_city';
+        return NP()->db->prefix . self::$key;
     }
 
     /**

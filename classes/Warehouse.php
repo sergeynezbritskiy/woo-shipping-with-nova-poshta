@@ -10,13 +10,17 @@ use plugins\NovaPoshta\classes\base\OptionsHelper;
  */
 class Warehouse extends Location
 {
+    /**
+     * @var string
+     */
+    public static $key = 'nova_poshta_warehouse';
 
     /**
      * @return string
      */
     public static function table()
     {
-        return NP()->db->prefix . 'nova_poshta_warehouse';
+        return NP()->db->prefix . self::$key;
     }
 
     /**
