@@ -11,16 +11,11 @@ use plugins\NovaPoshta\classes\base\OptionsHelper;
 class Warehouse extends Area
 {
     /**
-     * @var string
-     */
-    public static $key = 'nova_poshta_warehouse';
-
-    /**
      * @return string
      */
-    public static function table()
+    public static function areaType()
     {
-        return NP()->db->prefix . self::$key;
+        return self::WAREHOUSE_KEY;
     }
 
     /**
@@ -29,7 +24,7 @@ class Warehouse extends Area
      */
     public static function findByCityRef($cityRef)
     {
-        $query = NP()->db->prepare("SELECT * FROM " . self::table() . " WHERE `city_ref` = '%s'", $cityRef);
+        $query = NP()->db->prepare("SELECT * FROM " . self::table() . " WHERE `parent_area_ref` = '%s' AND `area_type` = %s", $cityRef, self::areaType());
         return self::findByQuery($query);
     }
 
@@ -40,7 +35,7 @@ class Warehouse extends Area
      */
     public static function findByCityRefAndName($name, $cityRef)
     {
-        $query = "SELECT * FROM " . self::table() . " WHERE `city_ref` = '" . $cityRef . "' AND (`description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%'))";
+        $query = "SELECT * FROM " . self::table() . " WHERE `parent_area_ref` = '" . $cityRef . "' AND (`description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%')) AND `area_type`='" . self::areaType() . "'";
         return self::findByQuery($query);
     }
 

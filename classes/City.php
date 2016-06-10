@@ -1,6 +1,7 @@
 <?php
 
 namespace plugins\NovaPoshta\classes;
+
 use plugins\NovaPoshta\classes\base\OptionsHelper;
 
 /**
@@ -9,17 +10,9 @@ use plugins\NovaPoshta\classes\base\OptionsHelper;
  */
 class City extends Area
 {
-    /**
-     * @var string
-     */
-    public static $key = 'nova_poshta_city';
-
-    /**
-     * @return string
-     */
-    public static function table()
+    public static function areaType()
     {
-        return NP()->db->prefix . self::$key;
+        return City::CITY_KEY;
     }
 
     /**
@@ -28,7 +21,7 @@ class City extends Area
      */
     public static function findByAreaRef($area)
     {
-        $query = NP()->db->prepare("SELECT * FROM " . self::table() . " WHERE `area_ref` = '%s'", $area);
+        $query = NP()->db->prepare("SELECT * FROM " . static::table() . " WHERE `parent_area_ref` = '%s' AND `area_type`='%s'", $area, static::areaType());
         return self::findByQuery($query);
     }
 
@@ -39,7 +32,7 @@ class City extends Area
      */
     public static function findByAreaRefAndName($name, $areaRef)
     {
-        $query = "SELECT * FROM " . self::table() . " WHERE `area_ref` = '" . $areaRef . "' AND (`description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%'))";
+        $query = "SELECT * FROM " . static::table() . " WHERE `parent_area_ref` = '" . $areaRef . "' AND (`description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%')) AND `area_type`='" . static::areaType() . "'";
         return self::findByQuery($query);
     }
 
@@ -58,7 +51,7 @@ class City extends Area
     /**
      * @return void
      */
-    public static function ajaxGetCitiesBySuggestion()
+    public static function ajaxGetCitiesByNameSuggestion()
     {
         $areaRef = $_POST['area_ref'];
         $name = $_POST['name'];

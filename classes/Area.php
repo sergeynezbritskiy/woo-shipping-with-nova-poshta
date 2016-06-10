@@ -69,8 +69,10 @@ abstract class Area extends Base
      */
     public static function findByNameSuggestion($name)
     {
-        $query = "SELECT * FROM " . static::table()
-            . " WHERE `description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%')";
+        $query = "SELECT * FROM " . static::table() . " WHERE "
+            . "(`description` LIKE CONCAT('%', '" . $name . "', '%') "
+            . "OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%'))"
+            . " AND (`area_type`='" . static::areaType() . "')";
         return self::findByQuery($query);
     }
 
@@ -86,6 +88,11 @@ abstract class Area extends Base
             $locations[] = new static($item);
         }
         return $locations;
+    }
+
+    public static function areaType()
+    {
+        _doing_it_wrong("Area Type", "You should not call this method from abstract class", "1.0.0");
     }
 
     /**

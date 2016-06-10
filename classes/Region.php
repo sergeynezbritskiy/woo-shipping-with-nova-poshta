@@ -8,23 +8,16 @@ namespace plugins\NovaPoshta\classes;
  */
 class Region extends Area
 {
-    /**
-     * @var string
-     */
-    public static $key = 'nova_poshta_region';
 
-    /**
-     * @return string
-     */
-    public static function table()
+    public static function areaType()
     {
-        return NP()->db->prefix . self::$key;
+        return Region::REGION_KEY;
     }
 
     /**
      * Get areas by area name suggestion
      */
-    public static function ajaxGetAreasBySuggestion()
+    public static function ajaxGetRegionsByNameSuggestion()
     {
         $name = $_POST['name'];
         $areas = Region::findByNameSuggestion($name);

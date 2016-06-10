@@ -24,7 +24,7 @@ jQuery(document).ready(function ($) {
                         type: 'POST',
                         url: ajaxurl,
                         data: {
-                            action: NovaPoshtaHelper.getAreasBySuggestionAction,
+                            action: NovaPoshtaHelper.getRegionsByNameSuggestionAction,
                             name: request.term
                         },
                         success: function (json) {
@@ -57,7 +57,7 @@ jQuery(document).ready(function ($) {
                         type: 'POST',
                         url: ajaxurl,
                         data: {
-                            action: NovaPoshtaHelper.getCitiesBySuggestionAction,
+                            action: NovaPoshtaHelper.getCitiesByNameSuggestionAction,
                             name: request.term,
                             area_ref: NovaPoshtaAdmin.areaInputKey.val()
                         },
