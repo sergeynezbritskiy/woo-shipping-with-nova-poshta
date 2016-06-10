@@ -35,6 +35,11 @@ abstract class Area extends Base
         }
     }
 
+    public static function areaType()
+    {
+        _doing_it_wrong("Area Type", "You should not call this method from abstract class", "1.0.0");
+    }
+
     /**
      * @return string
      */
@@ -48,7 +53,38 @@ abstract class Area extends Base
      */
     public static function findAll()
     {
-        $query = "SELECT * FROM " . static::table();
+        $table = static::table();
+        $query = NP()->db->prepare("SELECT * FROM $table WHERE `area_type` = %s", static::areaType());
+        return self::findByQuery($query);
+    }
+
+    /**
+     * @param string $areaRef
+     * @return Area[]
+     */
+    public static function findByParentAreaRef($areaRef)
+    {
+        $query = NP()->db->prepare("SELECT * FROM " . static::table() . " WHERE `parent_area_ref` = '%s' AND `area_type`='%s'", $areaRef, static::areaType());
+        return self::findByQuery($query);
+    }
+
+    /**
+     * @param string $name
+     * @param string $parentRef
+     * @return Area[]
+     */
+    public static function findByNameSuggestion($name, $parentRef = null)
+    {
+        $table = static::table();
+        $type = static::areaType();
+        $query = "SELECT * FROM $table WHERE "
+            . "(`description` LIKE CONCAT('%', '$name', '%') OR `description_ru` LIKE CONCAT('%', '$name', '%'))"
+            . " AND (`area_type`='$type')";
+        if (is_null($parentRef)) {
+            $query .= " AND (`parent_area_ref` IS NULL)";
+        } else {
+            $query .= " AND (`parent_area_ref` = '$parentRef')";
+        }
         return self::findByQuery($query);
     }
 
@@ -58,22 +94,10 @@ abstract class Area extends Base
      */
     public static function findByRef($ref)
     {
-        $query = NP()->db->prepare("SELECT * FROM " . static::table() . " WHERE Ref = %s", $ref);
+        $table = static::table();
+        $query = NP()->db->prepare("SELECT * FROM $table WHERE Ref = %s AND `area_type` = %s", $ref, static::areaType());
         $result = NP()->db->get_row($query);
         return new static($result);
-    }
-
-    /**
-     * @param $name
-     * @return Area[]
-     */
-    public static function findByNameSuggestion($name)
-    {
-        $query = "SELECT * FROM " . static::table() . " WHERE "
-            . "(`description` LIKE CONCAT('%', '" . $name . "', '%') "
-            . "OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%'))"
-            . " AND (`area_type`='" . static::areaType() . "')";
-        return self::findByQuery($query);
     }
 
     /**
@@ -90,11 +114,6 @@ abstract class Area extends Base
         return $locations;
     }
 
-    public static function areaType()
-    {
-        _doing_it_wrong("Area Type", "You should not call this method from abstract class", "1.0.0");
-    }
-
     /**
      * @return mixed
      */
@@ -109,7 +128,8 @@ abstract class Area extends Base
      */
     protected function getContent()
     {
-        $query = NP()->db->prepare("SELECT * FROM " . static::table() . " WHERE `ref`='%s'", $this->ref);
+        $table = static::table();
+        $query = NP()->db->prepare("SELECT * FROM $table WHERE Ref = %s AND `area_type` = %s", $this->ref, static::areaType());
         $this->content = NP()->db->get_row($query);
         return $this->content;
     }

@@ -136,7 +136,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'label' => __('City', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => true,
-                'options' => OptionsHelper::getList(City::findByAreaRef($area)),
+                'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
                 'class' => array(),
                 'custom_attributes' => array(),
             ];
@@ -144,7 +144,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => true,
-                'options' => OptionsHelper::getList(Warehouse::findByCityRef($city)),
+                'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
                 'class' => array(),
                 'custom_attributes' => array(),
             ];
@@ -215,7 +215,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'chooseAnOptionText' => __('Choose an option', NOVA_POSHTA_DOMAIN),
                 'getRegionsByNameSuggestionAction' => AjaxRoute::GET_REGIONS_BY_NAME_SUGGESTION,
                 'getCitiesByNameSuggestionAction' => AjaxRoute::GET_CITIES_BY_NAME_SUGGESTION,
-                'getWarehousesBySuggestionAction' => AjaxRoute::GET_WAREHOUSES_BY_SUGGESTION,
+                'getWarehousesBySuggestionAction' => AjaxRoute::GET_WAREHOUSES_BY_NAME_SUGGESTION,
                 'getCitiesAction' => AjaxRoute::GET_CITIES_ROUTE,
                 'getWarehousesAction' => AjaxRoute::GET_WAREHOUSES_ROUTE,
             ]);

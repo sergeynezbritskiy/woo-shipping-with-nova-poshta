@@ -10,16 +10,18 @@ class AjaxRoute
 {
     const GET_CITIES_ROUTE = 'nova_poshta_get_cities_by_area';
     const GET_WAREHOUSES_ROUTE = 'nova_poshta_get_warehouses_by_city';
+
     const GET_REGIONS_BY_NAME_SUGGESTION = 'get_regions_by_name_suggestion';
     const GET_CITIES_BY_NAME_SUGGESTION = 'get_cities_by_suggestion';
-    const GET_WAREHOUSES_BY_SUGGESTION = 'get_warehouses_by_suggestion';
+    const GET_WAREHOUSES_BY_NAME_SUGGESTION = 'get_warehouses_by_suggestion';
 
     public static $handlers = array(
         self::GET_CITIES_ROUTE => array(City::class, 'ajaxGetCitiesListByAreaRef'),
         self::GET_WAREHOUSES_ROUTE => array(Warehouse::class, 'ajaxGetWarehousesListByCityRef'),
+
         self::GET_REGIONS_BY_NAME_SUGGESTION => array(Region::class, 'ajaxGetRegionsByNameSuggestion'),
         self::GET_CITIES_BY_NAME_SUGGESTION => array(City::class, 'ajaxGetCitiesByNameSuggestion'),
-        self::GET_WAREHOUSES_BY_SUGGESTION => array(Warehouse::class, 'ajaxGetWarehousesBySuggestion'),
+        self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array(Warehouse::class, 'ajaxGetWarehousesByNameSuggestion'),
     );
 
     public static function init()

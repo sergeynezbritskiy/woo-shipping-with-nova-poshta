@@ -16,33 +16,12 @@ class City extends Area
     }
 
     /**
-     * @param string $area
-     * @return City[]
-     */
-    public static function findByAreaRef($area)
-    {
-        $query = NP()->db->prepare("SELECT * FROM " . static::table() . " WHERE `parent_area_ref` = '%s' AND `area_type`='%s'", $area, static::areaType());
-        return self::findByQuery($query);
-    }
-
-    /**
-     * @param string $name
-     * @param string $areaRef
-     * @return City[]
-     */
-    public static function findByAreaRefAndName($name, $areaRef)
-    {
-        $query = "SELECT * FROM " . static::table() . " WHERE `parent_area_ref` = '" . $areaRef . "' AND (`description` LIKE CONCAT('%', '" . $name . "', '%') OR `description_ru` LIKE CONCAT('%', '" . $name . "', '%')) AND `area_type`='" . static::areaType() . "'";
-        return self::findByQuery($query);
-    }
-
-    /**
      * @return void
      */
     public static function ajaxGetCitiesListByAreaRef()
     {
         $areaRef = $_POST['area_ref'];
-        $cities = City::findByAreaRef($areaRef);
+        $cities = City::findByParentAreaRef($areaRef);
         $optionsList = OptionsHelper::getList($cities);
         echo json_encode($optionsList);
         exit;
@@ -55,7 +34,7 @@ class City extends Area
     {
         $areaRef = $_POST['area_ref'];
         $name = $_POST['name'];
-        $cities = self::findByAreaRefAndName($name, $areaRef);
+        $cities = self::findByNameSuggestion($name, $areaRef);
         foreach ($cities as $city) {
             $city->getRef();
             $city->getDescription();
