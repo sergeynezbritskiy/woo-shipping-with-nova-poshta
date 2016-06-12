@@ -6,17 +6,21 @@ jQuery(document).ready(function ($) {
         citySelect: null,
         warehouseSelect: null,
         shippingMethod: null,
+        novaPoshtaOptions: null,
+        billingOptions: null,
 
         init: function () {
 
             this.areaSelect = $('#nova_poshta_region');
             this.citySelect = $('#nova_poshta_city');
             this.warehouseSelect = $('#nova_poshta_warehouse');
-            this.shippingMethod = $("select.shipping_method, input[name^=shipping_method][type=radio], input[name^=shipping_method][type=hidden]");
+            this.shippingMethod = $("input[name^=shipping_method][type=radio]");
+            this.novaPoshtaOptions = $('#nova_poshta_region, #nova_poshta_city, #nova_poshta_warehouse');
+            this.billingOptions = $('#billing_address_1, #billing_address_2, #billing_city, #billing_state, #billing_postcode');
 
-            // NovaPoshta.handleShippingMethodChange();
-
-            this.shippingMethod.on('change', NovaPoshta.handleShippingMethodChange());
+            $(document).on('change', NovaPoshta.shippingMethod, function () {
+                NovaPoshta.handleShippingMethodChange();
+            });
 
             this.areaSelect.on('change', function () {
                 var areaRef = this.value;
@@ -87,25 +91,33 @@ jQuery(document).ready(function ($) {
                 });
             });
 
+            this.handleShippingMethodChange();
         },
 
         /**
          * @returns {boolean}
          */
         ensureNovaPoshta: function () {
-            var value = $('input.shipping_method').val();
-            console.log(value);
-            return (value === 'nova_poshta_shipping_method');
+            var currentShippingMethod = $('input[name^=shipping_method][type=radio]:checked');
+            return currentShippingMethod.val() === 'nova_poshta_shipping_method';
         },
 
         enableNovaPoshtaOptions: function () {
-            //TODO hide all options
-            //display nova poshta options
+            NovaPoshta.novaPoshtaOptions.each(function () {
+                $(this).removeAttr('disabled').closest('.form-row').show();
+            });
+            NovaPoshta.billingOptions.each(function () {
+                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
+            });
         },
 
         disableNovaPoshtaOptions: function () {
-            //TODO hide nova poshta options
-            //display all options
+            NovaPoshta.novaPoshtaOptions.each(function () {
+                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
+            });
+            NovaPoshta.billingOptions.each(function () {
+                $(this).removeAttr('disabled').closest('.form-row').show();
+            });
         },
 
         handleShippingMethodChange: function () {

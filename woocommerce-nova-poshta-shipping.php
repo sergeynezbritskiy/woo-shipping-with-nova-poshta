@@ -24,6 +24,7 @@ define('NOVA_POSHTA_SHIPPING_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('NOVA_POSHTA_SHIPPING_TEMPLATES_DIR', trailingslashit(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'templates'));
 define('NOVA_POSHTA_SHIPPING_CLASSES_DIR', trailingslashit(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'classes'));
 define('NOVA_POSHTA_DOMAIN', untrailingslashit(basename(dirname(__FILE__))));
+define('NOVA_POSHTA_SHIPPING_METHOD', 'nova_poshta_shipping_method');
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/autoload.php';
@@ -62,13 +63,57 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_action('wp_enqueue_scripts', array($this, 'scripts'));
             add_action('admin_enqueue_scripts', array($this, 'adminScripts'));
 
-            add_filter('woocommerce_checkout_fields', array($this, 'addNewBillingFields'));
+//            add_filter('woocommerce_checkout_fields', array($this, 'addNewBillingFields'));
+            add_filter('woocommerce_billing_fields', array($this, 'wc_change_required_fields'));
             add_action('woocommerce_checkout_update_order_meta', array($this, 'updateOrderMeta'));
             add_action('woocommerce_checkout_process', array($this, 'validateNewBillingFields'));
 //            add_filter('woocommerce_locate_template', array($this, 'locateTemplate'), 1, 3);
 //            add_filter("woocommerce_checkout_fields", array($this, 'changeFieldsOrder'));
 //            add_filter('woocommerce_order_formatted_billing_address', array($this, 'filterWoocommerceOrderFormattedBillingAddress'), 10, 3);
 //            add_filter('woocommerce_order_formatted_shipping_address', array($this, 'filterWoocommerceOrderFormattedBillingAddress'), 10, 3);
+        }
+
+        function wc_change_required_fields($address_fields)
+        {
+            $area = '';
+            $city = '';
+            $address_fields[Region::key()] = [
+                'label' => __('Region', NOVA_POSHTA_DOMAIN),
+                'type' => 'select',
+                'required' => true,
+                'options' => OptionsHelper::getList(Region::findAll()),
+                'class' => array(),
+                'custom_attributes' => array(),
+            ];
+            $address_fields[City::key()] = [
+                'label' => __('City', NOVA_POSHTA_DOMAIN),
+                'type' => 'select',
+                'required' => true,
+                'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
+                'class' => array(),
+                'custom_attributes' => array(),
+            ];
+            $address_fields[Warehouse::key()] = [
+                'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
+                'type' => 'select',
+                'required' => true,
+                'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
+                'class' => array(),
+                'custom_attributes' => array(),
+            ];
+            return $address_fields;
+        }
+
+        public function isNP()
+        {
+            /** @noinspection PhpUndefinedFieldInspection */
+            $packages = WC()->shipping->get_packages();
+            $chosenShippingMethod = '';
+            foreach ($packages as $i => $package) {
+                /** @noinspection PhpUndefinedFieldInspection */
+                $chosenShippingMethod = isset(WC()->session->chosen_shipping_methods[$i]) ? WC()->session->chosen_shipping_methods[$i] : '';
+            }
+            return $chosenShippingMethod == 'nova_poshta_shipping_method';
         }
 
         /**
@@ -85,7 +130,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 $area = new Region($regionRef);
                 update_post_meta($orderId, '_billing_' . $regionKey, $area->ref);
                 update_post_meta($orderId, '_billing_state', $area->description);
-
             }
             if (!empty($_POST[$cityKey])) {
                 $cityRef = sanitize_text_field($_POST[$cityKey]);
@@ -124,30 +168,32 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             $area = '';
             $city = '';
 
-            $fields['billing'][Region::key()] = [
-                'label' => __('Region', NOVA_POSHTA_DOMAIN),
-                'type' => 'select',
-                'required' => true,
-                'options' => OptionsHelper::getList(Region::findAll()),
-                'class' => array(),
-                'custom_attributes' => array(),
-            ];
-            $fields['billing'][City::key()] = [
-                'label' => __('City', NOVA_POSHTA_DOMAIN),
-                'type' => 'select',
-                'required' => true,
-                'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
-                'class' => array(),
-                'custom_attributes' => array(),
-            ];
-            $fields['billing'][Warehouse::key()] = [
-                'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
-                'type' => 'select',
-                'required' => true,
-                'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
-                'class' => array(),
-                'custom_attributes' => array(),
-            ];
+            if ($this->isNP()) {
+                $fields['billing'][Region::key()] = [
+                    'label' => __('Region', NOVA_POSHTA_DOMAIN),
+                    'type' => 'select',
+                    'required' => true,
+                    'options' => OptionsHelper::getList(Region::findAll()),
+                    'class' => array(),
+                    'custom_attributes' => array(),
+                ];
+                $fields['billing'][City::key()] = [
+                    'label' => __('City', NOVA_POSHTA_DOMAIN),
+                    'type' => 'select',
+                    'required' => true,
+                    'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
+                    'class' => array(),
+                    'custom_attributes' => array(),
+                ];
+                $fields['billing'][Warehouse::key()] = [
+                    'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
+                    'type' => 'select',
+                    'required' => true,
+                    'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
+                    'class' => array(),
+                    'custom_attributes' => array(),
+                ];
+            }
             return $fields;
         }
 

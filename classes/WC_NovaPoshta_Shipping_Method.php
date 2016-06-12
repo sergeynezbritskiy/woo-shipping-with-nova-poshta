@@ -1,8 +1,5 @@
 <?php
-use plugins\NovaPoshta\classes\Region;
 use plugins\NovaPoshta\classes\base\Options;
-use plugins\NovaPoshta\classes\City;
-use plugins\NovaPoshta\classes\Warehouse;
 
 /**
  * Class WC_NovaPoshta_Shipping_Method
@@ -16,7 +13,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
      */
     public function __construct()
     {
-        $this->id = 'nova_poshta_shipping_method';
+        $this->id = NOVA_POSHTA_SHIPPING_METHOD;
         $this->method_title = __('Nova Poshta', NOVA_POSHTA_DOMAIN);
         $this->method_description = __('Shipping with popular Ukrainian logistic company Nova Poshta', NOVA_POSHTA_DOMAIN);
 
