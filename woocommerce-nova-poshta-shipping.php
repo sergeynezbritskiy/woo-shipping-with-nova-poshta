@@ -9,6 +9,7 @@ Author URI: http://sergey-nezbritskiy.com
 */
 
 use plugins\NovaPoshta\classes\AjaxRoute;
+use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\Region;
 use plugins\NovaPoshta\classes\base\Base;
 use plugins\NovaPoshta\classes\base\Options;
@@ -54,66 +55,107 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             register_activation_hook(__FILE__, array($this, 'activatePlugin'));
             register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
 
-            add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
-            add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
-
+            //general plugin actions
             add_action('init', array(AjaxRoute::class, 'init'));
             add_action('admin_init', array(DatabaseSync::instance(), 'synchroniseLocations'));
             add_action('plugins_loaded', array($this, 'loadPluginDomain'));
             add_action('wp_enqueue_scripts', array($this, 'scripts'));
             add_action('admin_enqueue_scripts', array($this, 'adminScripts'));
 
-//            add_filter('woocommerce_checkout_fields', array($this, 'addNewBillingFields'));
-            add_filter('woocommerce_billing_fields', array($this, 'wc_change_required_fields'));
+            //register new shipping method
+            add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
+            add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
+
+            add_filter('woocommerce_checkout_fields', array($this, 'addNewBillingFields'));
+            add_action('woocommerce_checkout_process', array($this, 'validateNewBillingFields'), 10, 1);
             add_action('woocommerce_checkout_update_order_meta', array($this, 'updateOrderMeta'));
-            add_action('woocommerce_checkout_process', array($this, 'validateNewBillingFields'));
-//            add_filter('woocommerce_locate_template', array($this, 'locateTemplate'), 1, 3);
-//            add_filter("woocommerce_checkout_fields", array($this, 'changeFieldsOrder'));
-//            add_filter('woocommerce_order_formatted_billing_address', array($this, 'filterWoocommerceOrderFormattedBillingAddress'), 10, 3);
-//            add_filter('woocommerce_order_formatted_shipping_address', array($this, 'filterWoocommerceOrderFormattedBillingAddress'), 10, 3);
         }
 
-        function wc_change_required_fields($address_fields)
+        function addNewBillingFields($fields)
         {
+            //TODO get city and region values
+            //$area = WC()->checkout()->get_value(Region::key());
+            //$city = WC()->checkout()->get_value(City::key());
             $area = '';
             $city = '';
-            $address_fields[Region::key()] = [
+            $fields['billing'][Region::key()] = [
                 'label' => __('Region', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
-                'required' => true,
+                'required' => $this->isGet() ?: $this->isNP(),
+                'default' => '',
                 'options' => OptionsHelper::getList(Region::findAll()),
                 'class' => array(),
                 'custom_attributes' => array(),
             ];
-            $address_fields[City::key()] = [
+            $fields['billing'][City::key()] = [
                 'label' => __('City', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
-                'required' => true,
+                'required' => $this->isGet() ?: $this->isNP(),
                 'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
                 'class' => array(),
+                'value' => '',
                 'custom_attributes' => array(),
             ];
-            $address_fields[Warehouse::key()] = [
+            $fields['billing'][Warehouse::key()] = [
                 'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
-                'required' => true,
+                'required' => $this->isGet() ?: $this->isNP(),
                 'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
                 'class' => array(),
+                'value' => '',
                 'custom_attributes' => array(),
             ];
-            return $address_fields;
+            //disable required validation for location default fields
+            if ($this->isPost() && $this->isNP()) {
+                if (array_key_exists('billing_state', $fields['billing'])) {
+                    $fields['billing']['billing_state']['required'] = false;
+                }
+                if (array_key_exists('billing_city', $fields['billing'])) {
+                    $fields['billing']['billing_city']['required'] = false;
+                }
+                if (array_key_exists('billing_address_1', $fields['billing'])) {
+                    $fields['billing']['billing_address_1']['required'] = false;
+                }
+                if (array_key_exists('billing_postcode', $fields['billing'])) {
+                    $fields['billing']['billing_postcode']['required'] = false;
+                }
+            }
+            return $fields;
         }
 
+        /**
+         * @return bool
+         */
         public function isNP()
         {
-            /** @noinspection PhpUndefinedFieldInspection */
-            $packages = WC()->shipping->get_packages();
             $chosenShippingMethod = '';
-            foreach ($packages as $i => $package) {
+            if ($this->isPost() && ($shippingMethods = ArrayHelper::getValue($_POST, 'shipping_method', array()))) {
+                $chosenShippingMethod = array_shift($shippingMethods);
+            } else {
                 /** @noinspection PhpUndefinedFieldInspection */
-                $chosenShippingMethod = isset(WC()->session->chosen_shipping_methods[$i]) ? WC()->session->chosen_shipping_methods[$i] : '';
+                $packages = WC()->shipping->get_packages();
+                foreach ($packages as $i => $package) {
+                    /** @noinspection PhpUndefinedFieldInspection */
+                    $chosenShippingMethod = isset(WC()->session->chosen_shipping_methods[$i]) ? WC()->session->chosen_shipping_methods[$i] : '';
+                }
             }
-            return $chosenShippingMethod == 'nova_poshta_shipping_method';
+            return $chosenShippingMethod == NOVA_POSHTA_SHIPPING_METHOD;
+        }
+
+        /**
+         * @return bool
+         */
+        private function isPost()
+        {
+            return $_SERVER['REQUEST_METHOD'] === 'POST';
+        }
+
+        /**
+         * @return bool
+         */
+        private function isGet()
+        {
+            return !$this->isPost();
         }
 
         /**
@@ -143,78 +185,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 update_post_meta($orderId, '_billing_' . $warehouseKey, $warehouse->ref);
                 update_post_meta($orderId, '_billing_address_1', $warehouse->description);
             }
-        }
-
-        /**
-         * Process the checkout
-         */
-        function validateNewBillingFields()
-        {
-
-            // Check if set, if its not set add an error.
-            if (!$_POST[Region::key()]) {
-                wc_add_notice(__('Please enter something into field Region.'), 'error');
-            }
-            if (!$_POST[City::key()]) {
-                wc_add_notice(__('Please enter something into field City.'), 'error');
-            }
-            if (!$_POST[Warehouse::key()]) {
-                wc_add_notice(__('Please enter something into field Warehouse.'), 'error');
-            }
-        }
-
-        public function addNewBillingFields($fields)
-        {
-            $area = '';
-            $city = '';
-
-            if ($this->isNP()) {
-                $fields['billing'][Region::key()] = [
-                    'label' => __('Region', NOVA_POSHTA_DOMAIN),
-                    'type' => 'select',
-                    'required' => true,
-                    'options' => OptionsHelper::getList(Region::findAll()),
-                    'class' => array(),
-                    'custom_attributes' => array(),
-                ];
-                $fields['billing'][City::key()] = [
-                    'label' => __('City', NOVA_POSHTA_DOMAIN),
-                    'type' => 'select',
-                    'required' => true,
-                    'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
-                    'class' => array(),
-                    'custom_attributes' => array(),
-                ];
-                $fields['billing'][Warehouse::key()] = [
-                    'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
-                    'type' => 'select',
-                    'required' => true,
-                    'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
-                    'class' => array(),
-                    'custom_attributes' => array(),
-                ];
-            }
-            return $fields;
-        }
-
-        /**
-         * @param array $instance
-         * @deprecated We use different fields for saving locations ref
-         * @return array
-         */
-        public function filterWoocommerceOrderFormattedBillingAddress($instance)
-        {
-            $state = Region::findByRef($instance['state']);
-            $instance['state'] = $state->description;
-
-            $city = City::findByRef($instance['city']);
-            $instance['city'] = $city->description;
-
-            $warehouse = Warehouse::findByRef($instance['address_1']);
-            $instance['address_1'] = $warehouse->description;
-
-            // make filter magic happen here...
-            return $instance;
         }
 
         /**
@@ -265,30 +235,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'getCitiesAction' => AjaxRoute::GET_CITIES_ROUTE,
                 'getWarehousesAction' => AjaxRoute::GET_WAREHOUSES_ROUTE,
             ]);
-        }
-
-        /**
-         * @param array $fields
-         * @return array
-         */
-        function changeFieldsOrder($fields)
-        {
-            $order = array(
-                "billing_email",
-                "billing_phone",
-                "billing_first_name",
-                "billing_last_name",
-                "billing_state",
-                "billing_city",
-                "billing_address_1",
-                "billing_np_region"
-            );
-            $orderedFields = array();
-            foreach ($order as $field) {
-                $orderedFields[$field] = $fields["billing"][$field];
-            }
-            $fields["billing"] = $orderedFields;
-            return $fields;
         }
 
         /**
