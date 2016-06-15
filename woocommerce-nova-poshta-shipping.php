@@ -67,10 +67,14 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
 
             add_filter('woocommerce_checkout_fields', array($this, 'addNewBillingFields'));
-            add_action('woocommerce_checkout_process', array($this, 'validateNewBillingFields'), 10, 1);
             add_action('woocommerce_checkout_update_order_meta', array($this, 'updateOrderMeta'));
         }
 
+        /**
+         * Filter for hook woocommerce_shipping_init
+         * @param $fields
+         * @return mixed
+         */
         function addNewBillingFields($fields)
         {
             //TODO get city and region values
@@ -124,6 +128,33 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         }
 
         /**
+         * Update the order meta with field value
+         * @param int $orderId
+         */
+        public function updateOrderMeta($orderId)
+        {
+            if ($this->isNP()) {
+                $regionKey = Region::key();
+                $regionRef = sanitize_text_field($_POST[$regionKey]);
+                $area = new Region($regionRef);
+                update_post_meta($orderId, '_billing_' . $regionKey, $area->ref);
+                update_post_meta($orderId, '_billing_state', $area->description);
+
+                $cityKey = City::key();
+                $cityRef = sanitize_text_field($_POST[$cityKey]);
+                $city = new City($cityRef);
+                update_post_meta($orderId, '_billing_' . $cityKey, $city->ref);
+                update_post_meta($orderId, '_billing_city', $city->description);
+
+                $warehouseKey = Warehouse::key();
+                $warehouseRef = sanitize_text_field($_POST[$warehouseKey]);
+                $warehouse = new Warehouse($warehouseRef);
+                update_post_meta($orderId, '_billing_' . $warehouseKey, $warehouse->ref);
+                update_post_meta($orderId, '_billing_address_1', $warehouse->description);
+            }
+        }
+
+        /**
          * @return bool
          */
         public function isNP()
@@ -156,35 +187,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         private function isGet()
         {
             return !$this->isPost();
-        }
-
-        /**
-         * Update the order meta with field value
-         * @param int $orderId
-         */
-        function updateOrderMeta($orderId)
-        {
-            $regionKey = Region::key();
-            $cityKey = City::key();
-            $warehouseKey = Warehouse::key();
-            if (!empty($_POST[$regionKey])) {
-                $regionRef = sanitize_text_field($_POST[$regionKey]);
-                $area = new Region($regionRef);
-                update_post_meta($orderId, '_billing_' . $regionKey, $area->ref);
-                update_post_meta($orderId, '_billing_state', $area->description);
-            }
-            if (!empty($_POST[$cityKey])) {
-                $cityRef = sanitize_text_field($_POST[$cityKey]);
-                $city = new City($cityRef);
-                update_post_meta($orderId, '_billing_' . $cityKey, $city->ref);
-                update_post_meta($orderId, '_billing_city', $city->description);
-            }
-            if (!empty($_POST[$warehouseKey])) {
-                $warehouseRef = sanitize_text_field($_POST[$warehouseKey]);
-                $warehouse = new Warehouse($warehouseRef);
-                update_post_meta($orderId, '_billing_' . $warehouseKey, $warehouse->ref);
-                update_post_meta($orderId, '_billing_address_1', $warehouse->description);
-            }
         }
 
         /**
