@@ -66,7 +66,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
             add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
 
-            add_filter('woocommerce_checkout_fields', array($this, 'addNewBillingFields'));
+            add_filter('woocommerce_checkout_fields', array($this, 'maybeDisableDefaultShippingMethods'));
+            add_filter('woocommerce_billing_fields', array($this, 'addNewBillingFields'));
             add_action('woocommerce_checkout_update_order_meta', array($this, 'updateOrderMeta'));
         }
 
@@ -75,40 +76,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
          * @param $fields
          * @return mixed
          */
-        function addNewBillingFields($fields)
+        function maybeDisableDefaultShippingMethods($fields)
         {
-            //TODO get city and region values
-            //$area = WC()->checkout()->get_value(Region::key());
-            //$city = WC()->checkout()->get_value(City::key());
-            $area = '';
-            $city = '';
-            $fields['billing'][Region::key()] = [
-                'label' => __('Region', NOVA_POSHTA_DOMAIN),
-                'type' => 'select',
-                'required' => $this->isGet() ?: $this->isNP(),
-                'default' => '',
-                'options' => OptionsHelper::getList(Region::findAll()),
-                'class' => array(),
-                'custom_attributes' => array(),
-            ];
-            $fields['billing'][City::key()] = [
-                'label' => __('City', NOVA_POSHTA_DOMAIN),
-                'type' => 'select',
-                'required' => $this->isGet() ?: $this->isNP(),
-                'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
-                'class' => array(),
-                'value' => '',
-                'custom_attributes' => array(),
-            ];
-            $fields['billing'][Warehouse::key()] = [
-                'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
-                'type' => 'select',
-                'required' => $this->isGet() ?: $this->isNP(),
-                'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
-                'class' => array(),
-                'value' => '',
-                'custom_attributes' => array(),
-            ];
             //disable required validation for location default fields
             if ($this->isPost() && $this->isNP()) {
                 if (array_key_exists('billing_state', $fields['billing'])) {
@@ -124,6 +93,48 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                     $fields['billing']['billing_postcode']['required'] = false;
                 }
             }
+            return $fields;
+        }
+
+        /**
+         * Filter for hook woocommerce_shipping_init
+         * @param $fields
+         * @return mixed
+         */
+        function addNewBillingFields($fields)
+        {
+            //TODO get city and region values
+            //$area = WC()->checkout()->get_value(Region::key());
+            //$city = WC()->checkout()->get_value(City::key());
+            $area = '';
+            $city = '';
+            $fields[Region::key()] = [
+                'label' => __('Region', NOVA_POSHTA_DOMAIN),
+                'type' => 'select',
+                'required' => $this->isGet() ?: $this->isNP(),
+                'default' => '',
+                'options' => OptionsHelper::getList(Region::findAll()),
+                'class' => array(),
+                'custom_attributes' => array(),
+            ];
+            $fields[City::key()] = [
+                'label' => __('City', NOVA_POSHTA_DOMAIN),
+                'type' => 'select',
+                'required' => $this->isGet() ?: $this->isNP(),
+                'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
+                'class' => array(),
+                'value' => '',
+                'custom_attributes' => array(),
+            ];
+            $fields[Warehouse::key()] = [
+                'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
+                'type' => 'select',
+                'required' => $this->isGet() ?: $this->isNP(),
+                'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
+                'class' => array(),
+                'value' => '',
+                'custom_attributes' => array(),
+            ];
             return $fields;
         }
 
