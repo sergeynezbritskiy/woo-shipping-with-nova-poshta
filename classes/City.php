@@ -9,10 +9,11 @@ namespace plugins\NovaPoshta\classes;
 class City extends Area
 {
     /**
+     * @param string $type
      * @return string
      */
-    public static function key()
+    public static function key($type = '')
     {
-        return City::KEY_CITY;
+        return parent::_key(self::KEY_CITY, $type);
     }
 }

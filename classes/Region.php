@@ -9,10 +9,11 @@ namespace plugins\NovaPoshta\classes;
 class Region extends Area
 {
     /**
+     * @param string $type
      * @return string
      */
-    public static function key()
+    public static function key($type = '')
     {
-        return Region::KEY_REGION;
+        return parent::_key(self::KEY_REGION, $type);
     }
 }

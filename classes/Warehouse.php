@@ -9,10 +9,11 @@ namespace plugins\NovaPoshta\classes;
 class Warehouse extends Area
 {
     /**
+     * @param string $type
      * @return string
      */
-    public static function key()
+    public static function key($type = '')
     {
-        return self::KEY_WAREHOUSE;
+        return parent::_key(self::KEY_WAREHOUSE, $type);
     }
 }

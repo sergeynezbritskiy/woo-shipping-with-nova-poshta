@@ -23,6 +23,9 @@ abstract class Area extends Base
     const KEY_CITY = 'nova_poshta_city';
     const KEY_WAREHOUSE = 'nova_poshta_warehouse';
 
+    const BILLING = 'billing';
+    const SHIPPING = 'shipping';
+
     /**
      * Location constructor.
      * @param $ref
@@ -42,6 +45,17 @@ abstract class Area extends Base
     public static function key()
     {
         _doing_it_wrong("Area Type", "You should not call this method from abstract class", "1.0.0");
+    }
+
+
+    /**
+     * @param string $name
+     * @param string $type
+     * @return string
+     */
+    protected static function _key($name, $type)
+    {
+        return $type ? $type . '_' . $name : $name;
     }
 
     /**

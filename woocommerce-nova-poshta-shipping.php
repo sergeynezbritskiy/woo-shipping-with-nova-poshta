@@ -9,6 +9,7 @@ Author URI: http://sergey-nezbritskiy.com
 */
 
 use plugins\NovaPoshta\classes\AjaxRoute;
+use plugins\NovaPoshta\classes\Area;
 use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\Region;
 use plugins\NovaPoshta\classes\base\Base;
@@ -67,7 +68,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
 
             add_filter('woocommerce_checkout_fields', array($this, 'maybeDisableDefaultShippingMethods'));
-            add_filter('woocommerce_billing_fields', array($this, 'addNewBillingFields'));
+            add_filter('woocommerce_billing_fields', array($this, 'addNovaPoshtaBillingFields'));
+            add_filter('woocommerce_shipping_fields', array($this, 'addNovaPoshtaShippingFields'));
             add_action('woocommerce_checkout_update_order_meta', array($this, 'updateOrderMeta'));
         }
 
@@ -97,18 +99,38 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         }
 
         /**
-         * Filter for hook woocommerce_shipping_init
-         * @param $fields
-         * @return mixed
+         * Hook for adding nova poshta billing fields
+         * @param array $fields
+         * @return array
          */
-        function addNewBillingFields($fields)
+        public function addNovaPoshtaBillingFields($fields)
+        {
+            return $this->addNovaPoshtaFields($fields, Area::BILLING);
+        }
+
+        /**
+         * Hook for adding nova poshta shipping fields
+         * @param array $fields
+         * @return array
+         */
+        public function addNovaPoshtaShippingFields($fields)
+        {
+            return $this->addNovaPoshtaFields($fields, Area::SHIPPING);
+        }
+
+        /**
+         * @param array $fields
+         * @param string $location
+         * @return array
+         */
+        private function addNovaPoshtaFields($fields, $location)
         {
             //TODO get city and region values
             //$area = WC()->checkout()->get_value(Region::key());
             //$city = WC()->checkout()->get_value(City::key());
             $area = '';
             $city = '';
-            $fields[Region::key()] = [
+            $fields[Region::key($location)] = [
                 'label' => __('Region', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => $this->isGet() ?: $this->isNP(),
@@ -117,7 +139,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'class' => array(),
                 'custom_attributes' => array(),
             ];
-            $fields[City::key()] = [
+            $fields[City::key($location)] = [
                 'label' => __('City', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => $this->isGet() ?: $this->isNP(),
@@ -126,7 +148,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 'value' => '',
                 'custom_attributes' => array(),
             ];
-            $fields[Warehouse::key()] = [
+            $fields[Warehouse::key($location)] = [
                 'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'required' => $this->isGet() ?: $this->isNP(),
