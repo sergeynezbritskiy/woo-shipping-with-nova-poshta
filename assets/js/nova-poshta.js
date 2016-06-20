@@ -249,17 +249,6 @@ jQuery(document).ready(function ($) {
             });
         },
 
-        //total
-        // disableDefaultOptions: function () {
-        //     NovaPoshta.disableDefaultShippingOptions();
-        //     NovaPoshta.disableDefaultBillingOptions();
-        // },
-
-        // enableDefaultOptions: function () {
-        //     NovaPoshta.enableDefaultBillingOptions();
-        //     NovaPoshta.enableDefaultShippingOptions();
-        // },
-
         disableNovaPoshtaOptions: function () {
             NovaPoshta.disableNovaPoshtaBillingOptions();
             NovaPoshta.disableNovaPoshtaShippingOptions();
