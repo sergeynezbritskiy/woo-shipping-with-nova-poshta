@@ -82,17 +82,39 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         {
             //disable required validation for location default fields
             if ($this->isPost() && $this->isNP()) {
-                if (array_key_exists('billing_state', $fields['billing'])) {
-                    $fields['billing']['billing_state']['required'] = false;
-                }
-                if (array_key_exists('billing_city', $fields['billing'])) {
-                    $fields['billing']['billing_city']['required'] = false;
-                }
-                if (array_key_exists('billing_address_1', $fields['billing'])) {
-                    $fields['billing']['billing_address_1']['required'] = false;
-                }
-                if (array_key_exists('billing_postcode', $fields['billing'])) {
-                    $fields['billing']['billing_postcode']['required'] = false;
+                if ($this->shipToDifferentAddress()) {
+                    if (array_key_exists('shipping_state', $fields['shipping'])) {
+                        $fields['shipping']['shipping_state']['required'] = false;
+                    }
+                    if (array_key_exists('shipping_city', $fields['shipping'])) {
+                        $fields['shipping']['shipping_city']['required'] = false;
+                    }
+                    if (array_key_exists('shipping_address_1', $fields['shipping'])) {
+                        $fields['shipping']['shipping_address_1']['required'] = false;
+                    }
+                    if (array_key_exists('shipping_postcode', $fields['shipping'])) {
+                        $fields['shipping']['shipping_postcode']['required'] = false;
+                    }
+                    $fields['billing']['billing_nova_poshta_region']['required'] = false;
+                    $fields['billing']['billing_nova_poshta_city']['required'] = false;
+                    $fields['billing']['billing_nova_poshta_warehouse']['required'] = false;
+
+                } else {
+                    if (array_key_exists('billing_state', $fields['billing'])) {
+                        $fields['billing']['billing_state']['required'] = false;
+                    }
+                    if (array_key_exists('billing_city', $fields['billing'])) {
+                        $fields['billing']['billing_city']['required'] = false;
+                    }
+                    if (array_key_exists('billing_address_1', $fields['billing'])) {
+                        $fields['billing']['billing_address_1']['required'] = false;
+                    }
+                    if (array_key_exists('billing_postcode', $fields['billing'])) {
+                        $fields['billing']['billing_postcode']['required'] = false;
+                    }
+                    $fields['shipping']['shipping_nova_poshta_region']['required'] = false;
+                    $fields['shipping']['shipping_nova_poshta_city']['required'] = false;
+                    $fields['shipping']['shipping_nova_poshta_warehouse']['required'] = false;
                 }
             }
             return $fields;
@@ -167,23 +189,45 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         public function updateOrderMeta($orderId)
         {
             if ($this->isNP()) {
-                $regionKey = Region::key();
-                $regionRef = sanitize_text_field($_POST[$regionKey]);
-                $area = new Region($regionRef);
-                update_post_meta($orderId, '_billing_' . $regionKey, $area->ref);
-                update_post_meta($orderId, '_billing_state', $area->description);
+                if ($this->shipToDifferentAddress()) {
+                    $fieldGroup = 'shipping';
+                    $regionKey = Region::key($fieldGroup);
+                    $regionRef = sanitize_text_field($_POST[$regionKey]);
+                    $area = new Region($regionRef);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_' . $regionKey, $area->ref);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_state', $area->description);
 
-                $cityKey = City::key();
-                $cityRef = sanitize_text_field($_POST[$cityKey]);
-                $city = new City($cityRef);
-                update_post_meta($orderId, '_billing_' . $cityKey, $city->ref);
-                update_post_meta($orderId, '_billing_city', $city->description);
+                    $cityKey = City::key($fieldGroup);
+                    $cityRef = sanitize_text_field($_POST[$cityKey]);
+                    $city = new City($cityRef);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_' . $cityKey, $city->ref);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_city', $city->description);
 
-                $warehouseKey = Warehouse::key();
-                $warehouseRef = sanitize_text_field($_POST[$warehouseKey]);
-                $warehouse = new Warehouse($warehouseRef);
-                update_post_meta($orderId, '_billing_' . $warehouseKey, $warehouse->ref);
-                update_post_meta($orderId, '_billing_address_1', $warehouse->description);
+                    $warehouseKey = Warehouse::key($fieldGroup);
+                    $warehouseRef = sanitize_text_field($_POST[$warehouseKey]);
+                    $warehouse = new Warehouse($warehouseRef);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_' . $warehouseKey, $warehouse->ref);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_address_1', $warehouse->description);
+                } else {
+                    $fieldGroup = 'billing';
+                    $regionKey = Region::key($fieldGroup);
+                    $regionRef = sanitize_text_field($_POST[$regionKey]);
+                    $area = new Region($regionRef);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_' . $regionKey, $area->ref);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_state', $area->description);
+
+                    $cityKey = City::key($fieldGroup);
+                    $cityRef = sanitize_text_field($_POST[$cityKey]);
+                    $city = new City($cityRef);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_' . $cityKey, $city->ref);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_city', $city->description);
+
+                    $warehouseKey = Warehouse::key($fieldGroup);
+                    $warehouseRef = sanitize_text_field($_POST[$warehouseKey]);
+                    $warehouse = new Warehouse($warehouseRef);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_' . $warehouseKey, $warehouse->ref);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_address_1', $warehouse->description);
+                }
             }
         }
 
@@ -204,6 +248,25 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 }
             }
             return $chosenShippingMethod == NOVA_POSHTA_SHIPPING_METHOD;
+        }
+
+        /**
+         * @return bool
+         */
+        public function shipToDifferentAddress()
+        {
+            $shipToDifferentAddress = isset($_POST['ship_to_different_address']) ? true : false;
+
+            if (isset($_POST['shiptobilling'])) {
+                _deprecated_argument('WC_Checkout::process_checkout()', '2.1', 'The "shiptobilling" field is deprecated. The template files are out of date');
+                $shipToDifferentAddress = $_POST['shiptobilling'] ? false : true;
+            }
+
+            // Ship to billing only option
+            if (wc_ship_to_billing_address_only()) {
+                $shipToDifferentAddress = false;
+            }
+            return $shipToDifferentAddress;
         }
 
         /**
