@@ -1,0 +1,27 @@
+{
+  "name": "woocommerce-nova-poshta-shipping",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://snezbritskiy@bitbucket.org/altairsoftltd/nova-poshta-shipping-plugin.git"
+  },
+  "author": "Sergey Nezbritskiy",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/altairsoftltd/nova-poshta-shipping-plugin#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  },
+  "dependencies": {
+    "browser-sync": "^2.13.0",
+    "gulp-reload": "0.0.4",
+    "gulp-rename": "^1.2.2",
+    "gulp-rigger": "^0.5.8",
+    "gulp-uglify": "^1.5.4",
+    "gulp-watch": "^4.3.8"
+  }
+}
