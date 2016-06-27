@@ -2,7 +2,7 @@ jQuery(document).ready(function ($) {
 
 
     var NovaPoshtaOptions = (function () {
-        var my = {};
+        var result = {};
 
         var novaPoshtaBillingOptions = $('#billing_nova_poshta_region, #billing_nova_poshta_city, #billing_nova_poshta_warehouse');
         var billingAreaSelect = $('#billing_nova_poshta_region');
@@ -37,10 +37,11 @@ jQuery(document).ready(function ($) {
             disableDefaultBillingOptions();
         };
 
-        var disableDefaultBillingOptions = function () {
-            defaultBillingOptions.each(function () {
+        var disableNovaPoshtaBillingOptions = function () {
+            novaPoshtaBillingOptions.each(function () {
                 $(this).attr('disabled', 'disabled').closest('.form-row').hide();
             });
+            enableDefaultBillingOptions();
         };
 
         var enableDefaultBillingOptions = function () {
@@ -49,15 +50,8 @@ jQuery(document).ready(function ($) {
             });
         };
 
-        var disableNovaPoshtaBillingOptions = function () {
-            novaPoshtaBillingOptions.each(function () {
-                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
-            });
-            enableDefaultBillingOptions();
-        };
-
-        var disableDefaultShippingOptions = function () {
-            defaultShippingOptions.each(function () {
+        var disableDefaultBillingOptions = function () {
+            defaultBillingOptions.each(function () {
                 $(this).attr('disabled', 'disabled').closest('.form-row').hide();
             });
         };
@@ -70,12 +64,6 @@ jQuery(document).ready(function ($) {
             disableDefaultShippingOptions();
         };
 
-        var enableDefaultShippingOptions = function () {
-            defaultShippingOptions.each(function () {
-                $(this).removeAttr('disabled').closest('.form-row').show();
-            });
-        };
-
         var disableNovaPoshtaShippingOptions = function () {
             novaPoshtaShippingOptions.each(function () {
                 $(this).attr('disabled', 'disabled').closest('.form-row').hide();
@@ -83,6 +71,19 @@ jQuery(document).ready(function ($) {
             enableDefaultShippingOptions();
         };
 
+        var enableDefaultShippingOptions = function () {
+            defaultShippingOptions.each(function () {
+                $(this).removeAttr('disabled').closest('.form-row').show();
+            });
+        };
+
+        var disableDefaultShippingOptions = function () {
+            defaultShippingOptions.each(function () {
+                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
+            });
+        };
+
+        //common
         var disableNovaPoshtaOptions = function () {
             disableNovaPoshtaBillingOptions();
             disableNovaPoshtaShippingOptions();
@@ -103,16 +104,13 @@ jQuery(document).ready(function ($) {
             $(document).on('change', shippingMethod, function () {
                 handleShippingMethodChange();
             });
-
             $(document).on('change', shipToDifferentAddressCheckbox, function () {
                 handleShippingMethodChange();
             });
-
             handleShippingMethodChange();
         };
 
         var initOptionsHandlers = function () {
-
             billingAreaSelect.on('change', function () {
                 var areaRef = this.value;
                 $.ajax({
@@ -147,7 +145,6 @@ jQuery(document).ready(function ($) {
                     }
                 });
             });
-
             billingCitySelect.on('change', function () {
                 var cityRef = this.value;
                 $.ajax({
@@ -181,7 +178,6 @@ jQuery(document).ready(function ($) {
                     }
                 });
             });
-
             shippingAreaSelect.on('change', function () {
                 var areaRef = this.value;
                 $.ajax({
@@ -216,7 +212,6 @@ jQuery(document).ready(function ($) {
                     }
                 });
             });
-
             shippingCitySelect.on('change', function () {
                 var cityRef = this.value;
                 $.ajax({
@@ -252,13 +247,12 @@ jQuery(document).ready(function ($) {
             });
         };
 
-        my.init = function () {
+        result.init = function () {
             initShippingMethodHandlers();
             initOptionsHandlers();
         };
 
-        return my;
-
+        return result;
     }());
 
     NovaPoshtaOptions.init();
