@@ -195,7 +195,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         public function updateOrderMeta($orderId)
         {
             if ($this->isNP()) {
-                $fieldGroup = $this->shipToDifferentAddress() ? 'shipping' : 'billing';
+                $fieldGroup = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
 
                 $regionKey = Region::key($fieldGroup);
                 $regionRef = sanitize_text_field($_POST[$regionKey]);
@@ -211,6 +211,13 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 $warehouseRef = sanitize_text_field($_POST[$warehouseKey]);
                 $warehouse = new Warehouse($warehouseRef);
                 update_post_meta($orderId, '_' . $fieldGroup . '_address_1', $warehouse->description);
+                if (!$this->shipToDifferentAddress()) {
+                    $fieldGroup = Area::SHIPPING;
+                    update_post_meta($orderId, '_' . $fieldGroup . '_state', $area->description);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_city', $city->description);
+                    update_post_meta($orderId, '_' . $fieldGroup . '_address_1', $warehouse->description);
+                }
+
             }
         }
 
