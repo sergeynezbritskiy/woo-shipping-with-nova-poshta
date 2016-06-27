@@ -1,115 +1,52 @@
-jQuery(document).ready(function () {
-    var NovaPoshta = (function ($) {
+jQuery(document).ready(function ($) {
 
-        var my = {};
-        var novaPoshtaBillingOptions = $('#billing_nova_poshta_region, #billing_nova_poshta_city, #billing_nova_poshta_warehouse');
-        var billingAreaSelect = $('#billing_nova_poshta_region');
-        var billingCitySelect = $('#billing_nova_poshta_city');
-        var billingWarehouseSelect = $('#billing_nova_poshta_warehouse');
+    var NovaPoshta = {
 
-        var novaPoshtaShippingOptions = $('#shipping_nova_poshta_region, #shipping_nova_poshta_city, #shipping_nova_poshta_warehouse');
-        var shippingAreaSelect = $('#shipping_nova_poshta_region');
-        var shippingCitySelect = $('#shipping_nova_poshta_city');
-        var shippingWarehouseSelect = $('#shipping_nova_poshta_warehouse');
+        novaPoshtaBillingOptions: null,
+        billingAreaSelect: null,
+        billingCitySelect: null,
+        billingWarehouseSelect: null,
 
-        // var shippingMethod = $("input[name^=shipping_method][type=radio]");
+        novaPoshtaShippingOptions: null,
+        shippingAreaSelect: null,
+        shippingCitySelect: null,
+        shippingWarehouseSelect: null,
 
-        var defaultBillingOptions = $('#billing_address_1, #billing_address_2, #billing_city, #billing_state, #billing_postcode');
-        var defaultShippingOptions = $('#shipping_address_1, #shipping_address_2, #shipping_city, #shipping_state, #shipping_postcode');
+        shippingMethod: null,
 
-        function shipToDifferentAddress() {
+        defaultBillingOptions: null,
+        defaultShippingOptions: null,
+
+        shipToDifferentAddress: function () {
             return $('#ship-to-different-address-checkbox').is(':checked');
-        }
+        },
 
-        function ensureNovaPoshta() {
-            var currentShippingMethod = $('input[name^=shipping_method][type=radio]:checked');
-            return currentShippingMethod.val() === 'nova_poshta_shipping_method';
-        }
+        init: function () {
 
-        //billing
-        function enableNovaPoshtaBillingOptions() {
-            novaPoshtaBillingOptions.each(function () {
-                $(this).removeAttr('disabled').closest('.form-row').show();
-            });
-            disableDefaultBillingOptions();
-        }
+            this.novaPoshtaBillingOptions = $('#billing_nova_poshta_region, #billing_nova_poshta_city, #billing_nova_poshta_warehouse');
+            this.billingAreaSelect = $('#billing_nova_poshta_region');
+            this.billingCitySelect = $('#billing_nova_poshta_city');
+            this.billingWarehouseSelect = $('#billing_nova_poshta_warehouse');
 
-        function disableNovaPoshtaBillingOptions() {
-            novaPoshtaBillingOptions.each(function () {
-                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
-            });
-            enableDefaultBillingOptions();
-        }
+            this.novaPoshtaShippingOptions = $('#shipping_nova_poshta_region, #shipping_nova_poshta_city, #shipping_nova_poshta_warehouse');
+            this.shippingAreaSelect = $('#shipping_nova_poshta_region');
+            this.shippingCitySelect = $('#shipping_nova_poshta_city');
+            this.shippingWarehouseSelect = $('#shipping_nova_poshta_warehouse');
 
-        function enableDefaultBillingOptions() {
-            defaultBillingOptions.each(function () {
-                $(this).removeAttr('disabled').closest('.form-row').show();
-            });
-        }
+            this.shippingMethod = $("input[name^=shipping_method][type=radio]");
 
-        function disableDefaultBillingOptions() {
-            defaultBillingOptions.each(function () {
-                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
-            });
-        }
+            this.defaultBillingOptions = $('#billing_address_1, #billing_address_2, #billing_city, #billing_state, #billing_postcode');
+            this.defaultShippingOptions = $('#shipping_address_1, #shipping_address_2, #shipping_city, #shipping_state, #shipping_postcode');
 
-        //shipping
-        function enableNovaPoshtaShippingOptions() {
-            novaPoshtaShippingOptions.each(function () {
-                $(this).removeAttr('disabled').closest('.form-row').show();
-            });
-            disableDefaultShippingOptions();
-        }
-
-        function disableNovaPoshtaShippingOptions() {
-            novaPoshtaShippingOptions.each(function () {
-                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
-            });
-            enableDefaultShippingOptions();
-        }
-
-        function enableDefaultShippingOptions() {
-            defaultShippingOptions.each(function () {
-                $(this).removeAttr('disabled').closest('.form-row').show();
-            });
-        }
-
-        function disableDefaultShippingOptions() {
-            defaultShippingOptions.each(function () {
-                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
-            });
-        }
-
-        function disableNovaPoshtaOptions() {
-            disableNovaPoshtaBillingOptions();
-            disableNovaPoshtaShippingOptions();
-        }
-
-        //other
-        function handleShippingMethodChange() {
-            disableNovaPoshtaOptions();
-            if (ensureNovaPoshta()) {
-                if (shipToDifferentAddress()) {
-                    enableNovaPoshtaShippingOptions();
-                } else {
-                    enableNovaPoshtaBillingOptions();
-                }
-            }
-        }
-
-        function initHandlers() {
-            $(document).on('change', "input[name^=shipping_method][type=radio]", function () {
-                handleShippingMethodChange();
+            $(document).on('change', NovaPoshta.shippingMethod, function () {
+                NovaPoshta.handleShippingMethodChange();
             });
 
             $(document).on('change', '#ship-to-different-address-checkbox', function () {
-                handleShippingMethodChange();
+                NovaPoshta.handleShippingMethodChange();
             });
-            handleShippingMethodChange();
-        }
 
-        function initNovaPoshtaOptions() {
-            billingAreaSelect.on('change', function () {
+            this.billingAreaSelect.on('change', function () {
                 var areaRef = this.value;
                 $.ajax({
                     url: NovaPoshtaHelper.ajaxUrl,
@@ -121,77 +58,18 @@ jQuery(document).ready(function () {
                     success: function (json) {
                         try {
                             var data = JSON.parse(json);
-                            billingCitySelect.find('option').remove();
-
-                            $.each(data, function (key, value) {
-                                billingCitySelect.append($("<option></option>").attr("value", key).text(value));
-                            });
-                            billingWarehouseSelect.find('option').remove();
-
-                        } catch (s) {
-                            console.log("Error. Response from server was: " + json);
-                        }
-                    },
-                    error: function () {
-                        console.log('Error.');
-                    }
-                });
-            });
-
-            billingCitySelect.on('change', function () {
-                var cityRef = this.value;
-                $.ajax({
-                    url: NovaPoshtaHelper.ajaxUrl,
-                    method: "POST",
-                    data: {
-                        'action': NovaPoshtaHelper.getWarehousesAction,
-                        'parent_area_ref': cityRef
-                    },
-                    success: function (json) {
-                        try {
-                            var data = JSON.parse(json);
-                            billingWarehouseSelect
+                            NovaPoshta.billingCitySelect
                                 .find('option')
                                 .remove();
 
                             $.each(data, function (key, value) {
-                                billingWarehouseSelect.append($("<option></option>").attr("value", key).text(value));
-                            });
-
-                        } catch (s) {
-                            console.log("Error. Response from server was: " + json);
-                        }
-                    },
-                    error: function () {
-                        console.log('Error.');
-                    }
-                });
-            });
-
-            shippingAreaSelect.on('change', function () {
-                var areaRef = this.value;
-                $.ajax({
-                    url: NovaPoshtaHelper.ajaxUrl,
-                    method: "POST",
-                    data: {
-                        'action': NovaPoshtaHelper.getCitiesAction,
-                        'parent_area_ref': areaRef
-                    },
-                    success: function (json) {
-                        try {
-                            var data = JSON.parse(json);
-                            shippingCitySelect
-                                .find('option')
-                                .remove();
-
-                            $.each(data, function (key, value) {
-                                shippingCitySelect
+                                NovaPoshta.billingCitySelect
                                     .append($("<option></option>")
                                         .attr("value", key)
                                         .text(value)
                                     );
                             });
-                            shippingWarehouseSelect.find('option').remove();
+                            NovaPoshta.billingWarehouseSelect.find('option').remove();
 
                         } catch (s) {
                             console.log("Error. Response from server was: " + json);
@@ -203,7 +81,7 @@ jQuery(document).ready(function () {
                 });
             });
 
-            shippingCitySelect.on('change', function () {
+            this.billingCitySelect.on('change', function () {
                 var cityRef = this.value;
                 $.ajax({
                     url: NovaPoshtaHelper.ajaxUrl,
@@ -215,12 +93,12 @@ jQuery(document).ready(function () {
                     success: function (json) {
                         try {
                             var data = JSON.parse(json);
-                            shippingWarehouseSelect
+                            NovaPoshta.billingWarehouseSelect
                                 .find('option')
                                 .remove();
 
                             $.each(data, function (key, value) {
-                                shippingWarehouseSelect
+                                NovaPoshta.billingWarehouseSelect
                                     .append($("<option></option>")
                                         .attr("value", key)
                                         .text(value)
@@ -236,16 +114,158 @@ jQuery(document).ready(function () {
                     }
                 });
             });
+
+            this.shippingAreaSelect.on('change', function () {
+                var areaRef = this.value;
+                $.ajax({
+                    url: NovaPoshtaHelper.ajaxUrl,
+                    method: "POST",
+                    data: {
+                        'action': NovaPoshtaHelper.getCitiesAction,
+                        'parent_area_ref': areaRef
+                    },
+                    success: function (json) {
+                        try {
+                            var data = JSON.parse(json);
+                            NovaPoshta.shippingCitySelect
+                                .find('option')
+                                .remove();
+
+                            $.each(data, function (key, value) {
+                                NovaPoshta.shippingCitySelect
+                                    .append($("<option></option>")
+                                        .attr("value", key)
+                                        .text(value)
+                                    );
+                            });
+                            NovaPoshta.shippingWarehouseSelect.find('option').remove();
+
+                        } catch (s) {
+                            console.log("Error. Response from server was: " + json);
+                        }
+                    },
+                    error: function () {
+                        console.log('Error.');
+                    }
+                });
+            });
+
+            this.shippingCitySelect.on('change', function () {
+                var cityRef = this.value;
+                $.ajax({
+                    url: NovaPoshtaHelper.ajaxUrl,
+                    method: "POST",
+                    data: {
+                        'action': NovaPoshtaHelper.getWarehousesAction,
+                        'parent_area_ref': cityRef
+                    },
+                    success: function (json) {
+                        try {
+                            var data = JSON.parse(json);
+                            NovaPoshta.shippingWarehouseSelect
+                                .find('option')
+                                .remove();
+
+                            $.each(data, function (key, value) {
+                                NovaPoshta.shippingWarehouseSelect
+                                    .append($("<option></option>")
+                                        .attr("value", key)
+                                        .text(value)
+                                    );
+                            });
+
+                        } catch (s) {
+                            console.log("Error. Response from server was: " + json);
+                        }
+                    },
+                    error: function () {
+                        console.log('Error.');
+                    }
+                });
+            });
+
+            this.handleShippingMethodChange();
+        },
+
+        /**
+         * @returns {boolean}
+         */
+        ensureNovaPoshta: function () {
+            var currentShippingMethod = $('input[name^=shipping_method][type=radio]:checked');
+            return currentShippingMethod.val() === 'nova_poshta_shipping_method';
+        },
+
+        //billing
+        enableNovaPoshtaBillingOptions: function () {
+            NovaPoshta.novaPoshtaBillingOptions.each(function () {
+                $(this).removeAttr('disabled').closest('.form-row').show();
+            });
+            NovaPoshta.disableDefaultBillingOptions();
+        },
+
+        disableNovaPoshtaBillingOptions: function () {
+            NovaPoshta.novaPoshtaBillingOptions.each(function () {
+                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
+            });
+            NovaPoshta.enableDefaultBillingOptions();
+        },
+
+        enableDefaultBillingOptions: function () {
+            NovaPoshta.defaultBillingOptions.each(function () {
+                $(this).removeAttr('disabled').closest('.form-row').show();
+            });
+        },
+
+        disableDefaultBillingOptions: function () {
+            NovaPoshta.defaultBillingOptions.each(function () {
+                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
+            });
+        },
+
+        //shipping
+        enableNovaPoshtaShippingOptions: function () {
+            NovaPoshta.novaPoshtaShippingOptions.each(function () {
+                $(this).removeAttr('disabled').closest('.form-row').show();
+            });
+            NovaPoshta.disableDefaultShippingOptions();
+        },
+
+        disableNovaPoshtaShippingOptions: function () {
+            NovaPoshta.novaPoshtaShippingOptions.each(function () {
+                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
+            });
+            NovaPoshta.enableDefaultShippingOptions();
+        },
+
+        enableDefaultShippingOptions: function () {
+            NovaPoshta.defaultShippingOptions.each(function () {
+                $(this).removeAttr('disabled').closest('.form-row').show();
+            });
+        },
+
+        disableDefaultShippingOptions: function () {
+            NovaPoshta.defaultShippingOptions.each(function () {
+                $(this).attr('disabled', 'disabled').closest('.form-row').hide();
+            });
+        },
+
+        disableNovaPoshtaOptions: function () {
+            NovaPoshta.disableNovaPoshtaBillingOptions();
+            NovaPoshta.disableNovaPoshtaShippingOptions();
+        },
+
+        //other
+        handleShippingMethodChange: function () {
+            NovaPoshta.disableNovaPoshtaOptions();
+            if (NovaPoshta.ensureNovaPoshta()) {
+                if (NovaPoshta.shipToDifferentAddress()) {
+                    NovaPoshta.enableNovaPoshtaShippingOptions();
+                } else {
+                    NovaPoshta.enableNovaPoshtaBillingOptions();
+                }
+            }
         }
-
-        my.init = function () {
-            initHandlers();
-            initNovaPoshtaOptions();
-            console.info('Started');
-        };
-
-        return my;
-    }(jQuery));
+    };
 
     NovaPoshta.init();
 });
