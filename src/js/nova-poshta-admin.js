@@ -1,24 +1,17 @@
-jQuery(document).ready(function ($) {
+jQuery(document).ready(function () {
 
-    var NovaPoshtaAdmin = {
+    var NovaPoshtaAdmin = (function ($) {
 
-        areaInputName: null,
-        areaInputKey: null,
-        cityInputName: null,
-        cityInputKey: null,
-        warehouseInputName: null,
-        warehouseInputKey: null,
+        var my = {};
+        var areaInputName = $('#woocommerce_nova_poshta_shipping_method_area_name');
+        var areaInputKey = $('#woocommerce_nova_poshta_shipping_method_area');
+        var cityInputName = $('#woocommerce_nova_poshta_shipping_method_city_name');
+        var cityInputKey = $('#woocommerce_nova_poshta_shipping_method_city');
+        var warehouseInputName = $('#woocommerce_nova_poshta_shipping_method_warehouse_name');
+        var warehouseInputKey = $('#woocommerce_nova_poshta_shipping_method_warehouse');
 
-        init: function () {
-
-            this.areaInputName = $('#woocommerce_nova_poshta_shipping_method_area_name');
-            this.areaInputKey = $('#woocommerce_nova_poshta_shipping_method_area');
-            this.cityInputName = $('#woocommerce_nova_poshta_shipping_method_city_name');
-            this.cityInputKey = $('#woocommerce_nova_poshta_shipping_method_city');
-            this.warehouseInputName = $('#woocommerce_nova_poshta_shipping_method_warehouse_name');
-            this.warehouseInputKey = $('#woocommerce_nova_poshta_shipping_method_warehouse');
-
-            this.areaInputName.autocomplete({
+        function initAutocomplete() {
+            areaInputName.autocomplete({
                 source: function (request, response) {
                     jQuery.ajax({
                         type: 'POST',
@@ -39,19 +32,18 @@ jQuery(document).ready(function ($) {
                     })
                 },
                 focus: function (event, ui) {
-                    NovaPoshtaAdmin.areaInputName.val(ui.item.label);
+                    areaInputName.val(ui.item.label);
                     return false;
                 },
                 select: function (event, ui) {
-                    NovaPoshtaAdmin.areaInputName.val(ui.item.label);
-                    NovaPoshtaAdmin.areaInputKey.val(ui.item.value);
-                    NovaPoshtaAdmin.clearCity();
-                    NovaPoshtaAdmin.clearWarehouse();
+                    areaInputName.val(ui.item.label);
+                    areaInputKey.val(ui.item.value);
+                    clearCity();
+                    clearWarehouse();
                     return false;
                 }
             });
-
-            this.cityInputName.autocomplete({
+            cityInputName.autocomplete({
                 source: function (request, response) {
                     jQuery.ajax({
                         type: 'POST',
@@ -59,7 +51,7 @@ jQuery(document).ready(function ($) {
                         data: {
                             action: NovaPoshtaHelper.getCitiesByNameSuggestionAction,
                             name: request.term,
-                            parent_area_ref: NovaPoshtaAdmin.areaInputKey.val()
+                            parent_area_ref: areaInputKey.val()
                         },
                         success: function (json) {
                             var data = JSON.parse(json);
@@ -73,18 +65,17 @@ jQuery(document).ready(function ($) {
                     })
                 },
                 focus: function (event, ui) {
-                    NovaPoshtaAdmin.cityInputName.val(ui.item.label);
+                    cityInputName.val(ui.item.label);
                     return false;
                 },
                 select: function (event, ui) {
-                    NovaPoshtaAdmin.cityInputName.val(ui.item.label);
-                    NovaPoshtaAdmin.cityInputKey.val(ui.item.value);
-                    NovaPoshtaAdmin.clearWarehouse();
+                    cityInputName.val(ui.item.label);
+                    cityInputKey.val(ui.item.value);
+                    clearWarehouse();
                     return false;
                 }
             });
-
-            this.warehouseInputName.autocomplete({
+            warehouseInputName.autocomplete({
                 source: function (request, response) {
                     jQuery.ajax({
                         type: 'POST',
@@ -92,7 +83,7 @@ jQuery(document).ready(function ($) {
                         data: {
                             action: NovaPoshtaHelper.getWarehousesBySuggestionAction,
                             name: request.term,
-                            parent_area_ref: NovaPoshtaAdmin.cityInputKey.val()
+                            parent_area_ref: cityInputKey.val()
                         },
                         success: function (json) {
                             var data = JSON.parse(json);
@@ -106,28 +97,34 @@ jQuery(document).ready(function ($) {
                     })
                 },
                 focus: function (event, ui) {
-                    NovaPoshtaAdmin.warehouseInputName.val(ui.item.label);
+                    warehouseInputName.val(ui.item.label);
                     return false;
                 },
                 select: function (event, ui) {
-                    NovaPoshtaAdmin.warehouseInputName.val(ui.item.label);
-                    NovaPoshtaAdmin.warehouseInputKey.val(ui.item.value);
+                    warehouseInputName.val(ui.item.label);
+                    warehouseInputKey.val(ui.item.value);
                     return false;
                 }
             });
-        },
-
-        clearCity: function () {
-            this.cityInputName.val('');
-            this.cityInputKey.val('');
-        },
-
-        clearWarehouse: function () {
-            this.warehouseInputName.val('');
-            this.warehouseInputKey.val('');
         }
 
-    };
+        function clearCity() {
+            cityInputName.val('');
+            cityInputKey.val('');
+        }
+
+        function clearWarehouse() {
+            warehouseInputName.val('');
+            warehouseInputKey.val('');
+        }
+
+        my.init = function () {
+            initAutocomplete();
+        };
+
+        return my;
+
+    }(jQuery));
 
     NovaPoshtaAdmin.init();
 
