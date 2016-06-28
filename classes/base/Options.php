@@ -18,13 +18,13 @@ namespace plugins\NovaPoshta\classes\base;
  */
 class Options extends Base
 {
-    const OPTION_KEY_AREA_NAME = 'area_name';
-    const OPTION_KEY_AREA = 'area';
-    const OPTION_KEY_CITY_NAME = 'city_name';
-    const OPTION_KEY_CITY = 'city';
-    const OPTION_KEY_WAREHOUSE_NAME = 'warehouse_name';
-    const OPTION_KEY_WAREHOUSE = 'warehouse';
-    const OPTION_KEY_API_KEY = 'api_key';
+    const AREA_NAME = 'area_name';
+    const AREA = 'area';
+    const CITY_NAME = 'city_name';
+    const CITY = 'city';
+    const WAREHOUSE_NAME = 'warehouse_name';
+    const WAREHOUSE = 'warehouse';
+    const API_KEY = 'api_key';
 
     /**
      * @return int
@@ -112,7 +112,7 @@ class Options extends Base
      */
     protected function getSenderArea()
     {
-        $this->senderArea = $this->shippingMethodSettings[self::OPTION_KEY_AREA];
+        $this->senderArea = $this->shippingMethodSettings[self::AREA];
         return $this->senderArea;
     }
 
@@ -121,7 +121,7 @@ class Options extends Base
      */
     protected function getSenderCity()
     {
-        $this->senderCity = $this->shippingMethodSettings[self::OPTION_KEY_CITY_NAME];
+        $this->senderCity = $this->shippingMethodSettings[self::CITY_NAME];
         return $this->senderCity;
     }
 
@@ -130,7 +130,7 @@ class Options extends Base
      */
     protected function getSenderWarehouse()
     {
-        $this->senderWarehouse = $this->shippingMethodSettings[self::OPTION_KEY_WAREHOUSE];
+        $this->senderWarehouse = $this->shippingMethodSettings[self::WAREHOUSE];
         return $this->senderWarehouse;
     }
 
@@ -139,7 +139,7 @@ class Options extends Base
      */
     protected function getApiKey()
     {
-        $this->apiKey = $this->shippingMethodSettings[self::OPTION_KEY_API_KEY];
+        $this->apiKey = $this->shippingMethodSettings[self::API_KEY];
         return $this->apiKey;
     }
 

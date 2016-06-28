@@ -58,38 +58,38 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 'description' => __('This controls the title which the user sees during checkout.', NOVA_POSHTA_DOMAIN),
                 'default' => __('Nova Poshta', NOVA_POSHTA_DOMAIN)
             ),
-            Options::OPTION_KEY_API_KEY => array(
+            Options::API_KEY => array(
                 'title' => __('API Key', NOVA_POSHTA_DOMAIN),
                 'type' => 'text',
                 'description' => __('Get your API Key. <a href="https://my.novaposhta.ua/settings/index#apikeys">My Account (Nova Poshta)</a>', NOVA_POSHTA_DOMAIN),
                 'default' => ''
             ),
-            Options::OPTION_KEY_AREA_NAME => array(
+            Options::AREA_NAME => array(
                 'title' => __('Area', NOVA_POSHTA_DOMAIN),
                 'type' => 'text',
                 'description' => __('Specify the area, from where you are sending goods. (After save API key)', NOVA_POSHTA_DOMAIN),
                 'default' => '',
             ),
-            Options::OPTION_KEY_AREA => array(
+            Options::AREA => array(
                 'type' => 'hidden',
                 'default' => '',
             ),
-            Options::OPTION_KEY_CITY_NAME => array(
+            Options::CITY_NAME => array(
                 'title' => __('City', NOVA_POSHTA_DOMAIN),
                 'type' => 'input',
                 'description' => __('Specify the city, from where you are sending goods. (After save API key)', NOVA_POSHTA_DOMAIN),
                 'default' => '',
             ),
-            Options::OPTION_KEY_CITY => array(
+            Options::CITY => array(
                 'type' => 'hidden',
                 'default' => '',
             ),
-            Options::OPTION_KEY_WAREHOUSE_NAME => array(
+            Options::WAREHOUSE_NAME => array(
                 'title' => __('Warehouse (Number)', NOVA_POSHTA_DOMAIN),
                 'type' => 'input',
                 'description' => __('Specify the warehouse, from where you are sending goods. (After save API key)', NOVA_POSHTA_DOMAIN),
             ),
-            Options::OPTION_KEY_WAREHOUSE => array(
+            Options::WAREHOUSE => array(
                 'type' => 'hidden',
                 'default' => '',
             ),
