@@ -18,6 +18,7 @@ use plugins\NovaPoshta\classes\base\Base;
  * @method getCounterparties($counterpartyProperty, $page, $findByString, $cityRef)
  * @method getDocument($ref)
  * @method documentsTracking($ref)
+ * @method getDocumentPrice($citySender, $cityRecipient, $serviceType, $weight, $cost)
  */
 class NovaPoshtaApi extends Base
 {
@@ -50,8 +51,8 @@ class NovaPoshtaApi extends Base
     public function __call($method, $args)
     {
         //max count of args passed wia magic method is 3
-        $outputArgs = array_pad($args, 3, null);
-        $result = $this->api->$method($outputArgs[0], $outputArgs[1], $outputArgs[2]);
+        $outputArgs = array_pad($args, 5, null);
+        $result = $this->api->$method($outputArgs[0], $outputArgs[1], $outputArgs[2], $outputArgs[3], $outputArgs[4]);
         return $result['data'];
     }
 
@@ -73,7 +74,7 @@ class NovaPoshtaApi extends Base
 
     /**
      * NovaPoshtaApi constructor.
-     * 
+     *
      * @access private
      */
     private function __construct()

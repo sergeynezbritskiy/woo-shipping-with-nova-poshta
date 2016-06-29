@@ -121,7 +121,7 @@ class Options extends Base
      */
     protected function getSenderCity()
     {
-        $this->senderCity = $this->shippingMethodSettings[self::CITY_NAME];
+        $this->senderCity = $this->shippingMethodSettings[self::CITY];
         return $this->senderCity;
     }
 

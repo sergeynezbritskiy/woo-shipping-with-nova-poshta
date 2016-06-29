@@ -1,4 +1,5 @@
 <?php
+use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\base\Options;
 
 /**
@@ -110,6 +111,20 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             'calc_tax' => 'per_item'
         );
 
+        /** @noinspection PhpUndefinedFieldInspection */
+        if ($cityRecipient = WC()->customer->nova_poshta_city) {
+            $citySender = NP()->options->senderCity;
+            $serviceType = 'WarehouseWarehouse';
+            /** @noinspection PhpUndefinedFieldInspection */
+            $cartWeight = WC()->cart->cart_contents_weight;
+            $cartTotal = max(1, WC()->cart->cart_contents_total);
+            try {
+                $result = NP()->api->getDocumentPrice($citySender, $cityRecipient, $serviceType, $cartWeight, $cartTotal);
+                $cost = array_shift($result);
+                $rate['cost'] = ArrayHelper::getValue($cost, 'Cost', 0);
+            } catch (Exception $e) {
+            }
+        }
         // Register the rate
         $this->add_rate($rate);
     }
