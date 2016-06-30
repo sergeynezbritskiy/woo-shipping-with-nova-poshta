@@ -58,6 +58,13 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 'description' => __('This controls the title which the user sees during checkout.', NOVA_POSHTA_DOMAIN),
                 'default' => __('Nova Poshta', NOVA_POSHTA_DOMAIN)
             ),
+            Options::DEBUG => array(
+                'title' => __('Enable Debug Mode', NOVA_POSHTA_DOMAIN),
+                'label' => __('Enable Debug Mode', NOVA_POSHTA_DOMAIN),
+                'type' => 'checkbox',
+                'description' => __('Extended logging, use full version of script instead of min versions', NOVA_POSHTA_DOMAIN),
+                'default' => 'yes'
+            ),
             Options::API_KEY => array(
                 'title' => __('API Key', NOVA_POSHTA_DOMAIN),
                 'type' => 'text',

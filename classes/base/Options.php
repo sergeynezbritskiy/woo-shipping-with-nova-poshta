@@ -25,6 +25,7 @@ class Options extends Base
     const WAREHOUSE_NAME = 'warehouse_name';
     const WAREHOUSE = 'warehouse';
     const API_KEY = 'api_key';
+    const DEBUG = 'debug';
 
     /**
      * @return int
@@ -141,6 +142,20 @@ class Options extends Base
     {
         $this->apiKey = $this->shippingMethodSettings[self::API_KEY];
         return $this->apiKey;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDebug()
+    {
+        $isDebug = ArrayHelper::getValue($this->shippingMethodSettings, self::DEBUG);
+        if ('yes' === $isDebug) {
+            $isDebug = true;
+        } elseif ('no' === $isDebug) {
+            $isDebug = false;
+        }
+        return $isDebug;
     }
 
     /**

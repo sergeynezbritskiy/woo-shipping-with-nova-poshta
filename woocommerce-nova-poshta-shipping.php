@@ -22,7 +22,7 @@ use plugins\NovaPoshta\classes\NovaPoshtaApi;
 use plugins\NovaPoshta\classes\Warehouse;
 
 define('NOVA_POSHTA_SHIPPING_PLUGIN_DIR', trailingslashit(dirname(__FILE__)));
-define('NOVA_POSHTA_SHIPPING_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('NOVA_POSHTA_SHIPPING_PLUGIN_URL', trailingslashit(plugin_dir_url(__FILE__)));
 define('NOVA_POSHTA_SHIPPING_TEMPLATES_DIR', trailingslashit(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'templates'));
 define('NOVA_POSHTA_SHIPPING_CLASSES_DIR', trailingslashit(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'classes'));
 define('NOVA_POSHTA_DOMAIN', untrailingslashit(basename(dirname(__FILE__))));
@@ -334,11 +334,13 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
          */
         public function scripts()
         {
+            $suffix = $this->options->isDebug() ? '.js' : '.min.js';
+            $fileName = 'assets/js/nova-poshta' . $suffix;
             wp_register_script(
                 'nova-poshta-js',
-                NOVA_POSHTA_SHIPPING_PLUGIN_URL . '/assets/js/nova-poshta.js',
+                NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
                 ['jquery'],
-                filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'assets/js/nova-poshta.js')
+                filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
             );
 
             $this->localizeHelper('nova-poshta-js');
@@ -351,11 +353,13 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
          */
         public function adminScripts()
         {
+            $suffix = $this->options->isDebug() ? '.js' : '.min.js';
+            $fileName = 'assets/js/nova-poshta-admin' . $suffix;
             wp_register_script(
                 'nova-poshta-admin-js',
-                NOVA_POSHTA_SHIPPING_PLUGIN_URL . '/assets/js/nova-poshta-admin.js',
+                NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
                 ['jquery-ui-autocomplete'],
-                filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'assets/js/nova-poshta-admin.js')
+                filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
             );
 
             $this->localizeHelper('nova-poshta-admin-js');
@@ -423,7 +427,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         public function initNovaPoshtaShippingMethod()
         {
             if (!class_exists('WC_NovaPoshta_Shipping_Method')) {
-                require_once __DIR__ . '/classes/WC_NovaPoshta_Shipping_Method.php';
+                /** @noinspection PhpIncludeInspection */
+                require_once NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'classes/WC_NovaPoshta_Shipping_Method.php';
             }
         }
 
