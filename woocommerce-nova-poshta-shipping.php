@@ -11,6 +11,7 @@ Author URI: http://sergey-nezbritskiy.com
 use plugins\NovaPoshta\classes\AjaxRoute;
 use plugins\NovaPoshta\classes\Area;
 use plugins\NovaPoshta\classes\base\ArrayHelper;
+use plugins\NovaPoshta\classes\Log;
 use plugins\NovaPoshta\classes\Region;
 use plugins\NovaPoshta\classes\base\Base;
 use plugins\NovaPoshta\classes\base\Options;
@@ -43,6 +44,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
      * @property wpdb db
      * @property NovaPoshtaApi api
      * @property Options options
+     * @property mixed log
+     * @property Log log
      */
     class NovaPoshta extends Base
     {
@@ -372,6 +375,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
          */
         public function localizeHelper($handle)
         {
+            $this->log->error("Try to get API");
+            $this->log->error("Try to get API", Log::TARGET_DB_UPDATE);
             wp_localize_script($handle, 'NovaPoshtaHelper', [
                 'ajaxUrl' => admin_url('admin-ajax.php', 'relative'),
                 'chooseAnOptionText' => __('Choose an option', NOVA_POSHTA_DOMAIN),
@@ -466,6 +471,15 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         {
             $this->options = Options::instance();
             return $this->options;
+        }
+
+        /**
+         * @return Log
+         */
+        protected function getLog()
+        {
+            $this->log = Log::instance();
+            return $this->log;
         }
 
         /**
