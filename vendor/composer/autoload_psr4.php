@@ -6,5 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Monolog\\' => array($vendorDir . '/monolog/monolog/src/Monolog'),
     'LisDev\\' => array($vendorDir . '/lis-dev/nova-poshta-api-2/src'),
 );
