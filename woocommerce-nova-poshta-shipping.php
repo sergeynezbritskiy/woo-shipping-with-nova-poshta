@@ -69,10 +69,11 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
             add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
 
-            add_action('woocommerce_checkout_process', array($this, 'saveNovaPoshtaOptions'), 10, 2);
+            //set up checkout
             add_filter('woocommerce_checkout_fields', array($this, 'maybeDisableDefaultShippingMethods'));
             add_filter('woocommerce_billing_fields', array($this, 'addNovaPoshtaBillingFields'));
             add_filter('woocommerce_shipping_fields', array($this, 'addNovaPoshtaShippingFields'));
+            add_action('woocommerce_checkout_process', array($this, 'saveNovaPoshtaOptions'), 10, 2);
             add_action('woocommerce_checkout_update_order_meta', array($this, 'updateOrderMeta'));
 
             add_filter('nova_poshta_disable_default_fields', array($this, 'disableDefaultFields'));
@@ -84,6 +85,22 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_filter('default_checkout_shipping_nova_poshta_region', array($this, 'getDefaultRegion'));
             add_filter('default_checkout_shipping_nova_poshta_city', array($this, 'getDefaultCity'));
             add_filter('default_checkout_shipping_nova_poshta_warehouse', array($this, 'getDefaultWarehouse'));
+
+            //set up calculator
+            add_action('woocommerce_before_shipping_calculator', array($this, 'setupCalculatorFields'));
+            add_action('woocommerce_after_shipping_calculator', array($this, 'initNovaPoshtaCalculator'));
+        }
+
+        /**
+         * hook for action woocommerce_before_shipping_calculator
+         * called in woocommerce/templates/cart/shipping-calculator.phpAx
+         */
+        public function setupCalculatorFields()
+        {
+            if ($this->isNP()) {
+                add_filter('woocommerce_shipping_calculator_enable_postcode', '__return_false');
+                add_filter('woocommerce_shipping_calculator_enable_city', '__return_true');
+            }
         }
 
         /**
