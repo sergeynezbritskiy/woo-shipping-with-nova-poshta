@@ -104,9 +104,6 @@ var NovaPoshtaOptions = (function ($) {
         $(document).on('change', shipToDifferentAddressCheckbox, function () {
             handleShippingMethodChange();
         });
-        $(document.body).bind('update_checkout', function () {
-            handleShippingMethodChange();
-        });
         $(document.body).bind('updated_checkout', function () {
             handleShippingMethodChange();
         });

@@ -17,6 +17,8 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         $this->id = NOVA_POSHTA_SHIPPING_METHOD;
         $this->method_title = __('Nova Poshta', NOVA_POSHTA_DOMAIN);
         $this->method_description = __('Shipping with popular Ukrainian logistic company Nova Poshta', NOVA_POSHTA_DOMAIN);
+        $this->countries = array('UA');
+        $this->availability = 'specific';
 
         $this->init();
 
