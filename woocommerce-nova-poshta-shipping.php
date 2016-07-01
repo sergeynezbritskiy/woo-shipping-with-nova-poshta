@@ -374,8 +374,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
          */
         public function localizeHelper($handle)
         {
-            $this->log->error("Try to get API");
-            $this->log->error("Try to get API", Log::LOCATIONS_UPDATE);
             wp_localize_script($handle, 'NovaPoshtaHelper', [
                 'ajaxUrl' => admin_url('admin-ajax.php', 'relative'),
                 'chooseAnOptionText' => __('Choose an option', NOVA_POSHTA_DOMAIN),
