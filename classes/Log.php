@@ -15,29 +15,41 @@ use plugins\NovaPoshta\classes\base\Base;
  */
 class Log extends Base
 {
-    const TARGET_DEFAULT = 'main';
-    const TARGET_DB_UPDATE = 'db_update';
+    const MAIN = 'main';
+    const LOCATIONS_UPDATE = 'db_update';
 
     private $loggersTargets = array(
-        self::TARGET_DEFAULT => array(
+        self::MAIN => array(
             'fileName' => 'main.log',
             'name' => 'General Log',
             'level' => Logger::DEBUG
         ),
-        self::TARGET_DB_UPDATE => array(
+        self::LOCATIONS_UPDATE => array(
             'fileName' => 'updates.log',
-            'name' => 'Areas Updates',
+            'name' => 'Locations Updates',
             'level' => Logger::INFO
         ),
     );
 
     /**
-     * @param string $message
      * @param string $target
+     * @return void
      */
-    public function warning($message, $target = self::TARGET_DEFAULT)
+    public function clear($target = self::MAIN)
     {
-        $this->loggers[$target]->warning($message);
+        $filePath = NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $this->loggersTargets[$target]['fileName'];
+        $file = fopen($filePath, 'w');
+        fclose($file);
+    }
+
+    /**
+     * @return void
+     */
+    public function clearAll()
+    {
+        foreach ($this->loggersTargets as $target => $data) {
+            $this->clear($target);
+        }
     }
 
     /**
@@ -45,7 +57,7 @@ class Log extends Base
      * @param string $target
      * @param array $content
      */
-    public function info($message, $target = self::TARGET_DEFAULT, array $content = array())
+    public function info($message, $target = self::MAIN, array $content = array())
     {
         $this->loggers[$target]->info($message, $content);
     }
@@ -55,7 +67,28 @@ class Log extends Base
      * @param string $target
      * @param array $content
      */
-    public function error($message, $target = self::TARGET_DEFAULT, array $content = array())
+    public function debug($message, $target = self::MAIN, array $content = array())
+    {
+        if(NP()->isDebug()){
+            $this->loggers[$target]->debug($message, $content);
+        }
+    }
+
+    /**
+     * @param string $message
+     * @param string $target
+     */
+    public function warning($message, $target = self::MAIN)
+    {
+        $this->loggers[$target]->warning($message);
+    }
+
+    /**
+     * @param string $message
+     * @param string $target
+     * @param array $content
+     */
+    public function error($message, $target = self::MAIN, array $content = array())
     {
         $this->loggers[$target]->error($message, $content);
     }

@@ -14,6 +14,7 @@ use wpdb;
  * @property string warehousesHash
  * @property int $locationsLastUpdateDate
  * @property int updatedAt
+ * @property Log log
  */
 class DatabaseSync extends Base
 {
@@ -27,6 +28,7 @@ class DatabaseSync extends Base
     public function synchroniseLocations()
     {
         if ($this->requiresUpdate()) {
+            $this->log->info("Synchronization required", Log::LOCATIONS_UPDATE);
             $this->db->query('START TRANSACTION');
 
             $this->updateAreas();
@@ -35,8 +37,10 @@ class DatabaseSync extends Base
             $this->setLocationsLastUpdateDate($this->updatedAt);
 
             if (!$this->db->last_error) {
+                $this->log->info("Synchronization finished successfully", Log::LOCATIONS_UPDATE);
                 $this->db->query('COMMIT');
             } else {
+                $this->log->error("Synchronization failed. Rollback.", Log::LOCATIONS_UPDATE);
                 $this->db->query('ROLLBACK');
             }
         }
@@ -87,6 +91,9 @@ class DatabaseSync extends Base
             $this->setAreasHash($areasHashNew);
             $this->db->query($queryInsert);
             $this->db->query($queryDelete);
+            $this->log->info("Areas were successfully updated", Log::LOCATIONS_UPDATE);
+        } else {
+            $this->log->info("Areas are up-to-date, synchronization does not required", Log::LOCATIONS_UPDATE);
         }
     }
 
@@ -131,6 +138,9 @@ class DatabaseSync extends Base
             $this->setCitiesHash($citiesHashNew);
             $this->db->query($queryInsert);
             $this->db->query($queryDelete);
+            $this->log->info("Cities were successfully updated", Log::LOCATIONS_UPDATE);
+        } else {
+            $this->log->info("Cities are up-to-date, synchronization does not required", Log::LOCATIONS_UPDATE);
         }
     }
 
@@ -174,7 +184,30 @@ class DatabaseSync extends Base
             $this->setWarehousesHash($warehousesHashNew);
             $this->db->query($queryInsert);
             $this->db->query($queryDelete);
+            $this->log->info("Warehouses were successfully updated", Log::LOCATIONS_UPDATE);
+        } else {
+            $this->log->info("Warehouses are up-to-date, synchronization does not required", Log::LOCATIONS_UPDATE);
         }
+    }
+
+    /**
+     * @return int
+     */
+    protected function getInterval()
+    {
+        //604800 = 60*60*24*7 (update every week)
+        //86400 =60*60*24 (update every day)
+        $this->interval = NP()->isDebug() ? 86400 : 604800;
+        return $this->interval;
+    }
+
+    /**
+     * @return Log
+     */
+    protected function getLog()
+    {
+        $this->log = NP()->log;
+        return $this->log;
     }
 
     /**
@@ -288,8 +321,6 @@ class DatabaseSync extends Base
      */
     private function __construct()
     {
-        //update every week
-        $this->interval = 60 * 60 * 24 * 7;
     }
 
     /**

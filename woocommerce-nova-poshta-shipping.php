@@ -44,7 +44,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
      * @property wpdb db
      * @property NovaPoshtaApi api
      * @property Options options
-     * @property mixed log
      * @property Log log
      */
     class NovaPoshta extends Base
@@ -376,7 +375,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         public function localizeHelper($handle)
         {
             $this->log->error("Try to get API");
-            $this->log->error("Try to get API", Log::TARGET_DB_UPDATE);
+            $this->log->error("Try to get API", Log::LOCATIONS_UPDATE);
             wp_localize_script($handle, 'NovaPoshtaHelper', [
                 'ajaxUrl' => admin_url('admin-ajax.php', 'relative'),
                 'chooseAnOptionText' => __('Choose an option', NOVA_POSHTA_DOMAIN),
@@ -465,9 +464,17 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         }
 
         /**
+         * @return bool
+         */
+        public function isDebug()
+        {
+            return $this->options->isDebug();
+        }
+
+        /**
          * @return Options
          */
-        public function getOptions()
+        protected function getOptions()
         {
             $this->options = Options::instance();
             return $this->options;
@@ -511,10 +518,10 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
          */
         public static function instance()
         {
-            if (self::$_instance == null) {
-                self::$_instance = new self();
+            if (static::$_instance == null) {
+                static::$_instance = new static();
             }
-            return self::$_instance;
+            return static::$_instance;
         }
 
         /**
