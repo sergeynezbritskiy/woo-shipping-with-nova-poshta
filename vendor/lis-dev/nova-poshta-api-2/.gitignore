@@ -1,7 +1,0 @@
-.project
-.settings
-.htaccess
-composer.lock
-tests/cover
-/vendor/
-/web/

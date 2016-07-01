@@ -1,5 +1,10 @@
 /i18n/*.pot~
+
 /i18n/*.po~
+
 /assets
+
 /node_modules
+
 /logs
+/vendor
