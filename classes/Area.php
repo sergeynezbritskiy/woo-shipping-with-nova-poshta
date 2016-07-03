@@ -88,10 +88,27 @@ abstract class Area extends Base
 
     /**
      * @param string $name
+     * @return Area[]
+     */
+    public static function findByNameSuggestion($name)
+    {
+        $table = static::table();
+        $a = '%';
+        $query = NP()->db->prepare(
+            "SELECT * FROM $table WHERE (`description` LIKE CONCAT(%s, %s, %s) OR `description_ru` LIKE CONCAT(%s, %s, %s)) AND (`area_type`=%s)",
+            $a, $name, $a,
+            $a, $name, $a,
+            static::key()
+        );
+        return self::findByQuery($query);
+    }
+
+    /**
+     * @param string $name
      * @param string $parentRef
      * @return Area[]
      */
-    public static function findByNameSuggestion($name, $parentRef = null)
+    public static function findByNameSuggestionAndParentArea($name, $parentRef = null)
     {
         $table = static::table();
         $a = '%';
@@ -137,7 +154,7 @@ abstract class Area extends Base
     {
         $areaRef = ArrayHelper::getValue($_POST, 'parent_area_ref', null);
         $name = $_POST['name'];
-        $areas = self::findByNameSuggestion($name, $areaRef);
+        $areas = self::findByNameSuggestionAndParentArea($name, $areaRef);
         foreach ($areas as $area) {
             $area->getRef();
             $area->getDescription();

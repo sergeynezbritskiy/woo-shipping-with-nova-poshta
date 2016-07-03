@@ -13,7 +13,7 @@ var NovaPoshtaSettings = (function ($) {
             source: function (request, response) {
                 jQuery.ajax({
                     type: 'POST',
-                    url: ajaxurl,
+                    url: NovaPoshtaHelper.ajaxUrl,
                     data: {
                         action: NovaPoshtaHelper.getRegionsByNameSuggestionAction,
                         name: request.term
@@ -45,7 +45,7 @@ var NovaPoshtaSettings = (function ($) {
             source: function (request, response) {
                 jQuery.ajax({
                     type: 'POST',
-                    url: ajaxurl,
+                    url: NovaPoshtaHelper.ajaxUrl,
                     data: {
                         action: NovaPoshtaHelper.getCitiesByNameSuggestionAction,
                         name: request.term,
@@ -77,7 +77,7 @@ var NovaPoshtaSettings = (function ($) {
             source: function (request, response) {
                 jQuery.ajax({
                     type: 'POST',
-                    url: ajaxurl,
+                    url: NovaPoshtaHelper.ajaxUrl,
                     data: {
                         action: NovaPoshtaHelper.getWarehousesBySuggestionAction,
                         name: request.term,

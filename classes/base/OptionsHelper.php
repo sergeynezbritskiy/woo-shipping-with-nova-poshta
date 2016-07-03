@@ -1,5 +1,6 @@
 <?php
 namespace plugins\NovaPoshta\classes\base;
+
 use plugins\NovaPoshta\classes\Area;
 
 /**
@@ -10,11 +11,15 @@ class OptionsHelper
 {
     /**
      * @param Area[] $locations
+     * @param bool $enableEmpty
      * @return array
      */
-    public static function getList($locations)
+    public static function getList($locations, $enableEmpty = true)
     {
-        $result = array('' => __('Choose an option', NOVA_POSHTA_DOMAIN));
+        $result = array();
+        if ($enableEmpty) {
+            $result[''] = __('Choose an option', NOVA_POSHTA_DOMAIN);
+        }
         foreach ($locations as $location) {
             $result[$location->ref] = $location->description;
         }

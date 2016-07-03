@@ -7,10 +7,59 @@ var Calculator = (function ($) {
         return currentShippingMethod.val() === 'nova_poshta_shipping_method';
     };
 
+    function enableUpdateButton() {
+        console.log('enable button');
+    }
+
+    function disableUpdateButton() {
+        console.log('disable button');
+    }
+
     var addNovaPoshtaHandlers = function () {
-        //if not ukraine, disable form else enable form
-        //hide region input, instead print nova_poshta_region select,
-        //hide city input, instead print nova_poshta_city select,
+        $('#calc_shipping_state_field').hide();
+        var cityInputKey = $('<input type="hidden" id="calc_nova_poshta_shipping_city" name="calc_nova_poshta_shipping_city">');
+        $('#calc_shipping_city_field').append(cityInputKey);
+        var cityInputName = $('#calc_shipping_city');
+
+        cityInputName.autocomplete({
+            source: function (request, response) {
+                jQuery.ajax({
+                    type: 'POST',
+                    url: NovaPoshtaHelper.ajaxUrl,
+                    data: {
+                        action: NovaPoshtaHelper.getCitiesByNameSuggestionAction,
+                        name: request.term,
+                    },
+                    success: function (json) {
+                        var data = JSON.parse(json);
+                        response(jQuery.map(data, function (item) {
+                            return {
+                                label: item.description,
+                                value: item.ref
+                            }
+                        }));
+                    }
+                })
+            },
+            focus: function (event, ui) {
+                cityInputName.val(ui.item.label);
+                return false;
+            },
+            select: function (event, ui) {
+                cityInputName.val(ui.item.label);
+                cityInputKey.val(ui.item.value);
+                return false;
+            }
+        });
+
+
+        $('#calc_shipping_country').on('change', function () {
+            if ($(this).val() == 'UA') {
+                enableUpdateButton();
+            } else {
+                disableUpdateButton();
+            }
+        });
     };
 
     var initCalculatorOptionsHandlers = function () {

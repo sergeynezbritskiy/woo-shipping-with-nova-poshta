@@ -20,7 +20,7 @@ class AjaxRoute
         self::GET_WAREHOUSES_ROUTE => array(Warehouse::class, 'ajaxGetAreasListByParentAreaRef'),
 
         self::GET_REGIONS_BY_NAME_SUGGESTION => array(Region::class, 'ajaxGetAreasByNameSuggestion'),
-        self::GET_CITIES_BY_NAME_SUGGESTION => array(City::class, 'ajaxGetAreasByNameSuggestion'),
+        self::GET_CITIES_BY_NAME_SUGGESTION => array(City::class, 'ajaxGetCitiesByNameSuggestion'),
         self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array(Warehouse::class, 'ajaxGetAreasByNameSuggestion'),
     );
 

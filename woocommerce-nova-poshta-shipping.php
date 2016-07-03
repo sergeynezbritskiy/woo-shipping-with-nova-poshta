@@ -63,6 +63,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_action('admin_init', array(DatabaseSync::instance(), 'synchroniseLocations'));
             add_action('plugins_loaded', array($this, 'loadPluginDomain'));
             add_action('wp_enqueue_scripts', array($this, 'scripts'));
+            add_action('wp_enqueue_scripts', array($this, 'styles'));
             add_action('admin_enqueue_scripts', array($this, 'adminScripts'));
 
             //register new shipping method
@@ -98,8 +99,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         public function setupCalculatorFields()
         {
             if ($this->isNP()) {
-                add_filter('woocommerce_shipping_calculator_enable_postcode', '__return_false');
                 add_filter('woocommerce_shipping_calculator_enable_city', '__return_true');
+                add_filter('woocommerce_shipping_calculator_enable_postcode', '__return_false');
             }
         }
 
@@ -299,15 +300,19 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
          */
         public function isNP()
         {
+            /** @noinspection PhpUndefinedFieldInspection */
+            $sessionShippingMethods = WC()->session->chosen_shipping_methods;
+
             $chosenShippingMethod = '';
             if ($this->isPost() && ($shippingMethods = ArrayHelper::getValue($_POST, 'shipping_method', array()))) {
                 $chosenShippingMethod = array_shift($shippingMethods);
+            } elseif (isset($sessionShippingMethods) && count($sessionShippingMethods) > 0) {
+                $chosenShippingMethod = array_shift($sessionShippingMethods);
             } else {
                 /** @noinspection PhpUndefinedFieldInspection */
                 $packages = WC()->shipping->get_packages();
                 foreach ($packages as $i => $package) {
-                    /** @noinspection PhpUndefinedFieldInspection */
-                    $chosenShippingMethod = isset(WC()->session->chosen_shipping_methods[$i]) ? WC()->session->chosen_shipping_methods[$i] : '';
+                    $chosenShippingMethod = isset($sessionShippingMethods[$i]) ? $sessionShippingMethods[$i] : '';
                 }
             }
             return $chosenShippingMethod == NOVA_POSHTA_SHIPPING_METHOD;
@@ -358,13 +363,24 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             wp_register_script(
                 'nova-poshta-js',
                 NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
-                ['jquery'],
+                ['jquery-ui-autocomplete'],
                 filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
             );
 
             $this->localizeHelper('nova-poshta-js');
 
             wp_enqueue_script('nova-poshta-js');
+        }
+
+        /**
+         * Enqueue all required scripts
+         */
+        public function styles()
+        {
+            global $wp_scripts;
+            $jquery_version = isset($wp_scripts->registered['jquery-ui-core']->ver) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
+            wp_register_style('jquery-ui-style', '//code.jquery.com/ui/' . $jquery_version . '/themes/smoothness/jquery-ui.css', array(), $jquery_version);
+            wp_enqueue_style('jquery-ui-style');
         }
 
         /**
@@ -377,7 +393,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             wp_register_script(
                 'nova-poshta-admin-js',
                 NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
-                ['jquery-ui-autocomplete'],
+                ['jquery-ui-autocomplete', 'jquery-ui-style'],
                 filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
             );
 
