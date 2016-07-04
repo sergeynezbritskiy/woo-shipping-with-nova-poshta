@@ -20,7 +20,6 @@ var Calculator = (function ($) {
         $('#calc_shipping_city_field').append(cityInputKey).append(shippingMethod);
         var cityInputName = $('#calc_shipping_city');
 
-
         cityInputName.autocomplete({
             source: function (request, response) {
                 jQuery.ajax({
