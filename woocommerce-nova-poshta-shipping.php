@@ -147,13 +147,13 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         public function adminStyles()
         {
             $suffix = $this->options->isDebug() ? '.css' : '.min.css';
-            $fileName = 'assets/css/style-admin' . $suffix;
-            wp_register_style('nova-poshta-admin-css',
+            $fileName = 'assets/css/style' . $suffix;
+            wp_register_style('nova-poshta-style',
                 NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
                 ['jquery-ui-style'],
                 filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
             );
-            wp_enqueue_style('nova-poshta-admin-css');
+            wp_enqueue_style('nova-poshta-style');
         }
 
         /**
