@@ -10,13 +10,16 @@ var root = 'D:/Apache/development/wordpress/wp-content/plugins/woocommerce-nova-
 
 var path = {
     build: {
-        js: root + '/assets/js'
+        js: root + '/assets/js',
+        css: root + '/assets/css'
     },
     src: {
-        js: root + '/src/js/*.js'
+        js: root + '/src/js/*.js',
+        css: root + '/src/css/*.css'
     },
     watch: {
-        js: root + '/src/js/**/*.js'
+        js: root + '/src/js/**/*.js',
+        css: root + '/src/css/**/*.css'
     }
 };
 
@@ -31,21 +34,20 @@ gulp.task('js', function () {
         }))
         .pipe(gulp.dest(path.build.js)) //Выплюнем готовый файл в build
         .pipe(reload({stream: true})); //И перезагрузим сервер
+});
 
-    // gulp.src(path.src.js)
-    //     .pipe(rigger())
-    //     .pipe(uglify())
-    //     .pipe(gulp.dest(path.build.js)) //Выплюнем готовый файл в build
-    //     .pipe(reload({stream: true})); //И перезагрузим сервер
+gulp.task('sass', function () {
+    //TODO implement task sass
 });
 
 gulp.task('watch', function () {
     watch([path.watch.js], function () {
-        gulp.start('js');
+        gulp.start('js').start('sass');
     });
 });
 
 gulp.task('default', [
     'js',
+    'sass',
     'watch'
 ]);
