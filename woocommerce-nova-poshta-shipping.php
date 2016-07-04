@@ -9,15 +9,18 @@ Author URI: http://sergey-nezbritskiy.com
 */
 
 use plugins\NovaPoshta\classes\AjaxRoute;
+use plugins\NovaPoshta\classes\Area;
 use plugins\NovaPoshta\classes\base\ArrayHelper;
-use plugins\NovaPoshta\classes\Calculator;
-use plugins\NovaPoshta\classes\Checkout;
 use plugins\NovaPoshta\classes\Log;
+use plugins\NovaPoshta\classes\Region;
 use plugins\NovaPoshta\classes\base\Base;
 use plugins\NovaPoshta\classes\base\Options;
+use plugins\NovaPoshta\classes\base\OptionsHelper;
+use plugins\NovaPoshta\classes\City;
 use plugins\NovaPoshta\classes\Database;
 use plugins\NovaPoshta\classes\DatabaseSync;
 use plugins\NovaPoshta\classes\NovaPoshtaApi;
+use plugins\NovaPoshta\classes\Warehouse;
 
 define('NOVA_POSHTA_SHIPPING_PLUGIN_DIR', trailingslashit(dirname(__FILE__)));
 define('NOVA_POSHTA_SHIPPING_PLUGIN_URL', trailingslashit(plugin_dir_url(__FILE__)));
@@ -67,10 +70,240 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
             add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
 
-            Checkout::instance()->init();
-            Calculator::instance()->init();
+            //set up checkout
+            add_filter('woocommerce_checkout_fields', array($this, 'maybeDisableDefaultShippingMethods'));
+            add_filter('woocommerce_billing_fields', array($this, 'addNovaPoshtaBillingFields'));
+            add_filter('woocommerce_shipping_fields', array($this, 'addNovaPoshtaShippingFields'));
+            add_action('woocommerce_checkout_process', array($this, 'saveNovaPoshtaOptions'), 10, 2);
+            add_action('woocommerce_checkout_update_order_meta', array($this, 'updateOrderMeta'));
+
+            add_filter('nova_poshta_disable_default_fields', array($this, 'disableDefaultFields'));
+            add_filter('nova_poshta_disable_nova_poshta_fields', array($this, 'disableNovaPoshtaFields'));
+
+            add_filter('default_checkout_billing_nova_poshta_region', array($this, 'getDefaultRegion'));
+            add_filter('default_checkout_billing_nova_poshta_city', array($this, 'getDefaultCity'));
+            add_filter('default_checkout_billing_nova_poshta_warehouse', array($this, 'getDefaultWarehouse'));
+            add_filter('default_checkout_shipping_nova_poshta_region', array($this, 'getDefaultRegion'));
+            add_filter('default_checkout_shipping_nova_poshta_city', array($this, 'getDefaultCity'));
+            add_filter('default_checkout_shipping_nova_poshta_warehouse', array($this, 'getDefaultWarehouse'));
+
+            //set up calculator
+//            \plugins\NovaPoshta\classes\Calculator::instance()->init();
+            add_action('woocommerce_before_shipping_calculator', array($this, 'setupCalculatorFields'));
+            add_action('woocommerce_after_shipping_calculator', array($this, 'initNovaPoshtaCalculator'));
+            add_action('woocommerce_calculated_shipping', array($this, 'initNovaPoshtaCalculatorOptions'));
         }
 
+        public function initNovaPoshtaCalculatorOptions()
+        {
+            if ($this->isNP()) {
+                /** @noinspection PhpUndefinedFieldInspection */
+                WC()->customer->nova_poshta_city = ArrayHelper::getValue($_POST, 'calc_nova_poshta_shipping_city');
+            }
+        }
+
+        /**
+         * hook for action woocommerce_before_shipping_calculator
+         * called in woocommerce/templates/cart/shipping-calculator.phpAx
+         */
+        public function setupCalculatorFields()
+        {
+            if ($this->isNP()) {
+                add_filter('woocommerce_shipping_calculator_enable_city', '__return_true');
+                add_filter('woocommerce_shipping_calculator_enable_postcode', '__return_false');
+            }
+        }
+
+        /**
+         * @return string
+         */
+        public function getDefaultRegion()
+        {
+            /** @noinspection PhpUndefinedFieldInspection */
+            return WC()->customer->nova_poshta_region;
+        }
+
+        /**
+         * @return string
+         */
+        public function getDefaultCity()
+        {
+            /** @noinspection PhpUndefinedFieldInspection */
+            return WC()->customer->nova_poshta_city;
+        }
+
+        /**
+         * @return string
+         */
+        public function getDefaultWarehouse()
+        {
+            /** @noinspection PhpUndefinedFieldInspection */
+            return WC()->customer->nova_poshta_warehouse;
+        }
+
+        public function saveNovaPoshtaOptions()
+        {
+            if ($this->isPost() && $this->isNP()) {
+                $customer = WC()->customer;
+                $fieldGroup = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
+                /** @noinspection PhpUndefinedFieldInspection */
+                $customer->nova_poshta_region = ArrayHelper::getValue($_POST, Region::key($fieldGroup), '');
+                /** @noinspection PhpUndefinedFieldInspection */
+                $customer->nova_poshta_city = ArrayHelper::getValue($_POST, City::key($fieldGroup), '');
+                /** @noinspection PhpUndefinedFieldInspection */
+                $customer->nova_poshta_warehouse = ArrayHelper::getValue($_POST, Warehouse::key($fieldGroup), '');
+            }
+        }
+
+        /**
+         * Filter for hook woocommerce_shipping_init
+         * @param $fields
+         * @return mixed
+         */
+        public function maybeDisableDefaultShippingMethods($fields)
+        {
+            if ($this->isPost() && $this->isNP()) {
+                $fields = apply_filters('nova_poshta_disable_default_fields', $fields);
+                $fields = apply_filters('nova_poshta_disable_nova_poshta_fields', $fields);
+            }
+            return $fields;
+        }
+
+        /**
+         * Hook for adding nova poshta billing fields
+         * @param array $fields
+         * @return array
+         */
+        public function addNovaPoshtaBillingFields($fields)
+        {
+            return $this->addNovaPoshtaFields($fields, Area::BILLING);
+        }
+
+        /**
+         * Hook for adding nova poshta shipping fields
+         * @param array $fields
+         * @return array
+         */
+        public function addNovaPoshtaShippingFields($fields)
+        {
+            return $this->addNovaPoshtaFields($fields, Area::SHIPPING);
+        }
+
+        /**
+         * @param array $fields
+         * @param string $location
+         * @return array
+         */
+        private function addNovaPoshtaFields($fields, $location)
+        {
+            /** @noinspection PhpUndefinedFieldInspection */
+            $area = WC()->customer->nova_poshta_region;
+            /** @noinspection PhpUndefinedFieldInspection */
+            $city = WC()->customer->nova_poshta_city;
+            $fields[Region::key($location)] = [
+                'label' => __('Region', NOVA_POSHTA_DOMAIN),
+                'type' => 'select',
+                'required' => $this->isGet() ?: $this->isNP(),
+                'default' => '',
+                'options' => OptionsHelper::getList(Region::findAll()),
+                'class' => array(),
+                'custom_attributes' => array(),
+            ];
+            $fields[City::key($location)] = [
+                'label' => __('City', NOVA_POSHTA_DOMAIN),
+                'type' => 'select',
+                'required' => $this->isGet() ?: $this->isNP(),
+                'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
+                'class' => array(),
+                'value' => '',
+                'custom_attributes' => array(),
+            ];
+            $fields[Warehouse::key($location)] = [
+                'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
+                'type' => 'select',
+                'required' => $this->isGet() ?: $this->isNP(),
+                'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
+                'class' => array(),
+                'value' => '',
+                'custom_attributes' => array(),
+            ];
+            return $fields;
+        }
+
+
+        /**
+         * @param array $fields
+         * @return array
+         */
+        public function disableNovaPoshtaFields($fields)
+        {
+            $location = $this->shipToDifferentAddress() ? 'billing' : 'shipping';
+            $fields[$location][Region::key($location)]['required'] = false;
+            $fields[$location][City::key($location)]['required'] = false;
+            $fields[$location][Warehouse::key($location)]['required'] = false;
+            return $fields;
+        }
+
+        /**
+         * @param array $fields
+         * @return array
+         */
+        public function disableDefaultFields($fields)
+        {
+            $location = $this->shipToDifferentAddress() ? 'shipping' : 'billing';
+            if (array_key_exists($location . '_state', $fields[$location])) {
+                $fields[$location][$location . '_state']['required'] = false;
+            }
+            if (array_key_exists($location . '_city', $fields[$location])) {
+                $fields[$location][$location . '_city']['required'] = false;
+            }
+            if (array_key_exists($location . '_address_1', $fields[$location])) {
+                $fields[$location][$location . '_address_1']['required'] = false;
+            }
+            if (array_key_exists($location . '_postcode', $fields[$location])) {
+                $fields[$location][$location . '_postcode']['required'] = false;
+            }
+            return $fields;
+        }
+
+        /**
+         * Update the order meta with field value
+         * @param int $orderId
+         */
+        public function updateOrderMeta($orderId)
+        {
+            if ($this->isNP()) {
+                $fieldGroup = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
+
+                $regionKey = Region::key($fieldGroup);
+                $regionRef = sanitize_text_field($_POST[$regionKey]);
+                $area = new Region($regionRef);
+                update_post_meta($orderId, '_' . $fieldGroup . '_state', $area->description);
+
+                $cityKey = City::key($fieldGroup);
+                $cityRef = sanitize_text_field($_POST[$cityKey]);
+                $city = new City($cityRef);
+                update_post_meta($orderId, '_' . $fieldGroup . '_city', $city->description);
+
+                $warehouseKey = Warehouse::key($fieldGroup);
+                $warehouseRef = sanitize_text_field($_POST[$warehouseKey]);
+                $warehouse = new Warehouse($warehouseRef);
+                update_post_meta($orderId, '_' . $fieldGroup . '_address_1', $warehouse->description);
+
+
+                $shippingFieldGroup = Area::SHIPPING;
+                if ($this->shipToDifferentAddress()) {
+                    update_post_meta($orderId, '_' . Region::key($shippingFieldGroup), $area->ref);
+                    update_post_meta($orderId, '_' . City::key($shippingFieldGroup), $city->ref);
+                    update_post_meta($orderId, '_' . Warehouse::key($shippingFieldGroup), $warehouse->ref);
+                } else {
+                    update_post_meta($orderId, '_' . $shippingFieldGroup . '_state', $area->description);
+                    update_post_meta($orderId, '_' . $shippingFieldGroup . '_city', $city->description);
+                    update_post_meta($orderId, '_' . $shippingFieldGroup . '_address_1', $warehouse->description);
+                }
+
+            }
+        }
 
         /**
          * @return bool
@@ -98,7 +331,26 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         /**
          * @return bool
          */
-        public function isPost()
+        public function shipToDifferentAddress()
+        {
+            $shipToDifferentAddress = isset($_POST['ship_to_different_address']) ? true : false;
+
+            if (isset($_POST['shiptobilling'])) {
+                _deprecated_argument('WC_Checkout::process_checkout()', '2.1', 'The "shiptobilling" field is deprecated. The template files are out of date');
+                $shipToDifferentAddress = $_POST['shiptobilling'] ? false : true;
+            }
+
+            // Ship to billing only option
+            if (wc_ship_to_billing_address_only()) {
+                $shipToDifferentAddress = false;
+            }
+            return $shipToDifferentAddress;
+        }
+
+        /**
+         * @return bool
+         */
+        private function isPost()
         {
             return $_SERVER['REQUEST_METHOD'] === 'POST';
         }
@@ -106,7 +358,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         /**
          * @return bool
          */
-        public function isGet()
+        private function isGet()
         {
             return !$this->isPost();
         }
@@ -121,9 +373,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             wp_register_script(
                 'nova-poshta-js',
                 NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
-                ['jquery-ui-autocomplete', 'jquery-ui-style'],
-                filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName),
-                true
+                ['jquery-ui-autocomplete'],
+                filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
             );
 
             $this->localizeHelper('nova-poshta-js');
