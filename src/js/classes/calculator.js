@@ -1,19 +1,10 @@
 var Calculator = (function ($) {
     var result = {};
 
-
     var ensureNovaPoshta = function () {
         var currentShippingMethod = $('input[name^=shipping_method][type=radio]:checked');
         return currentShippingMethod.val() === 'nova_poshta_shipping_method';
     };
-
-    function enableUpdateButton() {
-        console.log('enable button');
-    }
-
-    function disableUpdateButton() {
-        console.log('disable button');
-    }
 
     var addNovaPoshtaHandlers = function () {
         $('#calc_shipping_state_field').hide();
@@ -21,6 +12,13 @@ var Calculator = (function ($) {
         var cityInputKey = $('<input type="hidden" id="calc_nova_poshta_shipping_city" name="calc_nova_poshta_shipping_city">');
         $('#calc_shipping_city_field').append(cityInputKey).append(shippingMethod);
         var cityInputName = $('#calc_shipping_city');
+
+        $('#calc_shipping_country').find('option').each(function () {
+            //ship to Ukraine only
+            if ($(this).val() !== 'UA') {
+                $(this).remove();
+            }
+        });
 
         cityInputName.autocomplete({
             source: function (request, response) {
@@ -53,12 +51,9 @@ var Calculator = (function ($) {
             }
         });
 
-
-        $('#calc_shipping_country').on('change', function () {
-            if ($(this).val() == 'UA') {
-                enableUpdateButton();
-            } else {
-                disableUpdateButton();
+        $('form.woocommerce-shipping-calculator').on('submit', function () {
+            if ($('#calc_shipping_country').val() !== 'UA') {
+                return false;
             }
         });
     };
