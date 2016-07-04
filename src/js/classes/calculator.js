@@ -17,8 +17,9 @@ var Calculator = (function ($) {
 
     var addNovaPoshtaHandlers = function () {
         $('#calc_shipping_state_field').hide();
+        var shippingMethod = $('<input type="hidden" id="calc_nova_poshta_shipping_method" value="nova_poshta_shipping_method" name="shipping_method">');
         var cityInputKey = $('<input type="hidden" id="calc_nova_poshta_shipping_city" name="calc_nova_poshta_shipping_city">');
-        $('#calc_shipping_city_field').append(cityInputKey);
+        $('#calc_shipping_city_field').append(cityInputKey).append(shippingMethod);
         var cityInputName = $('#calc_shipping_city');
 
         cityInputName.autocomplete({
@@ -28,7 +29,7 @@ var Calculator = (function ($) {
                     url: NovaPoshtaHelper.ajaxUrl,
                     data: {
                         action: NovaPoshtaHelper.getCitiesByNameSuggestionAction,
-                        name: request.term,
+                        name: request.term
                     },
                     success: function (json) {
                         var data = JSON.parse(json);

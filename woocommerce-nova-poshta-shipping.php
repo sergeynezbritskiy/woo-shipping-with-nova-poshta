@@ -90,6 +90,15 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             //set up calculator
             add_action('woocommerce_before_shipping_calculator', array($this, 'setupCalculatorFields'));
             add_action('woocommerce_after_shipping_calculator', array($this, 'initNovaPoshtaCalculator'));
+            add_action('woocommerce_calculated_shipping', array($this, 'initNovaPoshtaCalculatorOptions'));
+        }
+
+        public function initNovaPoshtaCalculatorOptions()
+        {
+            if ($this->isNP()) {
+                /** @noinspection PhpUndefinedFieldInspection */
+                WC()->customer->nova_poshta_city = ArrayHelper::getValue($_POST, 'calc_nova_poshta_shipping_city');
+            }
         }
 
         /**

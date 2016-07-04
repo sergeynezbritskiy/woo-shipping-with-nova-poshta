@@ -13,7 +13,7 @@ var path = {
         js: root + '/assets/js'
     },
     src: {
-        js: root + '/src/js/**/*.js'
+        js: root + '/src/js/*.js'
     },
     watch: {
         js: root + '/src/js/**/*.js'
