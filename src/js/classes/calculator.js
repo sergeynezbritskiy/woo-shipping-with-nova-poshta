@@ -7,18 +7,19 @@ var Calculator = (function ($) {
     };
 
     var addNovaPoshtaHandlers = function () {
+        $('#calc_shipping_country').find('option').each(function () {
+            //Ship to Ukraine only
+            if ($(this).val() !== 'UA') {
+                $(this).remove();
+            }
+        });
         $('#calc_shipping_state_field').hide();
+
         var shippingMethod = $('<input type="hidden" id="calc_nova_poshta_shipping_method" value="nova_poshta_shipping_method" name="shipping_method">');
         var cityInputKey = $('<input type="hidden" id="calc_nova_poshta_shipping_city" name="calc_nova_poshta_shipping_city">');
         $('#calc_shipping_city_field').append(cityInputKey).append(shippingMethod);
         var cityInputName = $('#calc_shipping_city');
 
-        $('#calc_shipping_country').find('option').each(function () {
-            //ship to Ukraine only
-            if ($(this).val() !== 'UA') {
-                $(this).remove();
-            }
-        });
 
         cityInputName.autocomplete({
             source: function (request, response) {
@@ -58,7 +59,7 @@ var Calculator = (function ($) {
         });
     };
 
-    var initCalculatorOptionsHandlers = function () {
+    result.init = function () {
         $(document.body).bind('updated_shipping_method', function () {
             if (ensureNovaPoshta()) {
                 addNovaPoshtaHandlers();
@@ -67,10 +68,6 @@ var Calculator = (function ($) {
         if (ensureNovaPoshta()) {
             addNovaPoshtaHandlers();
         }
-    };
-
-    result.init = function () {
-        initCalculatorOptionsHandlers();
     };
 
     return result;
