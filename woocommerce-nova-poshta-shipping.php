@@ -150,7 +150,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             wp_register_script(
                 'nova-poshta-admin-js',
                 NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
-                ['jquery-ui-autocomplete', 'jquery-ui-style'],
+                ['jquery-ui-autocomplete'],
                 filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
             );
 
