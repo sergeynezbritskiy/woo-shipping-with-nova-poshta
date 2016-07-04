@@ -62,6 +62,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_action('wp_enqueue_scripts', array($this, 'scripts'));
             add_action('wp_enqueue_scripts', array($this, 'styles'));
             add_action('admin_enqueue_scripts', array($this, 'adminScripts'));
+            add_action('admin_enqueue_scripts', array($this, 'adminStyles'));
 
             //register new shipping method
             add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
@@ -130,7 +131,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         }
 
         /**
-         * Enqueue all required scripts
+         * Enqueue all required styles
          */
         public function styles()
         {
@@ -138,6 +139,21 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             $jquery_version = isset($wp_scripts->registered['jquery-ui-core']->ver) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
             wp_register_style('jquery-ui-style', '//code.jquery.com/ui/' . $jquery_version . '/themes/smoothness/jquery-ui.css', array(), $jquery_version);
             wp_enqueue_style('jquery-ui-style');
+        }
+
+        /**
+         * Enqueue all required styles for admin panel
+         */
+        public function adminStyles()
+        {
+            $suffix = $this->options->isDebug() ? '.css' : '.min.css';
+            $fileName = 'assets/css/style-admin' . $suffix;
+            wp_register_style('nova-poshta-admin-css',
+                NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
+                ['jquery-ui-style'],
+                filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
+            );
+            wp_enqueue_style('nova-poshta-admin-css');
         }
 
         /**
