@@ -82,6 +82,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             Options::AREA => array(
                 'type' => 'hidden',
                 'default' => '',
+                'class' => 'js-hide-nova-poshta-option'
             ),
             Options::CITY_NAME => array(
                 'title' => __('City', NOVA_POSHTA_DOMAIN),
@@ -92,6 +93,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             Options::CITY => array(
                 'type' => 'hidden',
                 'default' => '',
+                'class' => 'js-hide-nova-poshta-option'
             ),
             Options::WAREHOUSE_NAME => array(
                 'title' => __('Warehouse (Number)', NOVA_POSHTA_DOMAIN),
@@ -101,6 +103,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             Options::WAREHOUSE => array(
                 'type' => 'hidden',
                 'default' => '',
+                'class' => 'js-hide-nova-poshta-option'
             ),
         );
     }

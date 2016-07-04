@@ -116,8 +116,13 @@ var NovaPoshtaSettings = (function ($) {
         warehouseInputKey.val('');
     };
 
+    var hideKeyRows = function () {
+        $('.js-hide-nova-poshta-option').closest('tr').addClass('nova-poshta-option-hidden');
+    };
+
     result.init = function () {
         initAutocomplete();
+        hideKeyRows();
     };
 
     return result;
