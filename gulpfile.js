@@ -31,9 +31,7 @@ gulp.task('js', function () {
         .pipe(rigger())
         .pipe(gulp.dest(path.build.js)) //Выплюнем готовый файл в build
         .pipe(uglify())
-        .pipe(rename({
-            suffix: '.min'
-        }))
+        .pipe(rename({suffix: '.min'}))
         .pipe(gulp.dest(path.build.js)) //Выплюнем готовый файл в build
         .pipe(reload({stream: true})); //И перезагрузим сервер
 });
