@@ -12,6 +12,7 @@ use plugins\NovaPoshta\classes\AjaxRoute;
 use plugins\NovaPoshta\classes\Area;
 use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\Calculator;
+use plugins\NovaPoshta\classes\Checkout;
 use plugins\NovaPoshta\classes\Log;
 use plugins\NovaPoshta\classes\Region;
 use plugins\NovaPoshta\classes\base\Base;
@@ -71,24 +72,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
             add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
 
-            //set up checkout
-            add_filter('woocommerce_checkout_fields', array($this, 'maybeDisableDefaultShippingMethods'));
-            add_filter('woocommerce_billing_fields', array($this, 'addNovaPoshtaBillingFields'));
-            add_filter('woocommerce_shipping_fields', array($this, 'addNovaPoshtaShippingFields'));
-            add_action('woocommerce_checkout_process', array($this, 'saveNovaPoshtaOptions'), 10, 2);
-            add_action('woocommerce_checkout_update_order_meta', array($this, 'updateOrderMeta'));
-
-            add_filter('nova_poshta_disable_default_fields', array($this, 'disableDefaultFields'));
-            add_filter('nova_poshta_disable_nova_poshta_fields', array($this, 'disableNovaPoshtaFields'));
-
-            add_filter('default_checkout_billing_nova_poshta_region', array($this, 'getDefaultRegion'));
-            add_filter('default_checkout_billing_nova_poshta_city', array($this, 'getDefaultCity'));
-            add_filter('default_checkout_billing_nova_poshta_warehouse', array($this, 'getDefaultWarehouse'));
-            add_filter('default_checkout_shipping_nova_poshta_region', array($this, 'getDefaultRegion'));
-            add_filter('default_checkout_shipping_nova_poshta_city', array($this, 'getDefaultCity'));
-            add_filter('default_checkout_shipping_nova_poshta_warehouse', array($this, 'getDefaultWarehouse'));
-
-            //set up calculator
+            Checkout::instance()->init();
             Calculator::instance()->init();
         }
 
@@ -348,7 +332,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         /**
          * @return bool
          */
-        private function isPost()
+        public function isPost()
         {
             return $_SERVER['REQUEST_METHOD'] === 'POST';
         }
@@ -356,7 +340,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         /**
          * @return bool
          */
-        private function isGet()
+        public function isGet()
         {
             return !$this->isPost();
         }
