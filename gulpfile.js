@@ -1,4 +1,6 @@
 var gulp = require('gulp'),
+    sass = require('gulp-sass'),
+    minifyCSS = require('gulp-minify-css'),
     rigger = require('gulp-rigger'),
     watch = require('gulp-watch'),
     uglify = require('gulp-uglify'),
@@ -15,11 +17,11 @@ var path = {
     },
     src: {
         js: root + '/src/js/*.js',
-        css: root + '/src/css/*.css'
+        sass: root + '/src/sass/**/*.scss'
     },
     watch: {
         js: root + '/src/js/**/*.js',
-        css: root + '/src/css/**/*.css'
+        sass: root + '/src/sass/**/*.scss'
     }
 };
 
@@ -37,7 +39,12 @@ gulp.task('js', function () {
 });
 
 gulp.task('sass', function () {
-    //TODO implement task sass
+    gulp.src(path.src.sass)
+        .pipe(sass().on('error', sass.logError))
+        .pipe(gulp.dest(path.build.css))
+        .pipe(minifyCSS({keepBreaks: true}))
+        .pipe(rename({suffix: '.min'}))
+        .pipe(gulp.dest(path.build.css));
 });
 
 gulp.task('watch', function () {
