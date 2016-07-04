@@ -11,6 +11,7 @@ Author URI: http://sergey-nezbritskiy.com
 use plugins\NovaPoshta\classes\AjaxRoute;
 use plugins\NovaPoshta\classes\Area;
 use plugins\NovaPoshta\classes\base\ArrayHelper;
+use plugins\NovaPoshta\classes\Calculator;
 use plugins\NovaPoshta\classes\Log;
 use plugins\NovaPoshta\classes\Region;
 use plugins\NovaPoshta\classes\base\Base;
@@ -88,10 +89,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             add_filter('default_checkout_shipping_nova_poshta_warehouse', array($this, 'getDefaultWarehouse'));
 
             //set up calculator
-//            \plugins\NovaPoshta\classes\Calculator::instance()->init();
-            add_action('woocommerce_before_shipping_calculator', array($this, 'setupCalculatorFields'));
-            add_action('woocommerce_after_shipping_calculator', array($this, 'initNovaPoshtaCalculator'));
-            add_action('woocommerce_calculated_shipping', array($this, 'initNovaPoshtaCalculatorOptions'));
+            Calculator::instance()->init();
         }
 
         public function initNovaPoshtaCalculatorOptions()
