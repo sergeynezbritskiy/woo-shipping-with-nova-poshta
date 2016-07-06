@@ -13,7 +13,7 @@ class Calculator extends Base
     public function init()
     {
         //set up calculator
-        add_action('woocommerce_before_shipping_calculator', array($this, 'setupCalculatorFields'));
+        add_action('init', array($this, 'setupCalculatorFields'));
         add_action('woocommerce_calculated_shipping', array($this, 'initNovaPoshtaCalculatorOptions'));
     }
 

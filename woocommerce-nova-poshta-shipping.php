@@ -85,7 +85,7 @@ class NovaPoshta extends Base
         $sessionShippingMethods = WC()->session->chosen_shipping_methods;
 
         $chosenShippingMethod = '';
-        if ($this->isPost() && ($shippingMethods = ArrayHelper::getValue($_POST, 'shipping_method', array()))) {
+        if ($this->isPost() && ($shippingMethods = (array)ArrayHelper::getValue($_POST, 'shipping_method', array()))) {
             $chosenShippingMethod = array_shift($shippingMethods);
         } elseif (isset($sessionShippingMethods) && count($sessionShippingMethods) > 0) {
             $chosenShippingMethod = array_shift($sessionShippingMethods);

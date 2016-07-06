@@ -22,8 +22,11 @@ var NovaPoshtaOptions = (function ($) {
     };
 
     var ensureNovaPoshta = function () {
-        var currentShippingMethod = $('input[name^=shipping_method][type=radio]:checked');
-        return currentShippingMethod.val() === 'nova_poshta_shipping_method';
+        var value = $('input[name^=shipping_method][type=radio]:checked').val();
+        if (!value) {
+            value = $('input#shipping_method_0').val();
+        }
+        return value === 'nova_poshta_shipping_method';
     };
 
     //billing
