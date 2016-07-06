@@ -30,31 +30,26 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/autoload.php';
 
 /**
- * Check if WooCommerce is active
+ * Class NovaPoshta
+ *
+ * @property wpdb db
+ * @property NovaPoshtaApi api
+ * @property Options options
+ * @property Log log
  */
-if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
-
+class NovaPoshta extends Base
+{
+    const LOCALE_RU = 'ru_RU';
 
     /**
-     * Class NovaPoshta
-     *
-     * @property wpdb db
-     * @property NovaPoshtaApi api
-     * @property Options options
-     * @property Log log
+     * Register main plugin hooks
      */
-    class NovaPoshta extends Base
+    public function init()
     {
-        const LOCALE_RU = 'ru_RU';
+        register_activation_hook(__FILE__, array($this, 'activatePlugin'));
+        register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
 
-        /**
-         * Register main plugin hooks
-         */
-        public function init()
-        {
-            register_activation_hook(__FILE__, array($this, 'activatePlugin'));
-            register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
-
+        if ($this->isWoocommerce()) {
             //general plugin actions
             add_action('init', array(AjaxRoute::class, 'init'));
             add_action('admin_init', array(DatabaseSync::instance(), 'synchroniseLocations'));
@@ -71,282 +66,291 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             Checkout::instance()->init();
             Calculator::instance()->init();
         }
+    }
 
-        /**
-         * @return bool
-         */
-        public function isNP()
-        {
+    /**
+     * @return bool
+     */
+    public function isWoocommerce()
+    {
+        return in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNP()
+    {
+        /** @noinspection PhpUndefinedFieldInspection */
+        $sessionShippingMethods = WC()->session->chosen_shipping_methods;
+
+        $chosenShippingMethod = '';
+        if ($this->isPost() && ($shippingMethods = ArrayHelper::getValue($_POST, 'shipping_method', array()))) {
+            $chosenShippingMethod = array_shift($shippingMethods);
+        } elseif (isset($sessionShippingMethods) && count($sessionShippingMethods) > 0) {
+            $chosenShippingMethod = array_shift($sessionShippingMethods);
+        } else {
             /** @noinspection PhpUndefinedFieldInspection */
-            $sessionShippingMethods = WC()->session->chosen_shipping_methods;
-
-            $chosenShippingMethod = '';
-            if ($this->isPost() && ($shippingMethods = ArrayHelper::getValue($_POST, 'shipping_method', array()))) {
-                $chosenShippingMethod = array_shift($shippingMethods);
-            } elseif (isset($sessionShippingMethods) && count($sessionShippingMethods) > 0) {
-                $chosenShippingMethod = array_shift($sessionShippingMethods);
-            } else {
-                /** @noinspection PhpUndefinedFieldInspection */
-                $packages = WC()->shipping->get_packages();
-                foreach ($packages as $i => $package) {
-                    $chosenShippingMethod = isset($sessionShippingMethods[$i]) ? $sessionShippingMethods[$i] : '';
-                }
-            }
-            return $chosenShippingMethod == NOVA_POSHTA_SHIPPING_METHOD;
-        }
-
-        /**
-         * @return bool
-         */
-        public function isPost()
-        {
-            return $_SERVER['REQUEST_METHOD'] === 'POST';
-        }
-
-        /**
-         * @return bool
-         */
-        public function isGet()
-        {
-            return !$this->isPost();
-        }
-
-        /**
-         * Enqueue all required scripts
-         */
-        public function scripts()
-        {
-            $suffix = $this->options->isDebug() ? '.js' : '.min.js';
-            $fileName = 'assets/js/nova-poshta' . $suffix;
-            wp_register_script(
-                'nova-poshta-js',
-                NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
-                ['jquery-ui-autocomplete'],
-                filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
-            );
-
-            $this->localizeHelper('nova-poshta-js');
-
-            wp_enqueue_script('nova-poshta-js');
-        }
-
-        /**
-         * Enqueue all required styles
-         */
-        public function styles()
-        {
-            global $wp_scripts;
-            $jquery_version = isset($wp_scripts->registered['jquery-ui-core']->ver) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
-            wp_register_style('jquery-ui-style', '//code.jquery.com/ui/' . $jquery_version . '/themes/smoothness/jquery-ui.css', array(), $jquery_version);
-            wp_enqueue_style('jquery-ui-style');
-        }
-
-        /**
-         * Enqueue all required styles for admin panel
-         */
-        public function adminStyles()
-        {
-            $suffix = $this->options->isDebug() ? '.css' : '.min.css';
-            $fileName = 'assets/css/style' . $suffix;
-            wp_register_style('nova-poshta-style',
-                NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
-                ['jquery-ui-style'],
-                filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
-            );
-            wp_enqueue_style('nova-poshta-style');
-        }
-
-        /**
-         * Enqueue all required scripts for admin panel
-         */
-        public function adminScripts()
-        {
-            $suffix = $this->options->isDebug() ? '.js' : '.min.js';
-            $fileName = 'assets/js/nova-poshta-admin' . $suffix;
-            wp_register_script(
-                'nova-poshta-admin-js',
-                NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
-                ['jquery-ui-autocomplete'],
-                filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
-            );
-
-            $this->localizeHelper('nova-poshta-admin-js');
-
-            wp_enqueue_script('nova-poshta-admin-js');
-        }
-
-        /**
-         * @param string $handle
-         */
-        public function localizeHelper($handle)
-        {
-            wp_localize_script($handle, 'NovaPoshtaHelper', [
-                'ajaxUrl' => admin_url('admin-ajax.php', 'relative'),
-                'chooseAnOptionText' => __('Choose an option', NOVA_POSHTA_DOMAIN),
-                'getRegionsByNameSuggestionAction' => AjaxRoute::GET_REGIONS_BY_NAME_SUGGESTION,
-                'getCitiesByNameSuggestionAction' => AjaxRoute::GET_CITIES_BY_NAME_SUGGESTION,
-                'getWarehousesBySuggestionAction' => AjaxRoute::GET_WAREHOUSES_BY_NAME_SUGGESTION,
-                'getCitiesAction' => AjaxRoute::GET_CITIES_ROUTE,
-                'getWarehousesAction' => AjaxRoute::GET_WAREHOUSES_ROUTE,
-            ]);
-        }
-
-        /**
-         * @param string $template
-         * @param string $templateName
-         * @param string $templatePath
-         * @return string
-         */
-        public function locateTemplate($template, $templateName, $templatePath)
-        {
-            global $woocommerce;
-            $_template = $template;
-            if (!$templatePath)
-                $templatePath = $woocommerce->template_url;
-
-            $pluginPath = NOVA_POSHTA_SHIPPING_TEMPLATES_DIR . 'woocommerce/';
-
-            // Look within passed path within the theme - this is priority
-            $template = locate_template(array(
-                $templatePath . $templateName,
-                $templateName
-            ));
-
-            if (!$template && file_exists($pluginPath . $templateName)) {
-                $template = $pluginPath . $templateName;
-            }
-
-            return $template ?: $_template;
-        }
-
-        /**
-         * @param array $methods
-         * @return array
-         */
-        public function addNovaPoshtaShippingMethod($methods)
-        {
-            $methods[] = 'WC_NovaPoshta_Shipping_Method';
-            return $methods;
-        }
-
-        /**
-         * Init NovaPoshta shipping method class
-         */
-        public function initNovaPoshtaShippingMethod()
-        {
-            if (!class_exists('WC_NovaPoshta_Shipping_Method')) {
-                /** @noinspection PhpIncludeInspection */
-                require_once NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'classes/WC_NovaPoshta_Shipping_Method.php';
+            $packages = WC()->shipping->get_packages();
+            foreach ($packages as $i => $package) {
+                $chosenShippingMethod = isset($sessionShippingMethods[$i]) ? $sessionShippingMethods[$i] : '';
             }
         }
+        return $chosenShippingMethod == NOVA_POSHTA_SHIPPING_METHOD;
+    }
 
-        /**
-         * Activation hook handler
-         */
-        public function activatePlugin()
-        {
-            Database::instance()->createTables();
-            DatabaseSync::instance()->synchroniseLocations();
+    /**
+     * @return bool
+     */
+    public function isPost()
+    {
+        return $_SERVER['REQUEST_METHOD'] === 'POST';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGet()
+    {
+        return !$this->isPost();
+    }
+
+    /**
+     * Enqueue all required scripts
+     */
+    public function scripts()
+    {
+        $suffix = $this->options->isDebug() ? '.js' : '.min.js';
+        $fileName = 'assets/js/nova-poshta' . $suffix;
+        wp_register_script(
+            'nova-poshta-js',
+            NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
+            ['jquery-ui-autocomplete'],
+            filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
+        );
+
+        $this->localizeHelper('nova-poshta-js');
+
+        wp_enqueue_script('nova-poshta-js');
+    }
+
+    /**
+     * Enqueue all required styles
+     */
+    public function styles()
+    {
+        global $wp_scripts;
+        $jquery_version = isset($wp_scripts->registered['jquery-ui-core']->ver) ? $wp_scripts->registered['jquery-ui-core']->ver : '1.9.2';
+        wp_register_style('jquery-ui-style', '//code.jquery.com/ui/' . $jquery_version . '/themes/smoothness/jquery-ui.css', array(), $jquery_version);
+        wp_enqueue_style('jquery-ui-style');
+    }
+
+    /**
+     * Enqueue all required styles for admin panel
+     */
+    public function adminStyles()
+    {
+        $suffix = $this->options->isDebug() ? '.css' : '.min.css';
+        $fileName = 'assets/css/style' . $suffix;
+        wp_register_style('nova-poshta-style',
+            NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
+            ['jquery-ui-style'],
+            filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
+        );
+        wp_enqueue_style('nova-poshta-style');
+    }
+
+    /**
+     * Enqueue all required scripts for admin panel
+     */
+    public function adminScripts()
+    {
+        $suffix = $this->options->isDebug() ? '.js' : '.min.js';
+        $fileName = 'assets/js/nova-poshta-admin' . $suffix;
+        wp_register_script(
+            'nova-poshta-admin-js',
+            NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
+            ['jquery-ui-autocomplete'],
+            filemtime(NOVA_POSHTA_SHIPPING_PLUGIN_DIR . $fileName)
+        );
+
+        $this->localizeHelper('nova-poshta-admin-js');
+
+        wp_enqueue_script('nova-poshta-admin-js');
+    }
+
+    /**
+     * @param string $handle
+     */
+    public function localizeHelper($handle)
+    {
+        wp_localize_script($handle, 'NovaPoshtaHelper', [
+            'ajaxUrl' => admin_url('admin-ajax.php', 'relative'),
+            'chooseAnOptionText' => __('Choose an option', NOVA_POSHTA_DOMAIN),
+            'getRegionsByNameSuggestionAction' => AjaxRoute::GET_REGIONS_BY_NAME_SUGGESTION,
+            'getCitiesByNameSuggestionAction' => AjaxRoute::GET_CITIES_BY_NAME_SUGGESTION,
+            'getWarehousesBySuggestionAction' => AjaxRoute::GET_WAREHOUSES_BY_NAME_SUGGESTION,
+            'getCitiesAction' => AjaxRoute::GET_CITIES_ROUTE,
+            'getWarehousesAction' => AjaxRoute::GET_WAREHOUSES_ROUTE,
+        ]);
+    }
+
+    /**
+     * @param string $template
+     * @param string $templateName
+     * @param string $templatePath
+     * @return string
+     */
+    public function locateTemplate($template, $templateName, $templatePath)
+    {
+        global $woocommerce;
+        $_template = $template;
+        if (!$templatePath)
+            $templatePath = $woocommerce->template_url;
+
+        $pluginPath = NOVA_POSHTA_SHIPPING_TEMPLATES_DIR . 'woocommerce/';
+
+        // Look within passed path within the theme - this is priority
+        $template = locate_template(array(
+            $templatePath . $templateName,
+            $templateName
+        ));
+
+        if (!$template && file_exists($pluginPath . $templateName)) {
+            $template = $pluginPath . $templateName;
         }
 
-        /**
-         * Deactivation hook handler
-         */
-        public function deactivatePlugin()
-        {
-            Database::instance()->dropTables();
-            Options::instance()->clearOptions();
-        }
+        return $template ?: $_template;
+    }
 
-        /**
-         * Register translations directory
-         * Register text domain
-         */
-        public function loadPluginDomain()
-        {
-            load_plugin_textdomain(NOVA_POSHTA_DOMAIN, false, './woocommerce-nova-poshta-shipping/i18n');
-        }
+    /**
+     * @param array $methods
+     * @return array
+     */
+    public function addNovaPoshtaShippingMethod($methods)
+    {
+        $methods[] = 'WC_NovaPoshta_Shipping_Method';
+        return $methods;
+    }
 
-        /**
-         * @return bool
-         */
-        public function isDebug()
-        {
-            return $this->options->isDebug();
-        }
-
-        /**
-         * @return Options
-         */
-        protected function getOptions()
-        {
-            $this->options = Options::instance();
-            return $this->options;
-        }
-
-        /**
-         * @return Log
-         */
-        protected function getLog()
-        {
-            $this->log = Log::instance();
-            return $this->log;
-        }
-
-        /**
-         * @return wpdb
-         */
-        protected function getDb()
-        {
-            global $wpdb;
-            $this->db = $wpdb;
-            return $this->db;
-        }
-
-        /**
-         * @return NovaPoshtaApi
-         */
-        protected function getApi()
-        {
-            $this->api = NovaPoshtaApi::instance();
-            return $this->api;
-        }
-
-        /**
-         * @var NovaPoshta
-         */
-        private static $_instance;
-
-        /**
-         * @return NovaPoshta
-         */
-        public static function instance()
-        {
-            if (static::$_instance == null) {
-                static::$_instance = new static();
-            }
-            return static::$_instance;
-        }
-
-        /**
-         * NovaPoshta constructor.
-         *
-         * @access private
-         */
-        private function __construct()
-        {
-        }
-
-        /**
-         * @access private
-         */
-        private function __clone()
-        {
+    /**
+     * Init NovaPoshta shipping method class
+     */
+    public function initNovaPoshtaShippingMethod()
+    {
+        if (!class_exists('WC_NovaPoshta_Shipping_Method')) {
+            /** @noinspection PhpIncludeInspection */
+            require_once NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'classes/WC_NovaPoshta_Shipping_Method.php';
         }
     }
 
-    NovaPoshta::instance()->init();
+    /**
+     * Activation hook handler
+     */
+    public function activatePlugin()
+    {
+        Database::instance()->createTables();
+        DatabaseSync::instance()->synchroniseLocations();
+    }
+
+    /**
+     * Deactivation hook handler
+     */
+    public function deactivatePlugin()
+    {
+        Database::instance()->dropTables();
+        Options::instance()->clearOptions();
+    }
+
+    /**
+     * Register translations directory
+     * Register text domain
+     */
+    public function loadPluginDomain()
+    {
+        load_plugin_textdomain(NOVA_POSHTA_DOMAIN, false, './woocommerce-nova-poshta-shipping/i18n');
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDebug()
+    {
+        return $this->options->isDebug();
+    }
+
+    /**
+     * @return Options
+     */
+    protected function getOptions()
+    {
+        $this->options = Options::instance();
+        return $this->options;
+    }
+
+    /**
+     * @return Log
+     */
+    protected function getLog()
+    {
+        $this->log = Log::instance();
+        return $this->log;
+    }
+
+    /**
+     * @return wpdb
+     */
+    protected function getDb()
+    {
+        global $wpdb;
+        $this->db = $wpdb;
+        return $this->db;
+    }
+
+    /**
+     * @return NovaPoshtaApi
+     */
+    protected function getApi()
+    {
+        $this->api = NovaPoshtaApi::instance();
+        return $this->api;
+    }
+
+    /**
+     * @var NovaPoshta
+     */
+    private static $_instance;
+
+    /**
+     * @return NovaPoshta
+     */
+    public static function instance()
+    {
+        if (static::$_instance == null) {
+            static::$_instance = new static();
+        }
+        return static::$_instance;
+    }
+
+    /**
+     * NovaPoshta constructor.
+     *
+     * @access private
+     */
+    private function __construct()
+    {
+    }
+
+    /**
+     * @access private
+     */
+    private function __clone()
+    {
+    }
 }
+
+NovaPoshta::instance()->init();
+
 
 /**
  * @return NovaPoshta
