@@ -81,6 +81,7 @@ class NovaPoshta extends Base
      */
     public function isNP()
     {
+        //TODO make this method more abstract, avoid elseif branch
         /** @noinspection PhpUndefinedFieldInspection */
         $sessionShippingMethods = WC()->session->chosen_shipping_methods;
 

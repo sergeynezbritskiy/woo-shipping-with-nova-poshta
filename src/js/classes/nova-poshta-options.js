@@ -22,6 +22,7 @@ var NovaPoshtaOptions = (function ($) {
     };
 
     var ensureNovaPoshta = function () {
+        //TODO this method should be more abstract
         var value = $('input[name^=shipping_method][type=radio]:checked').val();
         if (!value) {
             value = $('input#shipping_method_0').val();
@@ -101,6 +102,7 @@ var NovaPoshtaOptions = (function ($) {
     };
 
     var initShippingMethodHandlers = function () {
+        //TODO check count of call of this method during initialisation and other actions
         $(document).on('change', shippingMethod, function () {
             handleShippingMethodChange();
         });
