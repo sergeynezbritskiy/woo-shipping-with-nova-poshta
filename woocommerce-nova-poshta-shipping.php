@@ -81,23 +81,16 @@ class NovaPoshta extends Base
      */
     public function isNP()
     {
-        //TODO make this method more abstract, avoid elseif branch
         /** @noinspection PhpUndefinedFieldInspection */
-        $sessionShippingMethods = WC()->session->chosen_shipping_methods;
+        $sessionMethods = WC()->session->chosen_shipping_methods;
 
-        $chosenShippingMethod = '';
+        $CHOSENmETHODS = ARRAY();
         if ($this->isPost() && ($shippingMethods = (array)ArrayHelper::getValue($_POST, 'shipping_method', array()))) {
-            $chosenShippingMethod = array_shift($shippingMethods);
-        } elseif (isset($sessionShippingMethods) && count($sessionShippingMethods) > 0) {
-            $chosenShippingMethod = array_shift($sessionShippingMethods);
-        } else {
-            /** @noinspection PhpUndefinedFieldInspection */
-            $packages = WC()->shipping->get_packages();
-            foreach ($packages as $i => $package) {
-                $chosenShippingMethod = isset($sessionShippingMethods[$i]) ? $sessionShippingMethods[$i] : '';
-            }
+            $chosenMethods = $shippingMethods;
+        } elseif (isset($sessionMethods) && count($sessionMethods) > 0) {
+            $chosenMethods = $sessionMethods;
         }
-        return $chosenShippingMethod == NOVA_POSHTA_SHIPPING_METHOD;
+        return in_array(NOVA_POSHTA_SHIPPING_METHOD, $chosenMethods);
     }
 
     /**
