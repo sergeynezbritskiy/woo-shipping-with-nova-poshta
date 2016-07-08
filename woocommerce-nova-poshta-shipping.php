@@ -77,6 +77,9 @@ class NovaPoshta extends Base
     }
 
     /**
+     * This method can be used safely only after woocommerce_after_calculate_totals hook
+     * when $_SERVER['REQUEST_METHOD'] == 'GET'
+     *
      * @return bool
      */
     public function isNP()
