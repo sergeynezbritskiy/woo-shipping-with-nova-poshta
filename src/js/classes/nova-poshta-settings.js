@@ -7,6 +7,24 @@ var NovaPoshtaSettings = (function ($) {
     var cityInputKey = $('#woocommerce_nova_poshta_shipping_method_city');
     var warehouseInputName = $('#woocommerce_nova_poshta_shipping_method_warehouse_name');
     var warehouseInputKey = $('#woocommerce_nova_poshta_shipping_method_warehouse');
+    var el_cash_on_delivery = $("#woocommerce_nova_poshta_shipping_method_enabled_cash_on_delivery");
+
+    var handleCashOnDeliveryChange = function () {
+        var el_fixed_price = jQuery("#woocommerce_nova_poshta_shipping_method_fixed_price")
+        var change_value = el_cash_on_delivery.val();
+        if (change_value == 'on_delivery') {
+            el_fixed_price.parent().parent().parent().hide();
+        } else {
+            el_fixed_price.parent().parent().parent().show();
+        }
+    };
+
+    var initCashOnDelivery = function () {
+        el_cash_on_delivery.change(function () {
+            handleCashOnDeliveryChange();
+        });
+        handleCashOnDeliveryChange();
+    };
 
     var initAutocomplete = function () {
         areaInputName.autocomplete({
@@ -123,6 +141,7 @@ var NovaPoshtaSettings = (function ($) {
     result.init = function () {
         initAutocomplete();
         hideKeyRows();
+        initCashOnDelivery();
     };
 
     return result;

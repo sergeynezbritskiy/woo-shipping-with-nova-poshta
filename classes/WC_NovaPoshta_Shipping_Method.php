@@ -105,6 +105,23 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 'default' => '',
                 'class' => 'js-hide-nova-poshta-option'
             ),
+            'enabled_cash_on_delivery' => [
+                'title' => __('Cash on delivery or Fixed price.', 'nova_poshta_shipping_method'),
+                'label' => __('Enable Cash on delivery or Fixed price.', 'nova_poshta_shipping_method'),
+                'type' => 'select',
+                'description' => '',
+                'default' => 'on_delivery',
+                'options' => [
+                    'on_delivery' => 'Cash on delivery',
+                    'fixed_price' => 'Fixed Price',
+                ]
+            ],
+            'fixed_price' => [
+                'title' => __('Fixed price', 'nova_poshta_shipping_method'),
+                'type' => 'text',
+                'description' => __('Delivery Fixed price.', 'nova_poshta_shipping_method'),
+                'default' => __('0.00', 'nova_poshta_shipping_method')
+            ],
         );
     }
 
