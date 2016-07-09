@@ -7,20 +7,19 @@ var NovaPoshtaSettings = (function ($) {
     var cityInputKey = $('#woocommerce_nova_poshta_shipping_method_city');
     var warehouseInputName = $('#woocommerce_nova_poshta_shipping_method_warehouse_name');
     var warehouseInputKey = $('#woocommerce_nova_poshta_shipping_method_warehouse');
-    var el_cash_on_delivery = $("#woocommerce_nova_poshta_shipping_method_enabled_cash_on_delivery");
+    var enabledCashOnDelivery = $("#woocommerce_nova_poshta_shipping_method_enable_cash_on_delivery");
+    var fixedPrice = jQuery("#woocommerce_nova_poshta_shipping_method_fixed_price");
 
     var handleCashOnDeliveryChange = function () {
-        var el_fixed_price = jQuery("#woocommerce_nova_poshta_shipping_method_fixed_price")
-        var change_value = el_cash_on_delivery.val();
-        if (change_value == 'on_delivery') {
-            el_fixed_price.parent().parent().parent().hide();
+        if (enabledCashOnDelivery.val() == 'on_delivery') {
+            fixedPrice.closest('tr').hide();
         } else {
-            el_fixed_price.parent().parent().parent().show();
+            fixedPrice.closest('tr').show();
         }
     };
 
     var initCashOnDelivery = function () {
-        el_cash_on_delivery.change(function () {
+        enabledCashOnDelivery.change(function () {
             handleCashOnDeliveryChange();
         });
         handleCashOnDeliveryChange();

@@ -105,22 +105,24 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 'default' => '',
                 'class' => 'js-hide-nova-poshta-option'
             ),
-            'enabled_cash_on_delivery' => [
-                'title' => __('Cash on delivery or Fixed price.', 'nova_poshta_shipping_method'),
-                'label' => __('Enable Cash on delivery or Fixed price.', 'nova_poshta_shipping_method'),
+
+            Options::ENABLE_CASH_ON_DELIVERY => [
+                'title' => __('Cash on delivery or Fixed price.', NOVA_POSHTA_DOMAIN),
+                'label' => __('Enable Cash on delivery or Fixed price.', NOVA_POSHTA_DOMAIN),
                 'type' => 'select',
                 'description' => '',
                 'default' => 'on_delivery',
                 'options' => [
-                    'on_delivery' => 'Cash on delivery',
-                    'fixed_price' => 'Fixed Price',
+                    'on_delivery' => __('Cash on delivery', NOVA_POSHTA_DOMAIN),
+                    'fixed_price' => __('Fixed Price', NOVA_POSHTA_DOMAIN),
                 ]
             ],
-            'fixed_price' => [
-                'title' => __('Fixed price', 'nova_poshta_shipping_method'),
+
+            Options::FIXED_PRICE => [
+                'title' => __('Fixed price', NOVA_POSHTA_DOMAIN),
                 'type' => 'text',
-                'description' => __('Delivery Fixed price.', 'nova_poshta_shipping_method'),
-                'default' => __('0.00', 'nova_poshta_shipping_method')
+                'description' => __('Delivery Fixed price.', NOVA_POSHTA_DOMAIN),
+                'default' => __('0.00', NOVA_POSHTA_DOMAIN)
             ],
         );
     }

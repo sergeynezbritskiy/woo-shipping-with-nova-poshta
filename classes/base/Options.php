@@ -26,6 +26,8 @@ class Options extends Base
     const WAREHOUSE = 'warehouse';
     const API_KEY = 'api_key';
     const DEBUG = 'debug';
+    const ENABLE_CASH_ON_DELIVERY = 'enable_cash_on_delivery';
+    const FIXED_PRICE = 'fixed_price';
 
     /**
      * @return int
