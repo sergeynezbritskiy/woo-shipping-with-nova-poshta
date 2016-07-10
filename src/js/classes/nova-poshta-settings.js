@@ -7,22 +7,22 @@ var NovaPoshtaSettings = (function ($) {
     var cityInputKey = $('#woocommerce_nova_poshta_shipping_method_city');
     var warehouseInputName = $('#woocommerce_nova_poshta_shipping_method_warehouse_name');
     var warehouseInputKey = $('#woocommerce_nova_poshta_shipping_method_warehouse');
-    var enabledCashOnDelivery = $("#woocommerce_nova_poshta_shipping_method_enable_cash_on_delivery");
+    var useFixedPrice = $("#woocommerce_nova_poshta_shipping_method_use_fixed_price_on_delivery");
     var fixedPrice = jQuery("#woocommerce_nova_poshta_shipping_method_fixed_price");
 
-    var handleCashOnDeliveryChange = function () {
-        if (enabledCashOnDelivery.val() == 'on_delivery') {
-            fixedPrice.closest('tr').hide();
-        } else {
+    var handleUseFixedPriceOnDeliveryChange = function () {
+        if (useFixedPrice.prop('checked')) {
             fixedPrice.closest('tr').show();
+        } else {
+            fixedPrice.closest('tr').hide();
         }
     };
 
-    var initCashOnDelivery = function () {
-        enabledCashOnDelivery.change(function () {
-            handleCashOnDeliveryChange();
+    var initUseFixedPriceOnDelivery = function () {
+        useFixedPrice.change(function () {
+            handleUseFixedPriceOnDeliveryChange();
         });
-        handleCashOnDeliveryChange();
+        handleUseFixedPriceOnDeliveryChange();
     };
 
     var initAutocomplete = function () {
@@ -140,7 +140,7 @@ var NovaPoshtaSettings = (function ($) {
     result.init = function () {
         initAutocomplete();
         hideKeyRows();
-        initCashOnDelivery();
+        initUseFixedPriceOnDelivery();
     };
 
     return result;

@@ -14,7 +14,7 @@ namespace plugins\NovaPoshta\classes\base;
  * @property string senderCity
  * @property string senderWarehouse
  * @property string apiKey
- * @property string enableCashOnDelivery
+ * @property bool useFixedPriceOnDelivery
  * @property float fixedPrice
  *
  */
@@ -28,30 +28,29 @@ class Options extends Base
     const WAREHOUSE = 'warehouse';
     const API_KEY = 'api_key';
     const DEBUG = 'debug';
-    const ENABLE_CASH_ON_DELIVERY = 'enable_cash_on_delivery';
+    const USE_FIXED_PRICE_ON_DELIVERY = 'use_fixed_price_on_delivery';
     const FIXED_PRICE = 'fixed_price';
     const OPTION_CASH_ON_DELIVERY = 'on_delivery';
     const OPTION_FIXED_PRICE = 'fixed_price';
 
-    public function ensureCashOnDelivery()
+    /**
+     * @return bool
+     */
+    protected function getUseFixedPriceOnDelivery()
     {
-        return $this->enableCashOnDelivery == self::OPTION_CASH_ON_DELIVERY;
+        $this->useFixedPriceOnDelivery = $this->shippingMethodSettings[self::USE_FIXED_PRICE_ON_DELIVERY];
+        return $this->useFixedPriceOnDelivery === 'yes';
     }
 
-    public function ensureFixedPrice()
-    {
-        return $this->enableCashOnDelivery == self::OPTION_FIXED_PRICE;
-    }
-
-    protected function getEnableCashOnDelivery()
-    {
-        $this->enableCashOnDelivery = $this->shippingMethodSettings[self::ENABLE_CASH_ON_DELIVERY];
-        return $this->enableCashOnDelivery;
-    }
-
+    /**
+     * @return float
+     */
     protected function getFixedPrice()
     {
-        $this->fixedPrice = (float)$this->shippingMethodSettings[self::FIXED_PRICE];
+        $this->fixedPrice = null;
+        if ($this->useFixedPriceOnDelivery) {
+            $this->fixedPrice = (float)$this->shippingMethodSettings[self::FIXED_PRICE];
+        }
         return $this->fixedPrice;
     }
 
@@ -178,12 +177,7 @@ class Options extends Base
     public function isDebug()
     {
         $isDebug = ArrayHelper::getValue($this->shippingMethodSettings, self::DEBUG);
-        if ('yes' === $isDebug) {
-            $isDebug = true;
-        } elseif ('no' === $isDebug) {
-            $isDebug = false;
-        }
-        return $isDebug;
+        return $isDebug === 'yes';
     }
 
     /**

@@ -105,16 +105,12 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 'default' => '',
                 'class' => 'js-hide-nova-poshta-option'
             ),
-            Options::ENABLE_CASH_ON_DELIVERY => [
-                'title' => __('Cash on delivery or Fixed price.', NOVA_POSHTA_DOMAIN),
-                'label' => __('Enable Cash on delivery or Fixed price.', NOVA_POSHTA_DOMAIN),
-                'type' => 'select',
+            Options::USE_FIXED_PRICE_ON_DELIVERY => [
+                'title' => __('Set Fixed Price for Delivery.', NOVA_POSHTA_DOMAIN),
+                'label' => __('If checked, fixed price will be set for delivery.', NOVA_POSHTA_DOMAIN),
+                'type' => 'checkbox',
+                'default' => 'no',
                 'description' => '',
-                'default' => Options::OPTION_CASH_ON_DELIVERY,
-                'options' => [
-                    Options::OPTION_CASH_ON_DELIVERY => __('Cash on delivery', NOVA_POSHTA_DOMAIN),
-                    Options::OPTION_FIXED_PRICE => __('Fixed Price', NOVA_POSHTA_DOMAIN),
-                ]
             ],
             Options::FIXED_PRICE => [
                 'title' => __('Fixed price', NOVA_POSHTA_DOMAIN),
@@ -142,7 +138,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         /** @noinspection PhpUndefinedFieldInspection */
         $cityRecipient = WC()->customer->nova_poshta_city;
 
-        if (NP()->options->ensureFixedPrice()) {
+        if (NP()->options->useFixedPriceOnDelivery) {
             $rate['cost'] = NP()->options->fixedPrice;
         } elseif ($cityRecipient) {
             $citySender = NP()->options->senderCity;
