@@ -14,6 +14,8 @@ namespace plugins\NovaPoshta\classes\base;
  * @property string senderCity
  * @property string senderWarehouse
  * @property string apiKey
+ * @property string enableCashOnDelivery
+ * @property float fixedPrice
  *
  */
 class Options extends Base
@@ -28,6 +30,30 @@ class Options extends Base
     const DEBUG = 'debug';
     const ENABLE_CASH_ON_DELIVERY = 'enable_cash_on_delivery';
     const FIXED_PRICE = 'fixed_price';
+    const OPTION_CASH_ON_DELIVERY = 'on_delivery';
+    const OPTION_FIXED_PRICE = 'fixed_price';
+
+    public function ensureCashOnDelivery()
+    {
+        return $this->enableCashOnDelivery == self::OPTION_CASH_ON_DELIVERY;
+    }
+
+    public function ensureFixedPrice()
+    {
+        return $this->enableCashOnDelivery == self::OPTION_FIXED_PRICE;
+    }
+
+    protected function getEnableCashOnDelivery()
+    {
+        $this->enableCashOnDelivery = $this->shippingMethodSettings[self::ENABLE_CASH_ON_DELIVERY];
+        return $this->enableCashOnDelivery;
+    }
+
+    protected function getFixedPrice()
+    {
+        $this->fixedPrice = (float)$this->shippingMethodSettings[self::FIXED_PRICE];
+        return $this->fixedPrice;
+    }
 
     /**
      * @return int
