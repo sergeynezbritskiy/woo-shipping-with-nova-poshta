@@ -43,6 +43,7 @@ class DatabaseSync extends Base
                 $this->log->error("Synchronization failed. Rollback.", Log::LOCATIONS_UPDATE);
                 $this->db->query('ROLLBACK');
             }
+            $this->log->info("", Log::LOCATIONS_UPDATE);
         }
     }
 

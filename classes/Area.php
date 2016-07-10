@@ -170,11 +170,9 @@ abstract class Area extends Base
     public static function findByQuery($query)
     {
         $result = NP()->db->get_results($query);
-        $locations = array();
-        foreach ($result as $item) {
-            $locations[] = new static($item);
-        }
-        return $locations;
+        return array_map(function ($location) {
+            return new static($location);
+        }, $result);
     }
 
     /**
