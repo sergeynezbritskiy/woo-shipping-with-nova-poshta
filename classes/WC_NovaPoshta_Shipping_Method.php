@@ -96,7 +96,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 'class' => 'js-hide-nova-poshta-option'
             ),
             Options::WAREHOUSE_NAME => array(
-                'title' => __('Warehouse (Number)', NOVA_POSHTA_DOMAIN),
+                'title' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
                 'type' => 'input',
                 'description' => __('Specify the warehouse, from where you are sending goods. (After save API key)', NOVA_POSHTA_DOMAIN),
             ),
@@ -116,7 +116,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 'title' => __('Fixed price', NOVA_POSHTA_DOMAIN),
                 'type' => 'text',
                 'description' => __('Delivery Fixed price.', NOVA_POSHTA_DOMAIN),
-                'default' => __('0.00', NOVA_POSHTA_DOMAIN)
+                'default' => 0.00
             ],
         );
     }
