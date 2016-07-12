@@ -62,7 +62,7 @@ var Calculator = (function ($) {
     };
 
     result.init = function () {
-        $(document.body).bind('updated_shipping_method', function () {
+        $(document.body).bind('updated_wc_div updated_shipping_method', function () {
             if (ensureNovaPoshta()) {
                 addNovaPoshtaHandlers();
             }

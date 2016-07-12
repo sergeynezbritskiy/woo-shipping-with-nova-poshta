@@ -151,6 +151,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 $cost = array_shift($result);
                 $rate['cost'] = ArrayHelper::getValue($cost, 'Cost', 0);
             } catch (Exception $e) {
+                NP()->log->error($e->getMessage());
             }
         }
         // Register the rate
