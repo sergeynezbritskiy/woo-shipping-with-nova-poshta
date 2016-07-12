@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: WooСommerce Nova Poshta Shipping
-Plugin URI: http://woothemes.com/woocommerce
+Plugin URI: https://wordpress.org/plugins/woocommerce-nova-poshta-shipping
 Description: Plugin for administrating Nova Poshta shipping method within WooСommerce Plugin
 Version: 1.0.0
 Author: Sergey Nezbritskiy
-Author URI: http://sergey-nezbritskiy.com
+Author URI: https://www.linkedin.com/in/sergeynezbritskiy
 */
 
 /*  Copyright 2016 Sergey Nezbritskiy (email: nezbritskiy.sergey@gmail.com)
