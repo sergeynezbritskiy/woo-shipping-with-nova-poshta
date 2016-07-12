@@ -8,16 +8,18 @@ var gulp = require('gulp'),
     rename = require('gulp-rename'),
     reload = browserSync.reload;
 
-var root = 'D:/Apache/development/wordpress/wp-content/plugins/woocommerce-nova-poshta-shipping';
+var root = '.';
 
 var path = {
     build: {
         js: root + '/assets/js',
-        css: root + '/assets/css'
+        css: root + '/assets/css',
+        screen: root + '/assets'
     },
     src: {
         js: root + '/src/js/*.js',
-        sass: root + '/src/sass/**/*.scss'
+        sass: root + '/src/sass/**/*.scss',
+        screen: root + '/src/screenshot/*.png'
     },
     watch: {
         js: root + '/src/js/**/*.js',
@@ -44,14 +46,27 @@ gulp.task('sass', function () {
         .pipe(gulp.dest(path.build.css));
 });
 
+gulp.task('screen', function () {
+    gulp.src(path.src.screen)
+        .pipe(gulp.dest(path.build.screen))
+        .pipe(reload({stream: true}));
+});
+
 gulp.task('watch', function () {
     watch([path.watch.js], function () {
         gulp.start('js').start('sass');
     });
 });
 
+gulp.task('build', [
+    'js',
+    'sass',
+    'screen'
+]);
+
 gulp.task('default', [
     'js',
     'sass',
+    'screen',
     'watch'
 ]);
