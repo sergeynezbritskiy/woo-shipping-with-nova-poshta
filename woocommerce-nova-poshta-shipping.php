@@ -1,14 +1,14 @@
 <?php
 /*
 Plugin Name: WooСommerce Nova Poshta Shipping
-Plugin URI: https://wordpress.org/plugins/woocommerce-nova-poshta-shipping
+Plugin URI: http://altair-solutions.com.ua/portfolio/woocommerce-nova-poshta-shipping
 Description: Plugin for administrating Nova Poshta shipping method within WooСommerce Plugin
-Version: 1.0.0
-Author: Sergey Nezbritskiy
-Author URI: https://www.linkedin.com/in/sergeynezbritskiy
+Version: 1.1.0
+Author: Altair Solutions, Ltd.
+Author URI: http://altair-solutions.com.ua
 */
 
-/*  Copyright 2016 Sergey Nezbritskiy (email: nezbritskiy.sergey@gmail.com)
+/*  Copyright 2016 Altair Solutions, Ltd (email: support@altair-solutions.com.ua)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
