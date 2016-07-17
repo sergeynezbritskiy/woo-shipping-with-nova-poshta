@@ -125,9 +125,9 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
      * calculate_shipping function.
      *
      * @access public
-     * @return void
+     * @param array $package
      */
-    public function calculate_shipping()
+    public function calculate_shipping($package = array())
     {
         $rate = array(
             'id' => $this->id,
