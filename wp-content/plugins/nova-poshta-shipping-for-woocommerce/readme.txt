@@ -47,3 +47,8 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 * Task - Set up automatic updates of Nova Poshta locations
 * Task - User can select Nova Poshta area, city and warehouse from the dropdown lists
 * Task - Upgrade shipping calculator to work with Nova Poshta Locations
+= 1.0.2 =
+* Task - rename plugin according to Wordpress.org conventions
+= 1.0.3 =
+* Task - refactoring code, fix NovaPoshta::isNP() method
+* Bug - fix calculating shipping costs for products with empty weight
