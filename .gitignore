@@ -1,1 +1,4 @@
 /.idea
+/wp-content/uploads
+/.htaccess
+/wp-config.php
