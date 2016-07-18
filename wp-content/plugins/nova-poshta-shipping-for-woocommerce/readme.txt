@@ -1,4 +1,4 @@
-=== WooСommerce Nova Poshta Shipping ===
+=== Nova Poshta Shipping for WooCommerce ===
 Contributors: snezbritskiy
 Tags: ecommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
