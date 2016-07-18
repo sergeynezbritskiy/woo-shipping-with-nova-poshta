@@ -134,7 +134,7 @@ class NovaPoshta extends Base
      */
     public function scripts()
     {
-        $suffix = $this->options->isDebug() ? '.js' : '.min.js';
+        $suffix = $this->isDebug() ? '.js' : '.min.js';
         $fileName = 'assets/js/nova-poshta' . $suffix;
         wp_register_script(
             'nova-poshta-js',
@@ -164,7 +164,7 @@ class NovaPoshta extends Base
      */
     public function adminStyles()
     {
-        $suffix = $this->options->isDebug() ? '.css' : '.min.css';
+        $suffix = $this->isDebug() ? '.css' : '.min.css';
         $fileName = 'assets/css/style' . $suffix;
         wp_register_style('nova-poshta-style',
             NOVA_POSHTA_SHIPPING_PLUGIN_URL . $fileName,
@@ -179,7 +179,7 @@ class NovaPoshta extends Base
      */
     public function adminScripts()
     {
-        $suffix = $this->options->isDebug() ? '.js' : '.min.js';
+        $suffix = $this->isDebug() ? '.js' : '.min.js';
         $fileName = 'assets/js/nova-poshta-admin' . $suffix;
         wp_register_script(
             'nova-poshta-admin-js',
