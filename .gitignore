@@ -4,3 +4,4 @@
 /wp-config.php
 /wp-content/upgrade
 /node_modules
+/wp-content/debug.log
