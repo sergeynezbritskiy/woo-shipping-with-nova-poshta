@@ -9,12 +9,13 @@ var gulp = require('gulp'),
     reload = browserSync.reload;
 
 var root = '.';
+var destination = root + '/wp-content/plugins/nova-poshta-shipping-for-woocommerce/assets';
 
 var path = {
     build: {
-        js: root + '/assets/js',
-        css: root + '/assets/css',
-        screen: root + '/assets'
+        js: destination + '/js',
+        css: destination + '/css',
+        screen: destination
     },
     src: {
         js: root + '/src/js/*.js',
