@@ -9,7 +9,7 @@ var gulp = require('gulp'),
     reload = browserSync.reload;
 
 var root = '.';
-var destination = root + '/wp-content/plugins/nova-poshta-shipping-for-woocommerce/assets';
+var destination = root + '/wp-content/plugins/woo-shipping-for-nova-poshta/assets';
 
 var path = {
     build: {
