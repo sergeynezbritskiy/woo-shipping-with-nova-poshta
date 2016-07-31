@@ -1,9 +1,9 @@
-=== Nova Poshta Shipping for WooCommerce ===
+=== Woo Shipping for Nova Poshta ===
 Contributors: snezbritskiy
-Tags: ecommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
+Tags: eCommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
 Tested up to: 4.5
-Stable tag: 1.0.0
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
