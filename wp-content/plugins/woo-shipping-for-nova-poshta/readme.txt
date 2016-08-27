@@ -2,7 +2,7 @@
 Contributors: snezbritskiy
 Tags: eCommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
-Tested up to: 4.5
+Tested up to: 4.6
 Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -52,3 +52,6 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 = 1.0.3 =
 * Task - refactoring code, fix NovaPoshta::isNP() method
 * Bug - fix calculating shipping costs for products with empty weight
+= 1.0.4 =
+* Bug - fix translations
+* Task - check compatibility with WooCommerce 2.6.4
