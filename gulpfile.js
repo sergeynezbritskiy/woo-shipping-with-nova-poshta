@@ -18,7 +18,7 @@ var path = {
     build: {
         js: assetsPath + '/js',
         css: assetsPath + '/css',
-        screenShots: assetsPath
+        screenShots: svnPath + '/assets'
     },
     src: {
         js: root + '/src/js/*.js',
