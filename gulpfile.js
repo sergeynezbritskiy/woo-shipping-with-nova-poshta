@@ -12,13 +12,13 @@ var gulp = require('gulp'),
 var root = '.';
 var pluginPath = root + '/wp-content/plugins/woo-shipping-for-nova-poshta';
 var svnPath = root + '/svn.wordpress.org';
-var destination = pluginPath + '/assets';
+var assetsPath = pluginPath + '/assets';
 
 var path = {
     build: {
-        js: destination + '/js',
-        css: destination + '/css',
-        screenShots: destination
+        js: assetsPath + '/js',
+        css: assetsPath + '/css',
+        screenShots: assetsPath
     },
     src: {
         js: root + '/src/js/*.js',
