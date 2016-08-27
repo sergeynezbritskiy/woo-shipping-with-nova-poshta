@@ -5,22 +5,25 @@ var gulp = require('gulp'),
     watch = require('gulp-watch'),
     uglify = require('gulp-uglify'),
     browserSync = require("browser-sync"),
+    argv = require('yargs').argv,
     rename = require('gulp-rename'),
     reload = browserSync.reload;
 
 var root = '.';
-var destination = root + '/wp-content/plugins/woo-shipping-for-nova-poshta/assets';
+var pluginPath = root + '/wp-content/plugins/woo-shipping-for-nova-poshta';
+var svnPath = root + '/svn.wordpress.org';
+var destination = pluginPath + '/assets';
 
 var path = {
     build: {
         js: destination + '/js',
         css: destination + '/css',
-        screen: destination
+        screenShots: destination
     },
     src: {
         js: root + '/src/js/*.js',
         sass: root + '/src/sass/**/*.scss',
-        screen: root + '/src/screenshot/*.png'
+        screenShots: root + '/src/screenshot/*.png'
     },
     watch: {
         js: root + '/src/js/**/*.js',
@@ -47,12 +50,6 @@ gulp.task('sass', function () {
         .pipe(gulp.dest(path.build.css));
 });
 
-gulp.task('screen', function () {
-    gulp.src(path.src.screen)
-        .pipe(gulp.dest(path.build.screen))
-        .pipe(reload({stream: true}));
-});
-
 gulp.task('watch', function () {
     watch([path.watch.js], function () {
         gulp.start('js').start('sass');
@@ -61,13 +58,34 @@ gulp.task('watch', function () {
 
 gulp.task('build', [
     'js',
-    'sass',
-    'screen'
+    'sass'
 ]);
 
 gulp.task('default', [
     'js',
     'sass',
-    'screen',
     'watch'
 ]);
+
+gulp.task('svn:push', function () {
+    gulp.src(pluginPath + '/**/*')
+        .pipe(gulp.dest(svnPath + '/trunk'));
+    gulp.src(pluginPath + '/**/.*')
+        .pipe(gulp.dest(svnPath + '/trunk'));
+    //move screen shots to assets folder
+    gulp.src(path.src.screenShots)
+        .pipe(gulp.dest(path.build.screenShots))
+        .pipe(reload({stream: true}));
+});
+
+gulp.task('svn:tag', function () {
+    var tag = argv.t;
+    if (!tag) {
+        throw Error("Tag is undefined. Please set arg --t");
+    }
+    var destinationPath = svnPath + '/tags/' + tag;
+    gulp.src(pluginPath + '/**/*')
+        .pipe(gulp.dest(destinationPath));
+    gulp.src(pluginPath + '/**/.*')
+        .pipe(gulp.dest(destinationPath));
+});
