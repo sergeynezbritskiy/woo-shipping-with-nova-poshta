@@ -3,10 +3,10 @@ msgstr ""
 "Project-Id-Version: WooСommerce Nova Poshta Shipping\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: Fri May 20 2016 22:39:49 GMT+0300 (Финляндия (лето))\n"
-"PO-Revision-Date: Mon Jul 11 2016 21:48:17 GMT+0300\n"
+"PO-Revision-Date: Sat Aug 27 2016 14:27:41 GMT+0300\n"
 "Last-Translator: admin <nezbryk@mail.ru>\n"
 "Language-Team: \n"
-"Language: Russian\n"
+"Language: Ukrainian\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10 >= 2 && "
 "n%10<=4 &&(n%100<10||n%100 >= 20)? 1 : 2)\n"
 "MIME-Version: 1.0\n"
@@ -21,38 +21,29 @@ msgstr ""
 "esc_attr__:1;esc_html__:1;esc_attr_e:1;esc_html_e:1;esc_attr_x:1,2c;"
 "esc_html_x:1,2c;comments_number_link:2,3;t:1;st:1;trans:1;transChoice:1,2\n"
 "X-Generator: Loco - https://localise.biz/\n"
-"X-Loco-Target-Locale: ru_RU"
-
-#. Description of the plugin
-msgctxt "Плагин управления доставкой через Новую Почту для WooCommerce"
-msgid ""
-"Plugin for administrating Nova Poshta shipping method within WooСommerce "
-"Plugin"
-msgstr "Плагин управления доставкой через Новую Почту для WooCommerce"
-
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:73
-msgctxt "Получить Ваш API ключ. Мой аккаунт (Новая Почта)"
-msgid ""
-"Get your API Key. <a href=\"https://my.novaposhta."
-"ua/settings/index#apikeys\">My Account (Nova Poshta)</a>"
-msgstr ""
-"Получить API ключ. <a href=\"https://my.novaposhta."
-"ua/settings/index#apikeys\">Мой аккаунт (Новая почта)</a>"
+"X-Loco-Target-Locale: uk_UA"
 
 #. Name of the plugin
 msgctxt "Плагин доставки Новой Почтой для WooCommerce"
 msgid "WooСommerce Nova Poshta Shipping"
-msgstr "Плагин доставки Новой Почтой для WooCommerce"
+msgstr "Плагін доставки Новою Поштою для WooCommerce"
 
 #. URI of the plugin
 msgctxt "http://woothemes.com/woocommerce"
 msgid "http://woothemes.com/woocommerce"
 msgstr "http://woothemes.com/woocommerce"
 
+#. Description of the plugin
+msgctxt "Плагин управления доставкой через Новую Почту для WooCommerce"
+msgid ""
+"Plugin for administrating Nova Poshta shipping method within WooСommerce "
+"Plugin"
+msgstr "Плагін для адміністрування доставкою через Нову Пошту для WooCommerce"
+
 #. Author of the plugin
 msgctxt "Сергей Незбрицкий"
 msgid "Sergey Nezbritskiy"
-msgstr "Сергей Незбрицкий"
+msgstr "Сергій Незбрицький"
 
 #. Author URI of the plugin
 msgctxt "http://sergey-nezbritskiy.com"
@@ -62,78 +53,83 @@ msgstr "http://sergey-nezbritskiy.com"
 #: ../woocommerce-nova-poshta-shipping.php:186 ../classes/base/OptionsHelper.php:21
 msgctxt "Выберите опцию"
 msgid "Choose an option"
-msgstr "Выберите опцию"
+msgstr "Виберіть опцію"
 
 #: ../classes/Checkout.php:93
 msgctxt "Регион"
 msgid "Region"
-msgstr "Регион"
+msgstr "Регіон"
 
 #: ../classes/Checkout.php:102 ../classes/WC_NovaPoshta_Shipping_Method.php:88
 msgctxt "Город"
 msgid "City"
-msgstr "Город"
+msgstr "Місто"
 
 #: ../classes/Checkout.php:111 ../classes/WC_NovaPoshta_Shipping_Method.php:99
 msgctxt "Склад Новой Почты (№)"
 msgid "Nova Poshta Warehouse (#)"
-msgstr "Склад Новой Почты (№)"
+msgstr "Склад Нової Пошти (№)"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:18 ..
 #: classes/WC_NovaPoshta_Shipping_Method.php:58 ..
 #: classes/WC_NovaPoshta_Shipping_Method.php:61
 msgctxt "Новая Почта"
 msgid "Nova Poshta"
-msgstr "Новая Почта"
+msgstr "Нова Пошта"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:19
 msgctxt "Доставка через популярную украинскую логистическую компанию Новая Почта"
 msgid "Shipping with popular Ukrainian logistic company Nova Poshta"
-msgstr "Доставка через популярную украинскую логистическую компанию Новая Почта"
+msgstr "Доставка популярною українською логістичною компанією Нова Пошта"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:51
 msgctxt "Активировать/Деактивировать"
 msgid "Enable/Disable"
-msgstr "Активировать/Деактивировать"
+msgstr "Активувати/деактивувати"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:52
 msgctxt "Активировать Новую Почту"
 msgid "Enable NovaPoshta"
-msgstr "Активировать Новую Почту"
+msgstr "Активувати Нову Пошту"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:60
 msgctxt ""
 "Установите заголовок, который будет видеть пользователь во время оформления "
 "заказа"
 msgid "This controls the title which the user sees during checkout."
-msgstr ""
-"Установите заголовок, который будет видеть пользователь во время оформления "
-"заказа"
+msgstr "Встановіть, яку назву бачитиме користувач під час оформлення замовлення"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:64 ..
 #: classes/WC_NovaPoshta_Shipping_Method.php:65
 msgctxt "Активировать режим разработки"
 msgid "Enable Debug Mode"
-msgstr "Активировать режим разработки"
+msgstr "Активувати режим розробки"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:67
 msgctxt ""
 "Расширенное логирование, использование полных версий скриптов вместо "
 "минифицированных"
 msgid "Extended logging, use full version of script instead of min versions"
-msgstr ""
-"Расширенное логирование, использование полных версий скриптов вместо "
-"минифицированных"
+msgstr "Розширений запис логів, повна версія скриптів замість мінімізованих"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:71
 msgctxt "API ключ"
 msgid "API Key"
 msgstr "API ключ"
 
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:73
+msgctxt "Получить Ваш API ключ. Мой аккаунт (Новая Почта)"
+msgid ""
+"Get your API Key. <a href=\"https://my.novaposhta."
+"ua/settings/index#apikeys\">My Account (Nova Poshta)</a>"
+msgstr ""
+"Отримати Ваш API ключ. <a href=\"https://my.novaposhta."
+"ua/settings/index#apikeys\">Мій кабінет (Нова Пошта)</a>"
+
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:77
 msgctxt "Регион"
 msgid "Area"
-msgstr "Регион"
+msgstr "Регіон"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:79
 msgctxt ""
@@ -141,7 +137,7 @@ msgctxt ""
 "ключ)"
 msgid "Specify the area, from where you are sending goods. (After save API key)"
 msgstr ""
-"Выберите регион, откуда вы будете отправлять товары. (Сначала сохраните API "
+"Встановить регіон, з якого ви будете надсилати товари. (Спочатку вкажіть API "
 "ключ)"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:90
@@ -150,8 +146,8 @@ msgctxt ""
 "API ключ)"
 msgid "Specify the city, from where you are sending goods. (After save API key)"
 msgstr ""
-"Выберите город, с которого вы будете отправлять товары. (Сначала сохраните "
-"API ключ)"
+"Встановить місто, з якого ви будете надсилати товари. (Спочатку вкажіть API "
+"ключ)"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:101
 msgctxt ""
@@ -159,25 +155,25 @@ msgctxt ""
 "API ключ)"
 msgid "Specify the warehouse, from where you are sending goods. (After save API key)"
 msgstr ""
-"Выберите склад, с которого вы будете отправлять товары. (Сначала сохраните "
-"API ключ)"
+"Встановить склад, з якого ви будете надсилати товари. (Спочатку вкажіть API "
+"ключ)"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:109
 msgctxt "Установить фиксированную стоимость доставки."
 msgid "Set Fixed Price for Delivery."
-msgstr "Установить фиксированную стоимость доставки."
+msgstr "Установіть фіксовану вартість доставки"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:110
 msgctxt "Если выбрано, за доставку будет устанавливаться фиксированная стоимость."
 msgid "If checked, fixed price will be set for delivery."
-msgstr "Если выбрано, за доставку будет устанавливаться фиксированная стоимость."
+msgstr "Якщо вибрано, за доставку буде встановлюватися фіксована ціна"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:116
 msgctxt "Стоимость доставки"
 msgid "Fixed price"
-msgstr "Стоимость доставки"
+msgstr "Вартість доставки"
 
 #: ../classes/WC_NovaPoshta_Shipping_Method.php:118
 msgctxt "Фиксированная стоимость доставки."
 msgid "Delivery Fixed price."
-msgstr "Фиксированная стоимость доставки."
+msgstr "Фіксована вартість доставки"

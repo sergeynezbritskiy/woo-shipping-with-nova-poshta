@@ -282,7 +282,8 @@ class NovaPoshta extends Base
      */
     public function loadPluginDomain()
     {
-        load_plugin_textdomain(NOVA_POSHTA_DOMAIN, false, './woocommerce-nova-poshta-shipping/i18n');
+        $path = sprintf('./%s/i18n', NOVA_POSHTA_DOMAIN);
+        load_plugin_textdomain(NOVA_POSHTA_DOMAIN, false, $path);
     }
 
     /**
