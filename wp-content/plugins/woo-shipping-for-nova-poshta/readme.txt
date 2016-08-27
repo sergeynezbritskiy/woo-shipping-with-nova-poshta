@@ -3,7 +3,7 @@ Contributors: snezbritskiy
 Tags: eCommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
 Tested up to: 4.6
-Stable tag: 1.1.2
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,11 +47,11 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 * Task - Set up automatic updates of Nova Poshta locations
 * Task - User can select Nova Poshta area, city and warehouse from the dropdown lists
 * Task - Upgrade shipping calculator to work with Nova Poshta Locations
-= 1.0.2 =
+= 1.1.2 =
 * Task - rename plugin according to Wordpress.org conventions
-= 1.0.3 =
+= 1.1.3 =
 * Task - refactoring code, fix NovaPoshta::isNP() method
 * Bug - fix calculating shipping costs for products with empty weight
-= 1.0.4 =
+= 1.1.4 =
 * Bug - fix translations
 * Task - check compatibility with WooCommerce 2.6.4
