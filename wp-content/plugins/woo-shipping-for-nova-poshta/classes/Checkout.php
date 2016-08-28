@@ -15,6 +15,22 @@ class Checkout extends Base
 {
 
     /**
+     * @var Checkout
+     */
+    private static $_instance;
+
+    /**
+     * @return Checkout
+     */
+    public static function instance()
+    {
+        if (static::$_instance == null) {
+            static::$_instance = new static();
+        }
+        return static::$_instance;
+    }
+
+    /**
      * @return void
      */
     public function init()
@@ -85,48 +101,6 @@ class Checkout extends Base
     public function addNovaPoshtaShippingFields($fields)
     {
         return $this->addNovaPoshtaFields($fields, Area::SHIPPING);
-    }
-
-    /**
-     * @param array $fields
-     * @param string $location
-     * @return array
-     */
-    private function addNovaPoshtaFields($fields, $location)
-    {
-        /** @noinspection PhpUndefinedFieldInspection */
-        $area = WC()->customer->nova_poshta_region;
-        /** @noinspection PhpUndefinedFieldInspection */
-        $city = WC()->customer->nova_poshta_city;
-        $required = NP()->isGet() ?: (NP()->isNP() && NP()->isCheckout());
-        $fields[Region::key($location)] = [
-            'label' => __('Region', NOVA_POSHTA_DOMAIN),
-            'type' => 'select',
-            'required' => $required,
-            'default' => '',
-            'options' => OptionsHelper::getList(Region::findAll()),
-            'class' => array(),
-            'custom_attributes' => array(),
-        ];
-        $fields[City::key($location)] = [
-            'label' => __('City', NOVA_POSHTA_DOMAIN),
-            'type' => 'select',
-            'required' => $required,
-            'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
-            'class' => array(),
-            'value' => '',
-            'custom_attributes' => array(),
-        ];
-        $fields[Warehouse::key($location)] = [
-            'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
-            'type' => 'select',
-            'required' => $required,
-            'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
-            'class' => array(),
-            'value' => '',
-            'custom_attributes' => array(),
-        ];
-        return $fields;
     }
 
     /**
@@ -262,19 +236,45 @@ class Checkout extends Base
     }
 
     /**
-     * @var Checkout
+     * @param array $fields
+     * @param string $location
+     * @return array
      */
-    private static $_instance;
-
-    /**
-     * @return Checkout
-     */
-    public static function instance()
+    private function addNovaPoshtaFields($fields, $location)
     {
-        if (static::$_instance == null) {
-            static::$_instance = new static();
-        }
-        return static::$_instance;
+        /** @noinspection PhpUndefinedFieldInspection */
+        $area = WC()->customer->nova_poshta_region;
+        /** @noinspection PhpUndefinedFieldInspection */
+        $city = WC()->customer->nova_poshta_city;
+        $required = NP()->isGet() ?: (NP()->isNP() && NP()->isCheckout());
+        $fields[Region::key($location)] = [
+            'label' => __('Region', NOVA_POSHTA_DOMAIN),
+            'type' => 'select',
+            'required' => $required,
+            'default' => '',
+            'options' => OptionsHelper::getList(Region::findAll()),
+            'class' => array(),
+            'custom_attributes' => array(),
+        ];
+        $fields[City::key($location)] = [
+            'label' => __('City', NOVA_POSHTA_DOMAIN),
+            'type' => 'select',
+            'required' => $required,
+            'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
+            'class' => array(),
+            'value' => '',
+            'custom_attributes' => array(),
+        ];
+        $fields[Warehouse::key($location)] = [
+            'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
+            'type' => 'select',
+            'required' => $required,
+            'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
+            'class' => array(),
+            'value' => '',
+            'custom_attributes' => array(),
+        ];
+        return $fields;
     }
 
     /**
@@ -292,4 +292,5 @@ class Checkout extends Base
     private function __clone()
     {
     }
+
 }
