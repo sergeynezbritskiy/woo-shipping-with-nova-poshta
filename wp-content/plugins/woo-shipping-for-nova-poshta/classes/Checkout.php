@@ -1,16 +1,22 @@
 <?php
 
 namespace plugins\NovaPoshta\classes;
+
 use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\base\Base;
 use plugins\NovaPoshta\classes\base\OptionsHelper;
 
 /**
  * Class Calculator
+ * @property bool isCheckout
  * @package plugins\NovaPoshta\classes
  */
 class Checkout extends Base
 {
+
+    /**
+     * @return void
+     */
     public function init()
     {
         add_filter('woocommerce_checkout_fields', array($this, 'maybeDisableDefaultShippingMethods'));
@@ -30,9 +36,12 @@ class Checkout extends Base
         add_filter('default_checkout_shipping_nova_poshta_warehouse', array($this, 'getDefaultWarehouse'));
     }
 
+    /**
+     * @return void
+     */
     public function saveNovaPoshtaOptions()
     {
-        if (NP()->isPost() && NP()->isNP()) {
+        if (NP()->isPost() && NP()->isNP() && NP()->isCheckout()) {
             $customer = WC()->customer;
             $fieldGroup = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
             /** @noinspection PhpUndefinedFieldInspection */
@@ -51,7 +60,7 @@ class Checkout extends Base
      */
     public function maybeDisableDefaultShippingMethods($fields)
     {
-        if (NP()->isPost() && NP()->isNP()) {
+        if (NP()->isPost() && NP()->isNP() && NP()->isCheckout()) {
             $fields = apply_filters('nova_poshta_disable_default_fields', $fields);
             $fields = apply_filters('nova_poshta_disable_nova_poshta_fields', $fields);
         }
@@ -89,10 +98,11 @@ class Checkout extends Base
         $area = WC()->customer->nova_poshta_region;
         /** @noinspection PhpUndefinedFieldInspection */
         $city = WC()->customer->nova_poshta_city;
+        $required = NP()->isGet() ?: (NP()->isNP() && NP()->isCheckout());
         $fields[Region::key($location)] = [
             'label' => __('Region', NOVA_POSHTA_DOMAIN),
             'type' => 'select',
-            'required' => NP()->isGet() ?: NP()->isNP(),
+            'required' => $required,
             'default' => '',
             'options' => OptionsHelper::getList(Region::findAll()),
             'class' => array(),
@@ -101,7 +111,7 @@ class Checkout extends Base
         $fields[City::key($location)] = [
             'label' => __('City', NOVA_POSHTA_DOMAIN),
             'type' => 'select',
-            'required' => NP()->isGet() ?: NP()->isNP(),
+            'required' => $required,
             'options' => OptionsHelper::getList(City::findByParentAreaRef($area)),
             'class' => array(),
             'value' => '',
@@ -110,7 +120,7 @@ class Checkout extends Base
         $fields[Warehouse::key($location)] = [
             'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
             'type' => 'select',
-            'required' => NP()->isGet() ?: NP()->isNP(),
+            'required' => $required,
             'options' => OptionsHelper::getList(Warehouse::findByParentAreaRef($city)),
             'class' => array(),
             'value' => '',
@@ -125,7 +135,7 @@ class Checkout extends Base
      */
     public function updateOrderMeta($orderId)
     {
-        if (NP()->isNP()) {
+        if (NP()->isNP() && NP()->isCheckout()) {
             $fieldGroup = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
 
             $regionKey = Region::key($fieldGroup);
@@ -156,6 +166,18 @@ class Checkout extends Base
             }
 
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCheckout()
+    {
+        global $post;
+        $checkoutPageId = get_option('woocommerce_checkout_page_id');
+        $pageId = ArrayHelper::getValue($post, 'ID', null);
+        $this->isCheckout = $pageId && $checkoutPageId && ($pageId == $checkoutPageId);
+        return $this->isCheckout;
     }
 
     /**

@@ -9,6 +9,7 @@ use plugins\NovaPoshta\classes\base\ArrayHelper;
  */
 class City extends Area
 {
+
     /**
      * @param string $type
      * @return string
@@ -18,6 +19,9 @@ class City extends Area
         return parent::_key(self::KEY_CITY, $type);
     }
 
+    /**
+     * @return void
+     */
     public static function ajaxGetCitiesByNameSuggestion()
     {
         $areaRef = ArrayHelper::getValue($_POST, 'parent_area_ref', null);

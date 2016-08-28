@@ -93,6 +93,15 @@ class NovaPoshta extends Base
         return in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')));
     }
 
+
+    /**
+     * @return bool
+     */
+    public function isCheckout()
+    {
+        return Checkout::instance()->isCheckout();
+    }
+
     /**
      * This method can be used safely only after woocommerce_after_calculate_totals hook
      * when $_SERVER['REQUEST_METHOD'] == 'GET'
