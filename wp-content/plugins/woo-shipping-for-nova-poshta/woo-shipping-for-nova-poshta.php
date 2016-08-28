@@ -3,7 +3,7 @@
 Plugin Name: Woo Shipping for Nova Poshta
 Plugin URI: http://altair-solutions.com.ua/portfolio/nova-poshta-shipping-for-woocommerce
 Description: Plugin for administrating Nova Poshta shipping method within WooСommerce Plugin
-Version: 1.1.4
+Version: 1.1.5
 Author: Altair Solutions, Ltd.
 Author URI: http://altair-solutions.com.ua
 */
