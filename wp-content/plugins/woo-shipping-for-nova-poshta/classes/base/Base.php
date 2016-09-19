@@ -3,6 +3,15 @@ namespace plugins\NovaPoshta\classes\base;
 
 class Base
 {
+
+    /**
+     * @return string
+     */
+    public static function getClass()
+    {
+        return get_called_class();
+    }
+
     /**
      * @param $property
      * @return mixed

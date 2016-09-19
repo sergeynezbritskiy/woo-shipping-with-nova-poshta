@@ -3,7 +3,7 @@ Contributors: snezbritskiy
 Tags: eCommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
 Tested up to: 4.6
-Stable tag: 1.1.5
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -32,7 +32,7 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 
 * WordPress 3.8 or greater
 * WooCommerce version 2.0.0 or greater
-* PHP version 5.2.4 or greater
+* PHP version 5.4.1 or greater
 * MySQL version 5.0 or greater
 
 == Screenshots ==
@@ -58,3 +58,5 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 = 1.1.5 =
 * Bug - fix problem with updating addresses within My Account
 * Task - refactoring of class Checkout, proper ordering methods and properties
+= 1.2.0 =
+* Task - add backward compatibility up to PHP 5.4.1

@@ -1,36 +1,21 @@
 <?php
 
 namespace plugins\NovaPoshta\classes;
+use plugins\NovaPoshta\classes\base\Base;
 
 /**
  * Class AjaxRoute
  * @package plugins\NovaPoshta\classes
  */
-class AjaxRoute
+class AjaxRoute extends Base
 {
+
     const GET_CITIES_ROUTE = 'nova_poshta_get_cities_by_area';
     const GET_WAREHOUSES_ROUTE = 'nova_poshta_get_warehouses_by_city';
 
     const GET_REGIONS_BY_NAME_SUGGESTION = 'get_regions_by_name_suggestion';
     const GET_CITIES_BY_NAME_SUGGESTION = 'get_cities_by_suggestion';
     const GET_WAREHOUSES_BY_NAME_SUGGESTION = 'get_warehouses_by_suggestion';
-
-    public static $handlers = array(
-        self::GET_CITIES_ROUTE => array(City::class, 'ajaxGetAreasListByParentAreaRef'),
-        self::GET_WAREHOUSES_ROUTE => array(Warehouse::class, 'ajaxGetAreasListByParentAreaRef'),
-
-        self::GET_REGIONS_BY_NAME_SUGGESTION => array(Region::class, 'ajaxGetAreasByNameSuggestion'),
-        self::GET_CITIES_BY_NAME_SUGGESTION => array(City::class, 'ajaxGetCitiesByNameSuggestion'),
-        self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array(Warehouse::class, 'ajaxGetAreasByNameSuggestion'),
-    );
-
-    public static function init()
-    {
-        foreach (self::$handlers as $key => $handler) {
-            $ajaxRoute = new self($key, $handler);
-            $ajaxRoute->handleRequest();
-        }
-    }
 
     /**
      * @var string
@@ -41,6 +26,32 @@ class AjaxRoute
      * @var array
      */
     private $handler;
+
+    /**
+     * @return void
+     */
+    public static function init()
+    {
+        foreach (self::getHandlers() as $key => $handler) {
+            $ajaxRoute = new self($key, $handler);
+            $ajaxRoute->handleRequest();
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public static function getHandlers()
+    {
+        return array(
+            self::GET_CITIES_ROUTE => array(City::getClass(), 'ajaxGetAreasListByParentAreaRef'),
+            self::GET_WAREHOUSES_ROUTE => array(Warehouse::getClass(), 'ajaxGetAreasListByParentAreaRef'),
+
+            self::GET_REGIONS_BY_NAME_SUGGESTION => array(Region::getClass(), 'ajaxGetAreasByNameSuggestion'),
+            self::GET_CITIES_BY_NAME_SUGGESTION => array(City::getClass(), 'ajaxGetCitiesByNameSuggestion'),
+            self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array(Warehouse::getClass(), 'ajaxGetAreasByNameSuggestion'),
+        );
+    }
 
     /**
      * AjaxRoute constructor.
