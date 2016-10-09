@@ -140,12 +140,17 @@ var NovaPoshtaSettings = (function ($) {
     var initRating = function () {
         $('a.np-rating-link').on('click', function () {
             var link = $(this);
-            link.parent().text(link.data('rated'));
             $.ajax({
                 type: 'POST',
                 url: NovaPoshtaHelper.ajaxUrl,
                 data: {
                     action: NovaPoshtaHelper.markPluginsAsRated
+                },
+                success: function (json) {
+                    var data = JSON.parse(json);
+                    if (data.result) {
+                        link.parent().text(data.message);
+                    }
                 }
             });
             return true;

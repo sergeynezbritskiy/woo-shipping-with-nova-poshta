@@ -14,10 +14,13 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
      */
     public function __construct()
     {
+        $href = "https://wordpress.org/support/view/plugin-reviews/woo-shipping-for-nova-poshta?filter=5#postform";
+        $link = sprintf('<a href="%s" target="_blank" class="np-rating-link">&#9733;&#9733;&#9733;&#9733;&#9733;</a>', $href);
+
         $descriptions = array();
         $descriptions[] = __('Shipping with popular Ukrainian logistic company Nova Poshta', NOVA_POSHTA_DOMAIN);
         if (!NP()->options->pluginRated) {
-            $descriptions[] = sprintf(__('If you like our work, please leave us a %s&#9733;&#9733;&#9733;&#9733;&#9733;%s rating!', NOVA_POSHTA_DOMAIN), '<a href="https://wordpress.org/support/view/plugin-reviews/woo-shipping-for-nova-poshta?filter=5#postform" target="_blank" class="np-rating-link" data-rated="' . esc_attr__('Thanks :)', NOVA_POSHTA_DOMAIN) . '">', '</a>');
+            $descriptions[] = sprintf(__("If you like our work, please leave us a %s rating!", NOVA_POSHTA_DOMAIN), $link);
         } else {
             $descriptions[] = __('Thank you for encouraging us!', NOVA_POSHTA_DOMAIN);
         }

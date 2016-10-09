@@ -42,7 +42,11 @@ class Options extends Base
     {
         NP()->log->info('Plugin marked as rated');
         $this->setOption(self::OPTION_PLUGIN_RATED, 1);
-        echo 1;
+        $result = array(
+            'result' => true,
+            'message' => __('Thank you :)', NOVA_POSHTA_DOMAIN)
+        );
+        echo json_encode($result);
         exit;
     }
 
