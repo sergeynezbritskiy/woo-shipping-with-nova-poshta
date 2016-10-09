@@ -1,6 +1,7 @@
 <?php
 
 namespace plugins\NovaPoshta\classes;
+
 use plugins\NovaPoshta\classes\base\Base;
 
 /**
@@ -16,6 +17,7 @@ class AjaxRoute extends Base
     const GET_REGIONS_BY_NAME_SUGGESTION = 'get_regions_by_name_suggestion';
     const GET_CITIES_BY_NAME_SUGGESTION = 'get_cities_by_suggestion';
     const GET_WAREHOUSES_BY_NAME_SUGGESTION = 'get_warehouses_by_suggestion';
+    const MARK_PLUGIN_AS_RATED = 'woo_shipping_with_nova_poshta_rated';
 
     /**
      * @var string
@@ -36,6 +38,9 @@ class AjaxRoute extends Base
             $ajaxRoute = new self($key, $handler);
             $ajaxRoute->handleRequest();
         }
+        foreach (self::getAdminHandlers() as $key => $handler) {
+            add_action('wp_ajax_' . $key, $handler);
+        }
     }
 
     /**
@@ -50,6 +55,16 @@ class AjaxRoute extends Base
             self::GET_REGIONS_BY_NAME_SUGGESTION => array(Region::getClass(), 'ajaxGetAreasByNameSuggestion'),
             self::GET_CITIES_BY_NAME_SUGGESTION => array(City::getClass(), 'ajaxGetCitiesByNameSuggestion'),
             self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array(Warehouse::getClass(), 'ajaxGetAreasByNameSuggestion'),
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public static function getAdminHandlers()
+    {
+        return array(
+            self::MARK_PLUGIN_AS_RATED => array(NP()->options, 'ajaxPluginRate'),
         );
     }
 

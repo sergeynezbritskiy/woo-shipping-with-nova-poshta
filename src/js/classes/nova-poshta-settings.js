@@ -137,10 +137,26 @@ var NovaPoshtaSettings = (function ($) {
         $('.js-hide-nova-poshta-option').closest('tr').addClass('nova-poshta-option-hidden');
     };
 
+    var initRating = function () {
+        $('a.np-rating-link').on('click', function () {
+            var link = $(this);
+            link.parent().text(link.data('rated'));
+            $.ajax({
+                type: 'POST',
+                url: NovaPoshtaHelper.ajaxUrl,
+                data: {
+                    action: NovaPoshtaHelper.markPluginsAsRated
+                }
+            });
+            return true;
+        });
+    };
+
     result.init = function () {
         initAutocomplete();
         hideKeyRows();
         initUseFixedPriceOnDelivery();
+        initRating();
     };
 
     return result;

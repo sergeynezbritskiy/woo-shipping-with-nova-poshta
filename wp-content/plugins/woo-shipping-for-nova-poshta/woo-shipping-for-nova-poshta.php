@@ -217,6 +217,7 @@ class NovaPoshta extends Base
             'getWarehousesBySuggestionAction' => AjaxRoute::GET_WAREHOUSES_BY_NAME_SUGGESTION,
             'getCitiesAction' => AjaxRoute::GET_CITIES_ROUTE,
             'getWarehousesAction' => AjaxRoute::GET_WAREHOUSES_ROUTE,
+            'markPluginsAsRated' => AjaxRoute::MARK_PLUGIN_AS_RATED,
         ]);
     }
 

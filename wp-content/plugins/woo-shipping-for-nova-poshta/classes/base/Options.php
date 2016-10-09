@@ -16,6 +16,7 @@ namespace plugins\NovaPoshta\classes\base;
  * @property string apiKey
  * @property bool useFixedPriceOnDelivery
  * @property float fixedPrice
+ * @property bool pluginRated
  *
  */
 class Options extends Base
@@ -32,6 +33,18 @@ class Options extends Base
     const FIXED_PRICE = 'fixed_price';
     const OPTION_CASH_ON_DELIVERY = 'on_delivery';
     const OPTION_FIXED_PRICE = 'fixed_price';
+    const OPTION_PLUGIN_RATED = 'plugin_rated';
+
+    /**
+     * @return void
+     */
+    public function ajaxPluginRate()
+    {
+        NP()->log->info('Plugin marked as rated');
+        $this->setOption(self::OPTION_PLUGIN_RATED, 1);
+        echo 1;
+        exit;
+    }
 
     /**
      * @return bool
@@ -160,6 +173,12 @@ class Options extends Base
     {
         $this->senderWarehouse = $this->shippingMethodSettings[self::WAREHOUSE];
         return $this->senderWarehouse;
+    }
+
+    protected function getPluginRated()
+    {
+        $this->pluginRated = (bool)$this->getOption(self::OPTION_PLUGIN_RATED);
+        return $this->pluginRated;
     }
 
     /**
