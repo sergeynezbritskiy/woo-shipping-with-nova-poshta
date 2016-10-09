@@ -306,9 +306,15 @@ class NovaPoshta extends Base
         return $this->options->isDebug();
     }
 
+    /**
+     * @param array $links
+     * @return array
+     */
     public function pluginActionLinks($links)
     {
-        array_unshift($links, '<a href="' . admin_url('admin.php?page=wc-settings&tab=shipping&section=' . NOVA_POSHTA_SHIPPING_METHOD) . '" title="' . esc_attr(__('View WooCommerce Settings', 'woocommerce')) . '">' . __('Settings', 'woocommerce') . '</a>');
+        $href = admin_url('admin.php?page=wc-settings&tab=shipping&section=' . NOVA_POSHTA_SHIPPING_METHOD);
+        $settingsLink = sprintf('<a href="%s" title="%s">%s</a>', $href, esc_attr(__('View Plugin Settings', NOVA_POSHTA_DOMAIN)), __('Settings', NOVA_POSHTA_DOMAIN));
+        array_unshift($links, $settingsLink);
         return $links;
     }
 
