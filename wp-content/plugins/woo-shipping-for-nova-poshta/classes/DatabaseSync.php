@@ -199,7 +199,7 @@ class DatabaseSync extends Base
     {
         //604800 = 60*60*24*7 (update every week)
         //86400 =60*60*24 (update every day)
-        $this->interval = NP()->isDebug() ? 86400 : 604800;
+        $this->interval = 86400;
         return $this->interval;
     }
 
