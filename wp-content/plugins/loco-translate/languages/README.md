@@ -1,7 +1,7 @@
 # Loco Translate translations
 
-This is an early release of version 2, so please don't submit any translations yet.
+This the first release of version 2.0, so please don't submit any translations yet.
 
-English source strings are likely to change regularly in the short term.
+All English strings are likely to change regularly.
 
-The POT file will be updated as soon as strings are finalized.
+Once strings are finalized the POT file will be updated.

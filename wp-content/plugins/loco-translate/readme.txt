@@ -2,8 +2,8 @@
 Contributors: timwhitlock
 Tags: translation, translators, localization, localisation, l10n, i18n, Gettext, PO, MO, productivity
 Requires at least: 4.0
-Tested up to: 4.6.1
-Stable tag: 2.0.7
+Tested up to: 4.6
+Stable tag: 2.0.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -85,18 +85,6 @@ Help is provided via the [plugin support forum](https://wordpress.org/support/pl
 
 == Changelog ==
 
-= 2.0.7 =
-* Fixed prototype.js conflict
-* More Windows file path fixes
-* Added loco_current_translator filter
-* Fixed false positive in extra files test
-
-= 2.0.6 =
-* PO wrapping bugfix
-* Downgraded source code bugfix
-* Tolerating headerless POT files
-* Core bundle metadata tweaks
-
 = 2.0.5 =
 * Deferred missing tokenizer warning
 * Allows editing of files in unconfigured sets
@@ -130,7 +118,7 @@ Help is provided via the [plugin support forum](https://wordpress.org/support/pl
 
 == Upgrade Notice ==
 
-= 2.0.7 =
+= 2.0.5 =
 * Various bug fixes and improvements
 
 

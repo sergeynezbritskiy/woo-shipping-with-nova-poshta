@@ -279,7 +279,7 @@ class Loco_mvc_AdminRouter extends Loco_hooks_Hookable {
             unset( $args['action'] );
         }
         // append all arguments to base URL        
-        if( $query = http_build_query($args,null,'&') ){
+        if( $query = http_build_query($args) ){
             $sep = false === strpos($url, '?') ? '?' : '&';
             $url .= $sep.$query;
         }
