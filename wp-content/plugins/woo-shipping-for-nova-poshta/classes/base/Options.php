@@ -181,11 +181,13 @@ class Options extends Base
     }
 
     /**
-     * Delete all plugin specific options from wp_options table
+     * Delete all plugin specific options from options table
+     * @return void
      */
     public function clearOptions()
     {
-        $query = "DELETE FROM wp_options WHERE option_name LIKE CONCAT ('_nova_poshta_', '%')";
+        $table = NP()->db->options;
+        $query = "DELETE FROM `$table` WHERE option_name LIKE CONCAT ('_nova_poshta_', '%')";
         NP()->db->query($query);
     }
 
