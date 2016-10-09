@@ -90,9 +90,10 @@ class DatabaseSync extends Base
             $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d AND `area_type` = %s", $updatedAt, $type);
 
             $this->setAreasHash($areasHashNew);
-            $this->db->query($queryInsert);
-            $this->db->query($queryDelete);
-            $this->log->info("Areas were successfully updated", Log::LOCATIONS_UPDATE);
+
+            $rowsAffected = $this->db->query($queryInsert);
+            $rowsDeleted = $this->db->query($queryDelete);
+            $this->log->info("Areas were successfully updated, affected $rowsAffected rows, deleted $rowsDeleted rows", Log::LOCATIONS_UPDATE);
         } else {
             $this->log->info("Areas are up-to-date, synchronization does not required", Log::LOCATIONS_UPDATE);
         }
@@ -137,9 +138,9 @@ class DatabaseSync extends Base
             $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d AND `area_type` = %s", $updatedAt, $type);
 
             $this->setCitiesHash($citiesHashNew);
-            $this->db->query($queryInsert);
-            $this->db->query($queryDelete);
-            $this->log->info("Cities were successfully updated", Log::LOCATIONS_UPDATE);
+            $rowsAffected = $this->db->query($queryInsert);
+            $rowsDeleted = $this->db->query($queryDelete);
+            $this->log->info("Cities were successfully updated, affected $rowsAffected rows, deleted $rowsDeleted rows", Log::LOCATIONS_UPDATE);
         } else {
             $this->log->info("Cities are up-to-date, synchronization does not required", Log::LOCATIONS_UPDATE);
         }
@@ -183,9 +184,9 @@ class DatabaseSync extends Base
             $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d AND `area_type`=%s", $updatedAt, $type);
 
             $this->setWarehousesHash($warehousesHashNew);
-            $this->db->query($queryInsert);
-            $this->db->query($queryDelete);
-            $this->log->info("Warehouses were successfully updated", Log::LOCATIONS_UPDATE);
+            $rowsAffected = $this->db->query($queryInsert);
+            $rowsDeleted = $this->db->query($queryDelete);
+            $this->log->info("Warehouses were successfully updated, affected $rowsAffected rows, deleted $rowsDeleted rows", Log::LOCATIONS_UPDATE);
         } else {
             $this->log->info("Warehouses are up-to-date, synchronization does not required", Log::LOCATIONS_UPDATE);
         }
