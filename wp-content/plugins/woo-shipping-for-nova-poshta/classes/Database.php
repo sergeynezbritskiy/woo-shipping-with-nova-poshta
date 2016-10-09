@@ -49,6 +49,9 @@ class Database extends Base
         $city = Area::KEY_CITY;
         $warehouse = Area::KEY_WAREHOUSE;
 
+        // http://stackoverflow.com/questions/766809/whats-the-difference-between-utf8-general-ci-and-utf8-unicode-ci
+        $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
+
         $query = <<<QUERY
             CREATE TABLE IF NOT EXISTS {$table} (
                 `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -61,7 +64,7 @@ class Database extends Base
                 `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY `id` (`id`),
                 UNIQUE KEY `uk_ref` (`ref`)
-            )ENGINE=INNODB
+            ){$tableOptions}
 QUERY;
         $this->db->query($query);
     }
