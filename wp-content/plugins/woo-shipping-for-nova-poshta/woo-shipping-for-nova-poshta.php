@@ -80,6 +80,8 @@ class NovaPoshta extends Base
             add_action('woocommerce_shipping_init', array($this, 'initNovaPoshtaShippingMethod'));
             add_filter('woocommerce_shipping_methods', array($this, 'addNovaPoshtaShippingMethod'));
 
+            add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'pluginActionLinks'));
+
             Checkout::instance()->init();
             Calculator::instance()->init();
         }
@@ -301,6 +303,12 @@ class NovaPoshta extends Base
     public function isDebug()
     {
         return $this->options->isDebug();
+    }
+
+    public function pluginActionLinks($links)
+    {
+        array_unshift($links, '<a href="' . admin_url('admin.php?page=wc-settings&tab=shipping&section=' . NOVA_POSHTA_SHIPPING_METHOD) . '" title="' . esc_attr(__('View WooCommerce Settings', 'woocommerce')) . '">' . __('Settings', 'woocommerce') . '</a>');
+        return $links;
     }
 
     /**
