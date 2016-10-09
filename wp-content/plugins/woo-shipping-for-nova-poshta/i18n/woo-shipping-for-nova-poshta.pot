@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Woo Shipping for Nova Poshta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: Fri May 20 2016 22:39:49 GMT+0300 (Финляндия (лето))\n"
-"POT-Revision-Date: Sat Aug 27 2016 14:11:11 GMT+0300\n"
+"POT-Revision-Date: Sun Oct 09 2016 20:01:10 GMT+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -24,93 +24,106 @@ msgstr ""
 "esc_html_x:1,2c;comments_number_link:2,3;t:1;st:1;trans:1;transChoice:1,2\n"
 "X-Generator: Loco - https://localise.biz/"
 
-#: ../classes/base/OptionsHelper.php:21 ../woo-shipping-for-nova-poshta.php:203
+#: ../classes/base/Options.php:47
+msgid "Thank you :)"
+msgstr ""
+
+#: ../classes/base/OptionsHelper.php:21 ../woo-shipping-for-nova-poshta.php:214
 msgid "Choose an option"
 msgstr ""
 
-#: ../classes/Checkout.php:93
+#: ../classes/Checkout.php:251
 msgid "Region"
 msgstr ""
 
-#: ../classes/Checkout.php:102 ../classes/WC_NovaPoshta_Shipping_Method.php:84
+#: ../classes/Checkout.php:260 ../classes/WC_NovaPoshta_Shipping_Method.php:89
 msgid "City"
 msgstr ""
 
-#: ../classes/Checkout.php:111 ../classes/WC_NovaPoshta_Shipping_Method.php:95
+#: ../classes/Checkout.php:269 ../classes/WC_NovaPoshta_Shipping_Method.php:100
 msgid "Nova Poshta Warehouse (#)"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:16 ..
-#: /classes/WC_NovaPoshta_Shipping_Method.php:54 ..
-#: /classes/WC_NovaPoshta_Shipping_Method.php:57
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:19 ..
+#: /classes/WC_NovaPoshta_Shipping_Method.php:59 ..
+#: /classes/WC_NovaPoshta_Shipping_Method.php:62
 msgid "Nova Poshta"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:17
-msgid "Shipping with popular Ukrainian logistic company Nova Poshta"
-msgstr ""
-
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:47
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:52
 msgid "Enable/Disable"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:48
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:53
 msgid "Enable NovaPoshta"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:56
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:61
 msgid "This controls the title which the user sees during checkout."
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:60 ..
-#: /classes/WC_NovaPoshta_Shipping_Method.php:61
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:65 ..
+#: /classes/WC_NovaPoshta_Shipping_Method.php:66
 msgid "Enable Debug Mode"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:63
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:68
 msgid "Extended logging, use full version of script instead of min versions"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:67
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:72
 msgid "API Key"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:69
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:74
 msgid ""
 "Get your API Key. <a href=\"https://my.novaposhta."
 "ua/settings/index#apikeys\">My Account (Nova Poshta)</a>"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:73
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:78
 msgid "Area"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:75
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:80
 msgid "Specify the area, from where you are sending goods. (After save API key)"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:86
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:91
 msgid "Specify the city, from where you are sending goods. (After save API key)"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:97
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:102
 msgid "Specify the warehouse, from where you are sending goods. (After save API key)"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:105
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:110
 msgid "Set Fixed Price for Delivery."
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:106
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:111
 msgid "If checked, fixed price will be set for delivery."
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:112
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:117
 msgid "Fixed price"
 msgstr ""
 
-#: ../classes/WC_NovaPoshta_Shipping_Method.php:114
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:119
 msgid "Delivery Fixed price."
+msgstr ""
+
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:172
+msgid "Shipping with popular Ukrainian logistic company Nova Poshta"
+msgstr ""
+
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:174
+#, php-format
+msgid "If you like our work, please leave us a %s rating!"
+msgstr ""
+
+#: ../classes/WC_NovaPoshta_Shipping_Method.php:176
+msgid "Thank you for encouraging us!"
 msgstr ""
 
 #. Name of the plugin
@@ -133,4 +146,12 @@ msgstr ""
 
 #. Author URI of the plugin
 msgid "http://altair-solutions.com.ua"
+msgstr ""
+
+#: ../woo-shipping-for-nova-poshta.php:316
+msgid "View Plugin Settings"
+msgstr ""
+
+#: ../woo-shipping-for-nova-poshta.php:316
+msgid "Settings"
 msgstr ""
