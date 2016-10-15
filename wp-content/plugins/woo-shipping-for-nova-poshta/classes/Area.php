@@ -17,7 +17,7 @@ use stdClass;
  * @property string ref
  * @property string locale
  */
-abstract class Area extends Base
+class Area extends Base
 {
     const KEY_REGION = 'nova_poshta_region';
     const KEY_CITY = 'nova_poshta_city';
