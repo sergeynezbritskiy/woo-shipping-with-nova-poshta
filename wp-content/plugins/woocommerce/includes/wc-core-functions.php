@@ -520,13 +520,13 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 		'INR' => '&#8377;',
 		'IQD' => '&#x639;.&#x62f;',
 		'IRR' => '&#xfdfc;',
-		'ISK' => 'Kr.',
+		'ISK' => 'kr.',
 		'JEP' => '&pound;',
 		'JMD' => '&#36;',
 		'JOD' => '&#x62f;.&#x627;',
 		'JPY' => '&yen;',
 		'KES' => 'KSh',
-		'KGS' => '&#x43b;&#x432;',
+		'KGS' => '&#x441;&#x43e;&#x43c;',
 		'KHR' => '&#x17db;',
 		'KMF' => 'Fr',
 		'KPW' => '&#x20a9;',
@@ -860,7 +860,7 @@ add_filter( 'mod_rewrite_rules', 'wc_ms_protect_download_rewite_rules' );
  * @return string[]
  */
 function wc_get_core_supported_themes() {
-	return array( 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 }
 
 /**

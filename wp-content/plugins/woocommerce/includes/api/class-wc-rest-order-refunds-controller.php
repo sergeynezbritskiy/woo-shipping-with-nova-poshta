@@ -56,6 +56,12 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+			'args' => array(
+				'order_id'  => array(
+					'description' => __( 'The order ID.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
@@ -72,6 +78,16 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'order_id'  => array(
+					'description' => __( 'The order ID.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -86,10 +102,10 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 				'args'                => array(
 					'force' => array(
-						'default'     => false,
+						'default'     => true,
+						'type'        => 'boolean',
 						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
-					'reassign' => array(),
 				),
 			),
 			'schema' => array( $this, 'get_public_item_schema' ),
@@ -281,6 +297,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 		$data = array(
 			'order_id'   => $order_data->ID,
 			'amount'     => $request['amount'],
+			'reason'     => empty( $request['reason'] ) ? null : $request['reason'],
 			'line_items' => $request['line_items'],
 		);
 
@@ -300,7 +317,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 			$order = wc_get_order( $order_data );
 
 			if ( isset( $payment_gateways[ $order->payment_method ] ) && $payment_gateways[ $order->payment_method ]->supports( 'refunds' ) ) {
-				$result = $payment_gateways[ $order->payment_method ]->process_refund( $order_id, $refund->get_refund_amount(), $refund->get_refund_reason() );
+				$result = $payment_gateways[ $order->payment_method ]->process_refund( $order->id, $refund->get_refund_amount(), $refund->get_refund_reason() );
 
 				if ( is_wp_error( $result ) ) {
 					return $result;
@@ -368,121 +385,130 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Posts_Controller {
 					'description' => __( 'Line items data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
-					'properties'  => array(
-						'id' => array(
-							'description' => __( 'Item ID.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'name' => array(
-							'description' => __( 'Product name.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'sku' => array(
-							'description' => __( 'Product SKU.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'product_id' => array(
-							'description' => __( 'Product ID.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'variation_id' => array(
-							'description' => __( 'Variation ID, if applicable.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'quantity' => array(
-							'description' => __( 'Quantity ordered.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'tax_class' => array(
-							'description' => __( 'Tax class of product.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'price' => array(
-							'description' => __( 'Product price.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'subtotal' => array(
-							'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'subtotal_tax' => array(
-							'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'total' => array(
-							'description' => __( 'Line total (after discounts).', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'total_tax' => array(
-							'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-						),
-						'taxes' => array(
-							'description' => __( 'Line taxes.', 'woocommerce' ),
-							'type'        => 'array',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-							'properties'  => array(
-								'id' => array(
-									'description' => __( 'Tax rate ID.', 'woocommerce' ),
-									'type'        => 'integer',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-								),
-								'total' => array(
-									'description' => __( 'Tax total.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-								),
-								'subtotal' => array(
-									'description' => __( 'Tax subtotal.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id' => array(
+								'description' => __( 'Item ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'name' => array(
+								'description' => __( 'Product name.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'sku' => array(
+								'description' => __( 'Product SKU.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'product_id' => array(
+								'description' => __( 'Product ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'variation_id' => array(
+								'description' => __( 'Variation ID, if applicable.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'quantity' => array(
+								'description' => __( 'Quantity ordered.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'tax_class' => array(
+								'description' => __( 'Tax class of product.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'price' => array(
+								'description' => __( 'Product price.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'subtotal' => array(
+								'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'subtotal_tax' => array(
+								'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'total' => array(
+								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'total_tax' => array(
+								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'taxes' => array(
+								'description' => __( 'Line taxes.', 'woocommerce' ),
+								'type'        => 'array',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+								'items'       => array(
+									'type'       => 'object',
+									'properties' => array(
+										'id' => array(
+											'description' => __( 'Tax rate ID.', 'woocommerce' ),
+											'type'        => 'integer',
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+										'total' => array(
+											'description' => __( 'Tax total.', 'woocommerce' ),
+											'type'        => 'string',
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+										'subtotal' => array(
+											'description' => __( 'Tax subtotal.', 'woocommerce' ),
+											'type'        => 'string',
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+									),
 								),
 							),
-						),
-						'meta' => array(
-							'description' => __( 'Line item meta data.', 'woocommerce' ),
-							'type'        => 'array',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-							'properties'  => array(
-								'key' => array(
-									'description' => __( 'Meta key.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-								),
-								'label' => array(
-									'description' => __( 'Meta label.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-								),
-								'value' => array(
-									'description' => __( 'Meta value.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
+							'meta' => array(
+								'description' => __( 'Line item meta data.', 'woocommerce' ),
+								'type'        => 'array',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+								'items'       => array(
+									'type'       => 'object',
+									'properties' => array(
+										'key' => array(
+											'description' => __( 'Meta key.', 'woocommerce' ),
+											'type'        => 'string',
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+										'label' => array(
+											'description' => __( 'Meta label.', 'woocommerce' ),
+											'type'        => 'string',
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+										'value' => array(
+											'description' => __( 'Meta value.', 'woocommerce' ),
+											'type'        => 'string',
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+									),
 								),
 							),
 						),

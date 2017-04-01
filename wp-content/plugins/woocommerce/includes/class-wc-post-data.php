@@ -28,6 +28,7 @@ class WC_Post_Data {
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'set_object_terms', array( __CLASS__, 'set_object_terms' ), 10, 6 );
 
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
@@ -41,6 +42,19 @@ class WC_Post_Data {
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
 		add_action( 'pre_post_update', array( __CLASS__, 'pre_post_update' ) );
 		add_action( 'update_post_meta', array( __CLASS__, 'sync_product_stock_status' ), 10, 4 );
+	}
+
+	/**
+	 * Link to parent products when getting permalink for variation.
+	 *
+	 * @return string
+	 */
+	public static function variation_post_link( $permalink, $post ) {
+		if ( 'product_variation' === $post->post_type ) {
+			$variation = wc_get_product( $post->ID );
+			return $variation->get_permalink();
+		}
+		return $permalink;
 	}
 
 	/**
@@ -174,7 +188,7 @@ class WC_Post_Data {
 	 * @param  mixed $_meta_value
 	 */
 	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $_meta_value ) {
-		if ( '_stock' === $meta_key && 'product' !== get_post_type( $object_id ) ) {
+		if ( '_stock' === $meta_key && 'product_variation' === get_post_type( $object_id ) ) {
 			$product = wc_get_product( $object_id );
 			$product->check_stock_status();
 		}
@@ -215,15 +229,17 @@ class WC_Post_Data {
 	 * @param int $post_id
 	 */
 	public static function pre_post_update( $post_id ) {
-		$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
+		if ( 'product' === get_post_type( $post_id ) ) {
+			$product_type = empty( $_POST['product-type'] ) ? 'simple' : sanitize_title( stripslashes( $_POST['product-type'] ) );
 
-		if ( isset( $_POST['_visibility'] ) ) {
-			if ( update_post_meta( $post_id, '_visibility', wc_clean( $_POST['_visibility'] ) ) ) {
-				do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_POST['_visibility'] ) );
+			if ( isset( $_POST['_visibility'] ) ) {
+				if ( update_post_meta( $post_id, '_visibility', wc_clean( $_POST['_visibility'] ) ) ) {
+					do_action( 'woocommerce_product_set_visibility', $post_id, wc_clean( $_POST['_visibility'] ) );
+				}
 			}
-		}
-		if ( isset( $_POST['_stock_status'] ) && 'variable' !== $product_type ) {
-			wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
+			if ( isset( $_POST['_stock_status'] ) && 'variable' !== $product_type ) {
+				wc_update_product_stock_status( $post_id, wc_clean( $_POST['_stock_status'] ) );
+			}
 		}
 	}
 }
