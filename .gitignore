@@ -6,4 +6,6 @@
 /node_modules
 /wp-content/debug.log
 /svn.wordpress.org
+/vendor/
 /tmp/
+/tests/_output/*
