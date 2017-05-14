@@ -48,6 +48,12 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+			'args' => array(
+				'order_id'  => array(
+					'description' => __( 'The order ID.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
@@ -60,7 +66,9 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 					'note' => array(
-						'required' => true,
+						'type'        => 'string',
+						'description' => __( 'Order note content.', 'woocommerce' ),
+						'required'    => true,
 					),
 				) ),
 			),
@@ -68,6 +76,16 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 		) );
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			'args' => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+				'order_id'  => array(
+					'description' => __( 'The order ID.', 'woocommerce' ),
+					'type'        => 'integer',
+				),
+			),
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
@@ -83,6 +101,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
+						'type'        => 'boolean',
 						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
 					),
 				),
@@ -161,7 +180,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 		$order = get_post( (int) $request['order_id'] );
 
 		if ( empty( $order->post_type ) || $this->post_type !== $order->post_type ) {
-			return new WP_Error( 'woocommerce_rest_{$this->post_type}_invalid_id', __( 'Invalid order id.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$args = array(
@@ -373,8 +392,8 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Controller {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'tax',
-			'type'       => 'order_note',
+			'title'      => 'order_note',
+			'type'       => 'object',
 			'properties' => array(
 				'id' => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),

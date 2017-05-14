@@ -137,11 +137,16 @@ class WC_Webhook {
 		// only active webhooks can be delivered
 		if ( 'active' != $this->get_status() ) {
 			$should_deliver = false;
+		} elseif ( in_array( $current_action, array( 'delete_post', 'wp_trash_post' ), true ) ) {
+			// Only deliver deleted event for coupons, orders, and products.
+			if ( ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
+				$should_deliver = false;
+			}
 
-		// only deliver deleted event for coupons, orders, and products
-		} elseif ( 'delete_post' === $current_action && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
-			$should_deliver = false;
-
+			// Check if is delivering for the correct resource.
+			if ( str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
+				$should_deliver = false;
+			}
 		} elseif ( 'delete_user' == $current_action ) {
 			$user = get_userdata( absint( $arg ) );
 
@@ -160,8 +165,11 @@ class WC_Webhook {
 			// creation date to determine the actual event
 			$resource = get_post( absint( $arg ) );
 
+			// Drafts don't have post_date_gmt so calculate it here
+			$gmt_date = get_gmt_from_date( $resource->post_date );
+
 			// a resource is considered created when the hook is executed within 10 seconds of the post creation date
-			$resource_created = ( ( time() - 10 ) <= strtotime( $resource->post_date_gmt ) );
+			$resource_created = ( ( time() - 10 ) <= strtotime( $gmt_date ) );
 
 			if ( 'created' == $this->get_event() && ! $resource_created ) {
 				$should_deliver = false;
@@ -184,7 +192,6 @@ class WC_Webhook {
 	 * @param mixed $arg First hook argument.
 	 */
 	public function deliver( $arg ) {
-
 		$payload = $this->build_payload( $arg );
 
 		// Setup request args.

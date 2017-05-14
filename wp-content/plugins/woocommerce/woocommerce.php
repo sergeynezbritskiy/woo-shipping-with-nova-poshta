@@ -3,11 +3,11 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://woocommerce.com/
  * Description: An e-commerce toolkit that helps you sell anything. Beautifully.
- * Version: 2.6.4
+ * Version: 2.6.14
  * Author: WooThemes
- * Author URI: https://woothemes.com
+ * Author URI: https://woocommerce.com
  * Requires at least: 4.4
- * Tested up to: 4.6
+ * Tested up to: 4.7
  *
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
@@ -35,7 +35,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '2.6.4';
+	public $version = '2.6.14';
 
 	/**
 	 * The single instance of the class.
@@ -221,6 +221,17 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Check the active theme.
+	 *
+	 * @since  2.6.9
+	 * @param  string $theme Theme slug to check
+	 * @return bool
+	 */
+	private function is_active_theme( $theme ) {
+		return $theme === get_template();
+	}
+
+	/**
 	 * Include required core files used in admin and on the frontend.
 	 */
 	public function includes() {
@@ -296,6 +307,10 @@ final class WooCommerce {
 		include_once( 'includes/class-wc-customer.php' );                       // Customer class
 		include_once( 'includes/class-wc-shortcodes.php' );                     // Shortcodes class
 		include_once( 'includes/class-wc-embed.php' );                          // Embeds
+
+		if ( $this->is_active_theme( 'twentyseventeen' ) ) {
+			include_once( 'includes/theme-support/class-wc-twenty-seventeen.php' );
+		}
 	}
 
 	/**
@@ -479,11 +494,14 @@ final class WooCommerce {
 	public function wpdb_table_fix() {
 		global $wpdb;
 		$wpdb->payment_tokenmeta    = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-		$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';
 		$wpdb->order_itemmeta       = $wpdb->prefix . 'woocommerce_order_itemmeta';
 		$wpdb->tables[]             = 'woocommerce_payment_tokenmeta';
-		$wpdb->tables[]             = 'woocommerce_termmeta';
 		$wpdb->tables[]             = 'woocommerce_order_itemmeta';
+
+		if ( get_option( 'db_version' ) < 34370 ) {
+			$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';
+			$wpdb->tables[]             = 'woocommerce_termmeta';
+		}
 	}
 
 	/**

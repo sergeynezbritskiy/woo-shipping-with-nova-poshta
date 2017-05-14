@@ -498,7 +498,7 @@ abstract class WC_Abstract_Order {
 		do_action( 'woocommerce_order_add_shipping', $this->id, $item_id, $shipping_rate );
 
 		// Update total
-		$this->set_total( $this->order_shipping + wc_format_decimal( $shipping_rate->cost ), 'shipping' );
+		$this->set_total( (float) $this->order_shipping + (float) wc_format_decimal( $shipping_rate->cost ), 'shipping' );
 
 		return $item_id;
 	}
@@ -1349,7 +1349,7 @@ abstract class WC_Abstract_Order {
 		}
 
 		foreach ( $shipping_methods as $shipping_method ) {
-			if ( $shipping_method['method_id'] == $method_id ) {
+			if ( strpos( $shipping_method['method_id'], $method_id ) === 0 ) {
 				$has_method = true;
 			}
 		}
@@ -2741,11 +2741,14 @@ abstract class WC_Abstract_Order {
 			return false;
 		}
 
-		$hide  = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
+		$hide          = apply_filters( 'woocommerce_order_hide_shipping_address', array( 'local_pickup' ), $this );
 		$needs_address = false;
 
 		foreach ( $this->get_shipping_methods() as $shipping_method ) {
-			if ( ! in_array( $shipping_method['method_id'], $hide ) ) {
+			// Remove any instance IDs after :
+			$shipping_method_id = current( explode( ':', $shipping_method['method_id'] ) );
+
+			if ( ! in_array( $shipping_method_id, $hide ) ) {
 				$needs_address = true;
 				break;
 			}
