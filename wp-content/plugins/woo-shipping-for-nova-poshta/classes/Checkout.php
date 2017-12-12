@@ -9,6 +9,7 @@ use plugins\NovaPoshta\classes\base\OptionsHelper;
 /**
  * Class Calculator
  * @property bool isCheckout
+ * @property Customer $customer
  * @package plugins\NovaPoshta\classes
  */
 class Checkout extends Base
@@ -19,10 +20,6 @@ class Checkout extends Base
      */
     private static $_instance;
 
-    /**
-     * @var array
-     */
-    private $customerData;
 
     /**
      * @return Checkout
@@ -63,11 +60,10 @@ class Checkout extends Base
     public function saveNovaPoshtaOptions()
     {
         if (NP()->isPost() && NP()->isNP() && NP()->isCheckout()) {
-            $customer = WC()->customer;
             $fieldGroup = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
-            $customer->add_meta_data('nova_poshta_region', ArrayHelper::getValue($_POST, Region::key($fieldGroup)));
-            $customer->add_meta_data('nova_poshta_city', ArrayHelper::getValue($_POST, City::key($fieldGroup)));
-            $customer->add_meta_data('nova_poshta_warehouse', ArrayHelper::getValue($_POST, Warehouse::key($fieldGroup)));
+            $this->customer->setMetadata('nova_poshta_region', ArrayHelper::getValue($_POST, Region::key($fieldGroup)));
+            $this->customer->setMetadata('nova_poshta_city', ArrayHelper::getValue($_POST, City::key($fieldGroup)));
+            $this->customer->setMetadata('nova_poshta_warehouse', ArrayHelper::getValue($_POST, Warehouse::key($fieldGroup)));
         }
     }
 
@@ -145,15 +141,6 @@ class Checkout extends Base
     }
 
     /**
-     * @deprecated
-     * @return bool
-     */
-    public function isCheckout()
-    {
-        return $this->getIsCheckout();
-    }
-
-    /**
      * @return bool
      */
     protected function getIsCheckout()
@@ -228,7 +215,7 @@ class Checkout extends Base
      */
     public function getDefaultRegion()
     {
-        return ArrayHelper::getValue($this->getCustomerData(), 'nova_poshta_region', '');
+        return $this->customer->getMetadata('nova_poshta_region');
     }
 
     /**
@@ -236,7 +223,7 @@ class Checkout extends Base
      */
     public function getDefaultCity()
     {
-        return ArrayHelper::getValue($this->getCustomerData(), 'nova_poshta_city', '');
+        return $this->customer->getMetadata('nova_poshta_city');
     }
 
     /**
@@ -244,7 +231,7 @@ class Checkout extends Base
      */
     public function getDefaultWarehouse()
     {
-        return ArrayHelper::getValue($this->getCustomerData(), 'nova_poshta_warehouse', '');
+        return $this->customer->getMetadata('nova_poshta_warehouse');
     }
 
     /**
@@ -254,8 +241,8 @@ class Checkout extends Base
      */
     private function addNovaPoshtaFields($fields, $location)
     {
-        $area = ArrayHelper::getValue($this->getCustomerData(), 'nova_poshta_region', '');
-        $city = ArrayHelper::getValue($this->getCustomerData(), 'nova_poshta_city', '');
+        $area = $this->customer->getMetadata('nova_poshta_region');
+        $city = $this->customer->getMetadata('nova_poshta_city');
         $required = NP()->isGet() ?: (NP()->isNP() && NP()->isCheckout());
         $fields[Region::key($location)] = [
             'label' => __('Region', NOVA_POSHTA_DOMAIN),
@@ -288,23 +275,20 @@ class Checkout extends Base
     }
 
     /**
+     * @return Customer
+     */
+    protected function getCustomer()
+    {
+        return Customer::instance();
+    }
+
+    /**
      * NovaPoshta constructor.
      *
      * @access private
      */
     private function __construct()
     {
-    }
-
-    /**
-     * @return array
-     */
-    protected function getCustomerData()
-    {
-        if ($this->customerData === null) {
-            $this->customerData = WC()->customer->get_meta_data();
-        }
-        return $this->customerData;
     }
 
     /**

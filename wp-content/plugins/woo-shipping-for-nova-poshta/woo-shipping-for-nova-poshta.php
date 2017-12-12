@@ -101,7 +101,7 @@ class NovaPoshta extends Base
      */
     public function isCheckout()
     {
-        return Checkout::instance()->isCheckout();
+        return Checkout::instance()->isCheckout;
     }
 
     /**

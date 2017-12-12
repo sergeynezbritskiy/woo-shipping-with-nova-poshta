@@ -2,6 +2,7 @@
 
 use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\base\Options;
+use plugins\NovaPoshta\classes\Customer;
 
 /**
  * Class WC_NovaPoshta_Shipping_Method
@@ -138,7 +139,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             'cost' => 0,
             'calc_tax' => 'per_item'
         );
-        $cityRecipient = ArrayHelper::getValue(WC()->customer->get_meta_data(), 'nova_poshta_city');
+        $cityRecipient = Customer::instance()->getMetadata('nova_poshta_city');
 
         if (NP()->options->useFixedPriceOnDelivery) {
             $rate['cost'] = NP()->options->fixedPrice;
@@ -147,6 +148,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             $serviceType = 'WarehouseWarehouse';
             /** @noinspection PhpUndefinedFieldInspection */
             $cartWeight = max(1, WC()->cart->cart_contents_weight);
+            /** @noinspection PhpUndefinedFieldInspection */
             $cartTotal = max(1, WC()->cart->cart_contents_total);
             try {
                 $result = NP()->api->getDocumentPrice($citySender, $cityRecipient, $serviceType, $cartWeight, $cartTotal);
