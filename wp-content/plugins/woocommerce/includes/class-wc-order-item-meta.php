@@ -1,7 +1,6 @@
 <?php
-
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 /**
@@ -9,6 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * A Simple class for managing order item meta so plugins add it in the correct format.
  *
+ * @deprecated  3.0.0 wc_display_item_meta function is used instead.
  * @class 		order_item_meta
  * @version		2.4
  * @package		WooCommerce/Classes
@@ -35,13 +35,14 @@ class WC_Order_Item_Meta {
 	 * @param \WC_Product $product defaults to null
 	 */
 	public function __construct( $item = array(), $product = null ) {
-		// Backwards (pre 2.4) compat
+		wc_deprecated_function( 'WC_Order_Item_Meta::__construct', '3.1', 'WC_Order_Item_Product' );
+
+		// Backwards (pre 2.4) compatibility
 		if ( ! isset( $item['item_meta'] ) ) {
 			$this->legacy = true;
 			$this->meta   = array_filter( (array) $item );
 			return;
 		}
-
 		$this->item    = $item;
 		$this->meta    = array_filter( (array) $item['item_meta'] );
 		$this->product = $product;
@@ -134,7 +135,7 @@ class WC_Order_Item_Meta {
 				$formatted_meta[ $meta_id ] = array(
 					'key'   => $meta->key,
 					'label' => wc_attribute_label( $attribute_key, $this->product ),
-					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ),
+					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value, $meta, $this->item ),
 				);
 			}
 		}
@@ -145,11 +146,14 @@ class WC_Order_Item_Meta {
 	/**
 	 * Return an array of formatted item meta in format e.g.
 	 * Handles @deprecated args.
+	 *
+	 * @param string $hideprefix
+	 *
 	 * @return array
 	 */
 	public function get_formatted_legacy( $hideprefix = '_' ) {
 		if ( ! is_ajax() ) {
-			_deprecated_function( 'get_formatted_legacy', '2.4', 'Item Meta Data is being called with legacy arguments' );
+			wc_deprecated_argument( 'WC_Order_Item_Meta::get_formatted', '2.4', 'Item Meta Data is being called with legacy arguments' );
 		}
 
 		$formatted_meta = array();

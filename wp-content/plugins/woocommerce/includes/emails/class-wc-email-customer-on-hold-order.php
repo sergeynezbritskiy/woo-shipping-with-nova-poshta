@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order' ) ) :
+if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 
 /**
  * Customer On-hold Order Email.
@@ -23,46 +23,71 @@ class WC_Email_Customer_On_Hold_Order extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id               = 'customer_on_hold_order';
-		$this->customer_email   = true;
-		$this->title            = __( 'Order on-hold', 'woocommerce' );
-		$this->description      = __( 'This is an order notification sent to customers containing order details after an order is placed on-hold.', 'woocommerce' );
-		$this->heading          = __( 'Thank you for your order', 'woocommerce' );
-		$this->subject          = __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
-		$this->template_html    = 'emails/customer-on-hold-order.php';
-		$this->template_plain   = 'emails/plain/customer-on-hold-order.php';
+		$this->id             = 'customer_on_hold_order';
+		$this->customer_email = true;
+		$this->title          = __( 'Order on-hold', 'woocommerce' );
+		$this->description    = __( 'This is an order notification sent to customers containing order details after an order is placed on-hold.', 'woocommerce' );
+		$this->template_html  = 'emails/customer-on-hold-order.php';
+		$this->template_plain = 'emails/plain/customer-on-hold-order.php';
+		$this->placeholders   = array(
+			'{site_title}'   => $this->get_blogname(),
+			'{order_date}'   => '',
+			'{order_number}' => '',
+		);
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
 
 		// Call parent constructor
 		parent::__construct();
 	}
 
 	/**
-	 * Trigger.
+	 * Get email subject.
 	 *
-	 * @param int $order_id
+	 * @since  3.1.0
+	 * @return string
 	 */
-	public function trigger( $order_id ) {
+	public function get_default_subject() {
+		return __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
+	}
 
-		if ( $order_id ) {
-			$this->object       = wc_get_order( $order_id );
-			$this->recipient    = $this->object->billing_email;
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return __( 'Thank you for your order', 'woocommerce' );
+	}
 
-			$this->find['order-date']      = '{order_date}';
-			$this->find['order-number']    = '{order_number}';
+	/**
+	 * Trigger the sending of this email.
+	 *
+	 * @param int $order_id The order ID.
+	 * @param WC_Order $order Order object.
+	 */
+	public function trigger( $order_id, $order = false ) {
+		$this->setup_locale();
 
-			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
-			$this->replace['order-number'] = $this->object->get_order_number();
+		if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
+			$order = wc_get_order( $order_id );
 		}
 
-		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
-			return;
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$this->object                         = $order;
+			$this->recipient                      = $this->object->get_billing_email();
+			$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+			$this->placeholders['{order_number}'] = $this->object->get_order_number();
 		}
 
-		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		if ( $this->is_enabled() && $this->get_recipient() ) {
+			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		}
+
+		$this->restore_locale();
 	}
 
 	/**
@@ -77,7 +102,7 @@ class WC_Email_Customer_On_Hold_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => false,
-			'email'			=> $this
+			'email'         => $this,
 		) );
 	}
 
@@ -93,7 +118,7 @@ class WC_Email_Customer_On_Hold_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => false,
 			'plain_text'    => true,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 }

@@ -32,7 +32,11 @@ class WC_Meta_Box_Order_Actions {
 			$theorder = wc_get_order( $post->ID );
 		}
 
-		$order_type_object = get_post_type_object( $post->post_type );
+		$order_actions = apply_filters( 'woocommerce_order_actions', array(
+			'send_order_details'              => __( 'Email invoice / order details to customer', 'woocommerce' ),
+			'send_order_details_admin'        => __( 'Resend new order notification', 'woocommerce' ),
+			'regenerate_download_permissions' => __( 'Regenerate download permissions', 'woocommerce' ),
+		) );
 		?>
 		<ul class="order_actions submitbox">
 
@@ -40,31 +44,12 @@ class WC_Meta_Box_Order_Actions {
 
 			<li class="wide" id="actions">
 				<select name="wc_order_action">
-					<option value=""><?php _e( 'Actions', 'woocommerce' ); ?></option>
-					<optgroup label="<?php esc_attr_e( 'Resend order emails', 'woocommerce' ); ?>">
-						<?php
-						$mailer           = WC()->mailer();
-						$available_emails = apply_filters( 'woocommerce_resend_order_emails_available', array( 'new_order', 'cancelled_order', 'customer_processing_order', 'customer_completed_order', 'customer_invoice', 'customer_refunded_order' ) );
-						$mails            = $mailer->get_emails();
-
-						if ( ! empty( $mails ) ) {
-							foreach ( $mails as $mail ) {
-								if ( in_array( $mail->id, $available_emails ) && 'no' !== $mail->enabled ) {
-									echo '<option value="send_email_'. esc_attr( $mail->id ) .'">' . esc_html( $mail->title ) . '</option>';
-								}
-							}
-						}
-						?>
-					</optgroup>
-
-					<option value="regenerate_download_permissions"><?php _e( 'Regenerate download permissions', 'woocommerce' ); ?></option>
-
-					<?php foreach( apply_filters( 'woocommerce_order_actions', array() ) as $action => $title ) { ?>
+					<option value=""><?php _e( 'Choose an action...', 'woocommerce' ); ?></option>
+					<?php foreach ( $order_actions as $action => $title ) { ?>
 						<option value="<?php echo $action; ?>"><?php echo $title; ?></option>
 					<?php } ?>
 				</select>
-
-				<button class="button wc-reload" title="<?php esc_attr_e( 'Apply', 'woocommerce' ); ?>"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
+				<button class="button wc-reload"><span><?php _e( 'Apply', 'woocommerce' ); ?></span></button>
 			</li>
 
 			<li class="wide">
@@ -73,15 +58,15 @@ class WC_Meta_Box_Order_Actions {
 					if ( current_user_can( 'delete_post', $post->ID ) ) {
 
 						if ( ! EMPTY_TRASH_DAYS ) {
-							$delete_text = __( 'Delete Permanently', 'woocommerce' );
+							$delete_text = __( 'Delete permanently', 'woocommerce' );
 						} else {
-							$delete_text = __( 'Move to Trash', 'woocommerce' );
+							$delete_text = __( 'Move to trash', 'woocommerce' );
 						}
 						?><a class="submitdelete deletion" href="<?php echo esc_url( get_delete_post_link( $post->ID ) ); ?>"><?php echo $delete_text; ?></a><?php
 					}
 				?></div>
 
-				<input type="submit" class="button save_order button-primary tips" name="save" value="<?php printf( __( 'Save %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" data-tip="<?php printf( __( 'Save/update the %s', 'woocommerce' ), $order_type_object->labels->singular_name ); ?>" />
+				<input type="submit" class="button save_order button-primary" name="save" value="<?php echo 'auto-draft' === $post->post_status ? esc_attr__( 'Create', 'woocommerce' ) : esc_attr__( 'Update', 'woocommerce' ); ?>" />
 			</li>
 
 			<?php do_action( 'woocommerce_order_actions_end', $post->ID ); ?>
@@ -97,9 +82,7 @@ class WC_Meta_Box_Order_Actions {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
-		global $wpdb;
-
-		// Order data saved, now get it so we can manipulate status
+		// Order data saved, now get it so we can manipulate status.
 		$order = wc_get_order( $post_id );
 
 		// Handle button actions
@@ -107,52 +90,40 @@ class WC_Meta_Box_Order_Actions {
 
 			$action = wc_clean( $_POST['wc_order_action'] );
 
-			if ( strstr( $action, 'send_email_' ) ) {
+			if ( 'send_order_details' === $action ) {
+				do_action( 'woocommerce_before_resend_order_emails', $order, 'customer_invoice' );
 
-				// Switch back to the site locale.
-				if ( function_exists( 'switch_to_locale' ) ) {
-					switch_to_locale( get_locale() );
-				}
-
-				do_action( 'woocommerce_before_resend_order_emails', $order );
-
-				// Ensure gateways are loaded in case they need to insert data into the emails.
+				// Send the customer invoice email.
 				WC()->payment_gateways();
 				WC()->shipping();
+				WC()->mailer()->customer_invoice( $order );
 
-				// Load mailer.
-				$mailer = WC()->mailer();
-				$email_to_send = str_replace( 'send_email_', '', $action );
-				$mails = $mailer->get_emails();
+				// Note the event.
+				$order->add_order_note( __( 'Order details manually sent to customer.', 'woocommerce' ), false, true );
 
-				if ( ! empty( $mails ) ) {
-					foreach ( $mails as $mail ) {
-						if ( $mail->id == $email_to_send ) {
-							$mail->trigger( $order->id );
-							$order->add_order_note( sprintf( __( '%s email notification manually sent.', 'woocommerce' ), $mail->title ), false, true );
-						}
-					}
-				}
+				do_action( 'woocommerce_after_resend_order_email', $order, 'customer_invoice' );
 
-				do_action( 'woocommerce_after_resend_order_email', $order, $email_to_send );
+				// Change the post saved message.
+				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
 
-				// Restore user locale.
-				if ( function_exists( 'restore_current_locale' ) ) {
-					restore_current_locale();
-				}
+			} elseif ( 'send_order_details_admin' === $action ) {
+
+				do_action( 'woocommerce_before_resend_order_emails', $order, 'new_order' );
+
+				WC()->payment_gateways();
+				WC()->shipping();
+				WC()->mailer()->emails['WC_Email_New_Order']->trigger( $order->get_id(), $order );
+
+				do_action( 'woocommerce_after_resend_order_email', $order, 'new_order' );
 
 				// Change the post saved message.
 				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
 
 			} elseif ( 'regenerate_download_permissions' === $action ) {
 
-				delete_post_meta( $post_id, '_download_permissions_granted' );
-				$wpdb->delete( 
-					$wpdb->prefix . 'woocommerce_downloadable_product_permissions',
-					array( 'order_id' => $post_id ),
-					array( '%d' )
-				);
-				wc_downloadable_product_permissions( $post_id );
+				$data_store = WC_Data_Store::load( 'customer-download' );
+				$data_store->delete_by_order_id( $post_id );
+				wc_downloadable_product_permissions( $post_id, true );
 
 			} else {
 
@@ -177,5 +148,4 @@ class WC_Meta_Box_Order_Actions {
 	public static function set_email_sent_message( $location ) {
 		return add_query_arg( 'message', 11, $location );
 	}
-
 }

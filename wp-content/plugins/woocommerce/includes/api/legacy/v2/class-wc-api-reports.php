@@ -40,7 +40,7 @@ class WC_API_Reports extends WC_API_Resource {
 		);
 
 		# GET /reports/sales
-		$routes[ $this->base . '/sales'] = array(
+		$routes[ $this->base . '/sales' ] = array(
 			array( array( $this, 'get_sales_report' ), WC_API_Server::READABLE ),
 		);
 
@@ -68,7 +68,7 @@ class WC_API_Reports extends WC_API_Resource {
 	 * @since 2.1
 	 * @param string $fields fields to include in response
 	 * @param array $filter date filtering
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_sales_report( $fields = null, $filter = array() ) {
 
@@ -203,7 +203,7 @@ class WC_API_Reports extends WC_API_Resource {
 	 * @since 2.1
 	 * @param string $fields fields to include in response
 	 * @param array $filter date filtering
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_top_sellers_report( $fields = null, $filter = array() ) {
 
@@ -223,14 +223,14 @@ class WC_API_Reports extends WC_API_Resource {
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => '',
-					'name'            => 'product_id'
+					'name'            => 'product_id',
 				),
 				'_qty' => array(
 					'type'            => 'order_item_meta',
 					'order_item_type' => 'line_item',
 					'function'        => 'SUM',
-					'name'            => 'order_item_qty'
-				)
+					'name'            => 'order_item_qty',
+				),
 			),
 			'order_by'     => 'order_item_qty DESC',
 			'group_by'     => 'product_id',
@@ -247,7 +247,7 @@ class WC_API_Reports extends WC_API_Resource {
 
 			if ( $product ) {
 				$top_sellers_data[] = array(
-					'title'      => $product->get_title(),
+					'title'      => $product->get_name(),
 					'product_id' => $top_seller->product_id,
 					'quantity'   => $top_seller->order_item_qty,
 				);
@@ -286,7 +286,6 @@ class WC_API_Reports extends WC_API_Resource {
 				// default custom range to today
 				$_GET['start_date'] = $_GET['end_date'] = date( 'Y-m-d', current_time( 'timestamp' ) );
 			}
-
 		} else {
 
 			// ensure period is valid
@@ -309,10 +308,12 @@ class WC_API_Reports extends WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @see WC_API_Resource::validate_request()
+	 *
 	 * @param null $id unused
 	 * @param null $type unused
 	 * @param null $context unused
-	 * @return bool true if the request is valid and should be processed, false otherwise
+	 *
+	 * @return bool|WP_Error
 	 */
 	protected function validate_request( $id = null, $type = null, $context = null ) {
 

@@ -27,7 +27,6 @@ class WC_API_Resource {
 	 *
 	 * @since 2.1
 	 * @param WC_API_Server $server
-	 * @return WC_API_Resource
 	 */
 	public function __construct( WC_API_Server $server ) {
 
@@ -41,14 +40,24 @@ class WC_API_Resource {
 			add_filter( "woocommerce_api_{$resource}_response", array( $this, 'maybe_add_meta' ), 15, 2 );
 		}
 
-		$response_names = array( 'order', 'coupon', 'customer', 'product', 'report',
-			'customer_orders', 'customer_downloads', 'order_note', 'order_refund',
-			'product_reviews', 'product_category'
+		$response_names = array(
+			'order',
+			'coupon',
+			'customer',
+			'product',
+			'report',
+			'customer_orders',
+			'customer_downloads',
+			'order_note',
+			'order_refund',
+			'product_reviews',
+			'product_category',
 		);
 
 		foreach ( $response_names as $name ) {
 
-			/* remove fields from responses when requests specify certain fields
+			/**
+			 * Remove fields from responses when requests specify certain fields
 			 * note these are hooked at a later priority so data added via
 			 * filters (e.g. customer data to the order response) still has the
 			 * fields filtered properly
@@ -91,7 +100,7 @@ class WC_API_Resource {
 			$post = get_post( $id );
 
 			if ( null === $post ) {
-				return new WP_Error( "woocommerce_api_no_{$resource_name}_found", sprintf( __( 'No %s found with the ID equal to %s', 'woocommerce' ), $resource_name, $id ), array( 'status' => 404 ) );
+				return new WP_Error( "woocommerce_api_no_{$resource_name}_found", sprintf( __( 'No %1$s found with the ID equal to %2$s', 'woocommerce' ), $resource_name, $id ), array( 'status' => 404 ) );
 			}
 
 			// For checking permissions, product variations are the same as the product post type
@@ -106,18 +115,21 @@ class WC_API_Resource {
 			switch ( $context ) {
 
 				case 'read':
-					if ( ! $this->is_readable( $post ) )
+					if ( ! $this->is_readable( $post ) ) {
 						return new WP_Error( "woocommerce_api_user_cannot_read_{$resource_name}", sprintf( __( 'You do not have permission to read this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+					}
 					break;
 
 				case 'edit':
-					if ( ! $this->is_editable( $post ) )
+					if ( ! $this->is_editable( $post ) ) {
 						return new WP_Error( "woocommerce_api_user_cannot_edit_{$resource_name}", sprintf( __( 'You do not have permission to edit this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+					}
 					break;
 
 				case 'delete':
-					if ( ! $this->is_deletable( $post ) )
+					if ( ! $this->is_deletable( $post ) ) {
 						return new WP_Error( "woocommerce_api_user_cannot_delete_{$resource_name}", sprintf( __( 'You do not have permission to delete this %s', 'woocommerce' ), $resource_name ), array( 'status' => 401 ) );
+					}
 					break;
 			}
 		}
@@ -233,8 +245,9 @@ class WC_API_Resource {
 		if ( isset( $this->server->params['GET']['filter']['meta'] ) && 'true' === $this->server->params['GET']['filter']['meta'] && is_object( $resource ) ) {
 
 			// don't attempt to add meta more than once
-			if ( preg_grep( '/[a-z]+_meta/', array_keys( $data ) ) )
+			if ( preg_grep( '/[a-z]+_meta/', array_keys( $data ) ) ) {
 				return $data;
+			}
 
 			// define the top-level property name for the meta
 			switch ( get_class( $resource ) ) {
@@ -261,25 +274,19 @@ class WC_API_Resource {
 				// customer meta
 				$meta = (array) get_user_meta( $resource->ID );
 
-			} elseif ( is_a( $resource, 'WC_Product_Variation' ) ) {
-
-				// product variation meta
-				$meta = (array) get_post_meta( $resource->get_variation_id() );
-
 			} else {
 
 				// coupon/order/product meta
-				$meta = (array) get_post_meta( $resource->id );
+				$meta = (array) get_post_meta( $resource->get_id() );
 			}
 
-			foreach( $meta as $meta_key => $meta_value ) {
+			foreach ( $meta as $meta_key => $meta_value ) {
 
 				// don't add hidden meta by default
 				if ( ! is_protected_meta( $meta_key ) ) {
 					$data[ $meta_name ][ $meta_key ] = maybe_unserialize( $meta_value[0] );
 				}
 			}
-
 		}
 
 		return $data;
@@ -328,7 +335,6 @@ class WC_API_Resource {
 						unset( $data[ $data_field ][ $sub_field ] );
 					}
 				}
-
 			} else {
 
 				// remove non-matching top-level fields
@@ -367,11 +373,9 @@ class WC_API_Resource {
 			} else {
 				return new WP_Error( 'woocommerce_api_cannot_delete_customer', __( 'The customer cannot be deleted', 'woocommerce' ), array( 'status' => 500 ) );
 			}
-
 		} else {
 
 			// delete order/coupon/webhook
-
 			$result = ( $force ) ? wp_delete_post( $id, true ) : wp_trash_post( $id );
 
 			if ( ! $result ) {
@@ -459,5 +463,4 @@ class WC_API_Resource {
 			return false;
 		}
 	}
-
 }

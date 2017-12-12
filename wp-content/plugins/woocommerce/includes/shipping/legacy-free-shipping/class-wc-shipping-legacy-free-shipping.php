@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Free Shipping Method.
  *
- * This class is here for backwards commpatility for methods existing before zones existed.
+ * This class is here for backwards compatibility for methods existing before zones existed.
  *
  * @deprecated  2.6.0
  * @version 2.4.0
@@ -27,8 +27,8 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 	 */
 	public function __construct() {
 		$this->id 			= 'legacy_free_shipping';
-		$this->method_title = __( 'Free Shipping (Legacy)', 'woocommerce' );
-		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping Zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) );
+		$this->method_title = __( 'Free shipping (legacy)', 'woocommerce' );
+		$this->method_description = '<strong>' . sprintf( __( 'This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping zones</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) . '</strong>';
 		$this->init();
 	}
 
@@ -38,12 +38,12 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 	public function process_admin_options() {
 		parent::process_admin_options();
 
-		if ( 'no' === $this->settings[ 'enabled' ] ) {
+		if ( 'no' === $this->settings['enabled'] ) {
 			wp_redirect( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=options' ) );
 			exit;
 		}
 	}
-	
+
 	/**
 	 * Return the name of the option in the WP DB.
 	 * @since 2.6.0
@@ -83,10 +83,10 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 				'title' 		=> __( 'Enable/Disable', 'woocommerce' ),
 				'type' 			=> 'checkbox',
 				'label' 		=> __( 'Once disabled, this legacy method will no longer be available.', 'woocommerce' ),
-				'default' 		=> 'no'
+				'default' 		=> 'no',
 			),
 			'title' => array(
-				'title' 		=> __( 'Method Title', 'woocommerce' ),
+				'title' 		=> __( 'Method title', 'woocommerce' ),
 				'type' 			=> 'text',
 				'description' 	=> __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'		=> __( 'Free Shipping', 'woocommerce' ),
@@ -99,41 +99,41 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 				'class'			=> 'availability wc-enhanced-select',
 				'options'		=> array(
 					'all' 		=> __( 'All allowed countries', 'woocommerce' ),
-					'specific' 	=> __( 'Specific Countries', 'woocommerce' )
-				)
+					'specific' 	=> __( 'Specific Countries', 'woocommerce' ),
+				),
 			),
 			'countries' => array(
-				'title' 		=> __( 'Specific Countries', 'woocommerce' ),
+				'title' 		=> __( 'Specific countries', 'woocommerce' ),
 				'type' 			=> 'multiselect',
 				'class'			=> 'wc-enhanced-select',
-				'css'			=> 'width: 450px;',
+				'css'			=> 'width: 400px;',
 				'default' 		=> '',
 				'options'		=> WC()->countries->get_shipping_countries(),
 				'custom_attributes' => array(
-					'data-placeholder' => __( 'Select some countries', 'woocommerce' )
-				)
+					'data-placeholder' => __( 'Select some countries', 'woocommerce' ),
+				),
 			),
 			'requires' => array(
-				'title' 		=> __( 'Free Shipping Requires...', 'woocommerce' ),
+				'title' 		=> __( 'Free shipping requires...', 'woocommerce' ),
 				'type' 			=> 'select',
 				'class'         => 'wc-enhanced-select',
 				'default' 		=> '',
 				'options'		=> array(
 					'' 				=> __( 'N/A', 'woocommerce' ),
 					'coupon'		=> __( 'A valid free shipping coupon', 'woocommerce' ),
-					'min_amount' 	=> __( 'A minimum order amount (defined below)', 'woocommerce' ),
+					'min_amount' 	=> __( 'A minimum order amount', 'woocommerce' ),
 					'either' 		=> __( 'A minimum order amount OR a coupon', 'woocommerce' ),
 					'both' 			=> __( 'A minimum order amount AND a coupon', 'woocommerce' ),
-				)
+				),
 			),
 			'min_amount' => array(
-				'title' 		=> __( 'Minimum Order Amount', 'woocommerce' ),
+				'title' 		=> __( 'Minimum order amount', 'woocommerce' ),
 				'type' 			=> 'price',
 				'placeholder'	=> wc_format_localized_price( 0 ),
 				'description' 	=> __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
 				'default' 		=> '0',
-				'desc_tip'		=> true
-			)
+				'desc_tip'		=> true,
+			),
 		);
 	}
 
@@ -166,18 +166,20 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 
 			if ( $coupons = WC()->cart->get_coupons() ) {
 				foreach ( $coupons as $code => $coupon ) {
-					if ( $coupon->is_valid() && $coupon->enable_free_shipping() ) {
+					if ( $coupon->is_valid() && $coupon->get_free_shipping() ) {
 						$has_coupon = true;
 					}
 				}
 			}
 		}
 
-		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) && isset( WC()->cart->cart_contents_total ) ) {
-			if ( WC()->cart->prices_include_tax ) {
-				$total = WC()->cart->cart_contents_total + array_sum( WC()->cart->taxes );
+		if ( in_array( $this->requires, array( 'min_amount', 'either', 'both' ) ) ) {
+			$total = WC()->cart->get_displayed_subtotal();
+
+			if ( 'incl' === WC()->cart->tax_display_cart ) {
+				$total = round( $total - ( WC()->cart->get_discount_total() + WC()->cart->get_discount_tax() ), wc_get_price_decimals() );
 			} else {
-				$total = WC()->cart->cart_contents_total;
+				$total = round( $total - WC()->cart->get_discount_total(), wc_get_price_decimals() );
 			}
 
 			if ( $total >= $this->min_amount ) {
@@ -211,12 +213,11 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 			break;
 		}
 
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available, $package, $this );
 	}
 
 	/**
 	 * calculate_shipping function.
-	 * @return array
 	 */
 	public function calculate_shipping( $package = array() ) {
 		$args = array(

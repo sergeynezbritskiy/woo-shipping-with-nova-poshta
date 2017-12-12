@@ -112,15 +112,15 @@ class WC_API_Server {
 	 *
 	 * @since 2.1
 	 * @param $path
-	 * @return WC_API_Server
 	 */
 	public function __construct( $path ) {
 
 		if ( empty( $path ) ) {
-			if ( isset( $_SERVER['PATH_INFO'] ) )
+			if ( isset( $_SERVER['PATH_INFO'] ) ) {
 				$path = $_SERVER['PATH_INFO'];
-			else
+			} else {
 				$path = '/';
+			}
 		}
 
 		$this->path           = $path;
@@ -138,14 +138,13 @@ class WC_API_Server {
 		}
 
 		// determine type of request/response and load handler, JSON by default
-		if ( $this->is_json_request() )
+		if ( $this->is_json_request() ) {
 			$handler_class = 'WC_API_JSON_Handler';
-
-		elseif ( $this->is_xml_request() )
+		} elseif ( $this->is_xml_request() ) {
 			$handler_class = 'WC_API_XML_Handler';
-
-		else
+		} else {
 			$handler_class = apply_filters( 'woocommerce_api_default_response_handler', 'WC_API_JSON_Handler', $this->path, $this );
+		}
 
 		$this->handler = new $handler_class();
 	}
@@ -162,12 +161,12 @@ class WC_API_Server {
 		$user = apply_filters( 'woocommerce_api_check_authentication', null, $this );
 
 		// API requests run under the context of the authenticated user
-		if ( is_a( $user, 'WP_User' ) )
+		if ( is_a( $user, 'WP_User' ) ) {
 			wp_set_current_user( $user->ID );
-
-		// WP_Errors are handled in serve_request()
-		elseif ( ! is_wp_error( $user ) )
+		} elseif ( ! is_wp_error( $user ) ) {
+			// WP_Errors are handled in serve_request()
 			$user = new WP_Error( 'woocommerce_api_authentication_error', __( 'Invalid authentication method', 'woocommerce' ), array( 'code' => 500 ) );
+		}
 
 		return $user;
 	}
@@ -241,8 +240,9 @@ class WC_API_Server {
 
 		if ( ! $served ) {
 
-			if ( 'HEAD' === $this->method )
+			if ( 'HEAD' === $this->method ) {
 				return;
+			}
 
 			echo $this->handler->generate_response( $result );
 		}
@@ -326,16 +326,19 @@ class WC_API_Server {
 				$callback = $handler[0];
 				$supported = isset( $handler[1] ) ? $handler[1] : self::METHOD_GET;
 
-				if ( !( $supported & $method ) )
+				if ( ! ( $supported & $method ) ) {
 					continue;
+				}
 
 				$match = preg_match( '@^' . $route . '$@i', urldecode( $this->path ), $args );
 
-				if ( !$match )
+				if ( ! $match ) {
 					continue;
+				}
 
-				if ( ! is_callable( $callback ) )
+				if ( ! is_callable( $callback ) ) {
 					return new WP_Error( 'woocommerce_api_invalid_handler', __( 'The handler for the route is invalid', 'woocommerce' ), array( 'status' => 500 ) );
+				}
 
 				$args = array_merge( $args, $this->params['GET'] );
 				if ( $method & self::METHOD_POST ) {
@@ -344,8 +347,7 @@ class WC_API_Server {
 				if ( $supported & self::ACCEPT_DATA ) {
 					$data = $this->handler->parse_body( $this->get_raw_data() );
 					$args = array_merge( $args, array( 'data' => $data ) );
-				}
-				elseif ( $supported & self::ACCEPT_RAW_DATA ) {
+				} elseif ( $supported & self::ACCEPT_RAW_DATA ) {
 					$data = $this->get_raw_data();
 					$args = array_merge( $args, array( 'data' => $data ) );
 				}
@@ -364,8 +366,9 @@ class WC_API_Server {
 				}
 
 				$params = $this->sort_callback_params( $callback, $args );
-				if ( is_wp_error( $params ) )
+				if ( is_wp_error( $params ) ) {
 					return $params;
+				}
 
 				return call_user_func_array( $callback, $params );
 			}
@@ -381,15 +384,18 @@ class WC_API_Server {
 	 * by the parameters the method actually needs, using the Reflection API
 	 *
 	 * @since 2.1
+	 *
 	 * @param callable|array $callback the endpoint callback
 	 * @param array $provided the provided request parameters
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	protected function sort_callback_params( $callback, $provided ) {
-		if ( is_array( $callback ) )
+		if ( is_array( $callback ) ) {
 			$ref_func = new ReflectionMethod( $callback[0], $callback[1] );
-		else
+		} else {
 			$ref_func = new ReflectionFunction( $callback );
+		}
 
 		$wanted = $ref_func->getParameters();
 		$ordered_parameters = array();
@@ -397,14 +403,11 @@ class WC_API_Server {
 		foreach ( $wanted as $param ) {
 			if ( isset( $provided[ $param->getName() ] ) ) {
 				// We have this parameters in the list to choose from
-
 				$ordered_parameters[] = is_array( $provided[ $param->getName() ] ) ? array_map( 'urldecode', $provided[ $param->getName() ] ) : urldecode( $provided[ $param->getName() ] );
-			}
-			elseif ( $param->isDefaultValueAvailable() ) {
+			} elseif ( $param->isDefaultValueAvailable() ) {
 				// We don't have this parameter, but it's optional
 				$ordered_parameters[] = $param->getDefaultValue();
-			}
-			else {
+			} else {
 				// We don't have this parameter and it wasn't optional, abort!
 				return new WP_Error( 'woocommerce_api_missing_callback_param', sprintf( __( 'Missing parameter %s', 'woocommerce' ), $param->getName() ), array( 'status' => 400 ) );
 			}
@@ -423,26 +426,28 @@ class WC_API_Server {
 	public function get_index() {
 
 		// General site data
-		$available = array( 'store' => array(
-			'name'        => get_option( 'blogname' ),
-			'description' => get_option( 'blogdescription' ),
-			'URL'         => get_option( 'siteurl' ),
-			'wc_version'  => WC()->version,
-			'routes'      => array(),
-			'meta'        => array(
-				'timezone'			 => wc_timezone_string(),
-				'currency'       	 => get_woocommerce_currency(),
-				'currency_format'    => get_woocommerce_currency_symbol(),
-				'tax_included'   	 => wc_prices_include_tax(),
-				'weight_unit'    	 => get_option( 'woocommerce_weight_unit' ),
-				'dimension_unit' 	 => get_option( 'woocommerce_dimension_unit' ),
-				'ssl_enabled'    	 => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
-				'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
-				'links'          	 => array(
-					'help' => 'https://woothemes.github.io/woocommerce/rest-api/',
+		$available = array(
+			'store' => array(
+				'name'        => get_option( 'blogname' ),
+				'description' => get_option( 'blogdescription' ),
+				'URL'         => get_option( 'siteurl' ),
+				'wc_version'  => WC()->version,
+				'routes'      => array(),
+				'meta'        => array(
+					'timezone'			 => wc_timezone_string(),
+					'currency'       	 => get_woocommerce_currency(),
+					'currency_format'    => get_woocommerce_currency_symbol(),
+					'tax_included'   	 => wc_prices_include_tax(),
+					'weight_unit'    	 => get_option( 'woocommerce_weight_unit' ),
+					'dimension_unit' 	 => get_option( 'woocommerce_dimension_unit' ),
+					'ssl_enabled'    	 => ( 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ),
+					'permalinks_enabled' => ( '' !== get_option( 'permalink_structure' ) ),
+					'links'          	 => array(
+						'help' => 'https://woocommerce.github.io/woocommerce/rest-api/',
+					),
 				),
 			),
-		) );
+		);
 
 		// Find the available routes
 		foreach ( $this->get_routes() as $route => $callbacks ) {
@@ -453,14 +458,17 @@ class WC_API_Server {
 			foreach ( self::$method_map as $name => $bitmask ) {
 				foreach ( $callbacks as $callback ) {
 					// Skip to the next route if any callback is hidden
-					if ( $callback[1] & self::HIDDEN_ENDPOINT )
+					if ( $callback[1] & self::HIDDEN_ENDPOINT ) {
 						continue 3;
+					}
 
-					if ( $callback[1] & $bitmask )
+					if ( $callback[1] & $bitmask ) {
 						$data['supports'][] = $name;
+					}
 
-					if ( $callback[1] & self::ACCEPT_DATA )
+					if ( $callback[1] & self::ACCEPT_DATA ) {
 						$data['accepts_data'] = true;
+					}
 
 					// For non-variable routes, generate links
 					if ( strpos( $route, '<' ) === false ) {
@@ -552,8 +560,9 @@ class WC_API_Server {
 			$total_pages = $query->max_num_pages;
 		}
 
-		if ( ! $page )
+		if ( ! $page ) {
 			$page = 1;
+		}
 
 		$next_page = absint( $page ) + 1;
 
@@ -571,8 +580,9 @@ class WC_API_Server {
 			}
 
 			// last
-			if ( $page != $total_pages )
+			if ( $page != $total_pages ) {
 				$this->link_header( 'last', $this->get_paginated_url( $total_pages ) );
+			}
 		}
 
 		$this->header( 'X-WC-Total', $total );
@@ -663,9 +673,17 @@ class WC_API_Server {
 	 * @since 2.1
 	 * @param int|string $timestamp unix timestamp or MySQL datetime
 	 * @param bool $convert_to_utc
+	 * @param bool $convert_to_gmt Use GMT timezone.
 	 * @return string RFC3339 datetime
 	 */
-	public function format_datetime( $timestamp, $convert_to_utc = false ) {
+	public function format_datetime( $timestamp, $convert_to_utc = false, $convert_to_gmt = false ) {
+		if ( $convert_to_gmt ) {
+			if ( is_numeric( $timestamp ) ) {
+				$timestamp = date( 'Y-m-d H:i:s', $timestamp );
+			}
+
+			$timestamp = get_gmt_from_date( $timestamp );
+		}
 
 		if ( $convert_to_utc ) {
 			$timezone = new DateTimeZone( wc_timezone_string() );
@@ -685,7 +703,6 @@ class WC_API_Server {
 			if ( $convert_to_utc ) {
 				$date->modify( -1 * $date->getOffset() . ' seconds' );
 			}
-
 		} catch ( Exception $e ) {
 
 			$date = new DateTime( '@0' );
@@ -701,16 +718,15 @@ class WC_API_Server {
 	 * @param array $server Associative array similar to $_SERVER
 	 * @return array Headers extracted from the input
 	 */
-	public function get_headers($server) {
+	public function get_headers( $server ) {
 		$headers = array();
 		// CONTENT_* headers are not prefixed with HTTP_
-		$additional = array('CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true);
+		$additional = array( 'CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true );
 
-		foreach ($server as $key => $value) {
-			if ( strpos( $key, 'HTTP_' ) === 0) {
+		foreach ( $server as $key => $value ) {
+			if ( strpos( $key, 'HTTP_' ) === 0 ) {
 				$headers[ substr( $key, 5 ) ] = $value;
-			}
-			elseif ( isset( $additional[ $key ] ) ) {
+			} elseif ( isset( $additional[ $key ] ) ) {
 				$headers[ $key ] = $value;
 			}
 		}
@@ -728,12 +744,14 @@ class WC_API_Server {
 	private function is_json_request() {
 
 		// check path
-		if ( false !== stripos( $this->path, '.json' ) )
+		if ( false !== stripos( $this->path, '.json' ) ) {
 			return true;
+		}
 
 		// check ACCEPT header, only 'application/json' is acceptable, see RFC 4627
-		if ( isset( $this->headers['ACCEPT'] ) && 'application/json' == $this->headers['ACCEPT'] )
+		if ( isset( $this->headers['ACCEPT'] ) && 'application/json' == $this->headers['ACCEPT'] ) {
 			return true;
+		}
 
 		return false;
 	}
@@ -748,12 +766,14 @@ class WC_API_Server {
 	private function is_xml_request() {
 
 		// check path
-		if ( false !== stripos( $this->path, '.xml' ) )
+		if ( false !== stripos( $this->path, '.xml' ) ) {
 			return true;
+		}
 
 		// check headers, 'application/xml' or 'text/xml' are acceptable, see RFC 2376
-		if ( isset( $this->headers['ACCEPT'] ) && ( 'application/xml' == $this->headers['ACCEPT'] || 'text/xml' == $this->headers['ACCEPT'] ) )
+		if ( isset( $this->headers['ACCEPT'] ) && ( 'application/xml' == $this->headers['ACCEPT'] || 'text/xml' == $this->headers['ACCEPT'] ) ) {
 			return true;
+		}
 
 		return false;
 	}

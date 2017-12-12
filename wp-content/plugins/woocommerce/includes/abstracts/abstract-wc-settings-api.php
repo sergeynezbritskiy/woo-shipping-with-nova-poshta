@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Abstract Settings API Class
  *
@@ -58,7 +63,10 @@ abstract class WC_Settings_API {
 
 	/**
 	 * Set default required properties for each field.
-	 * @param array
+	 *
+	 * @param array $field
+	 *
+	 * @return array
 	 */
 	protected function set_defaults( $field ) {
 		if ( ! isset( $field['default'] ) ) {
@@ -81,7 +89,6 @@ abstract class WC_Settings_API {
 	 * on the gateway's settings screen.
 	 *
 	 * @since  1.0.0
-	 * @return string
 	 */
 	public function init_form_fields() {}
 
@@ -273,9 +280,11 @@ abstract class WC_Settings_API {
 	 * Generate the HTML for the fields on the "settings" screen.
 	 *
 	 * @param  array $form_fields (default: array())
+	 * @param bool $echo
+	 *
+	 * @return string the html for the settings
 	 * @since  1.0.0
 	 * @uses   method_exists()
-	 * @return string the html for the settings
 	 */
 	public function generate_settings_html( $form_fields = array(), $echo = true ) {
 		if ( empty( $form_fields ) ) {
@@ -307,7 +316,7 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function get_tooltip_html( $data ) {
-		if ( $data['desc_tip'] === true ) {
+		if ( true === $data['desc_tip'] ) {
 			$tip = $data['description'];
 		} elseif ( ! empty( $data['desc_tip'] ) ) {
 			$tip = $data['desc_tip'];
@@ -325,7 +334,7 @@ abstract class WC_Settings_API {
 	 * @return string
 	 */
 	public function get_description_html( $data ) {
-		if ( $data['desc_tip'] === true ) {
+		if ( true === $data['desc_tip'] ) {
 			$description = '';
 		} elseif ( ! empty( $data['desc_tip'] ) ) {
 			$description = $data['description'];
@@ -384,8 +393,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -428,8 +437,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -472,8 +481,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -528,8 +537,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -574,8 +583,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -622,8 +631,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -668,8 +677,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -719,8 +728,8 @@ abstract class WC_Settings_API {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
+				<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 			</th>
 			<td class="forminp">
 				<fieldset>
@@ -797,7 +806,7 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_price_field( $key, $value ) {
 		$value = is_null( $value ) ? '' : $value;
-		return $value === '' ? '' : wc_format_decimal( trim( stripslashes( $value ) ) );
+		return ( '' === $value ) ? '' : wc_format_decimal( trim( stripslashes( $value ) ) );
 	}
 
 	/**
@@ -811,7 +820,7 @@ abstract class WC_Settings_API {
 	 */
 	public function validate_decimal_field( $key, $value ) {
 		$value = is_null( $value ) ? '' : $value;
-		return $value === '' ? '' : wc_format_decimal( trim( stripslashes( $value ) ) );
+		return ( '' === $value ) ? '' : wc_format_decimal( trim( stripslashes( $value ) ) );
 	}
 
 	/**
@@ -838,7 +847,7 @@ abstract class WC_Settings_API {
 		return wp_kses( trim( stripslashes( $value ) ),
 			array_merge(
 				array(
-					'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true )
+					'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true ),
 				),
 				wp_kses_allowed_html( 'post' )
 			)
@@ -875,7 +884,7 @@ abstract class WC_Settings_API {
 	 *
 	 * @param  string $key
 	 * @param  string $value Posted Value
-	 * @return string
+	 * @return string|array
 	 */
 	public function validate_multiselect_field( $key, $value ) {
 		return is_array( $value ) ? array_map( 'wc_clean', array_map( 'stripslashes', $value ) ) : '';
@@ -884,9 +893,11 @@ abstract class WC_Settings_API {
 	/**
 	 * Validate the data on the "Settings" form.
 	 * @deprecated 2.6.0 No longer used
+	 *
+	 * @param array $form_fields
 	 */
 	public function validate_settings_fields( $form_fields = array() ) {
-		_deprecated_function( 'validate_settings_fields', '2.6' );
+		wc_deprecated_function( 'validate_settings_fields', '2.6' );
 	}
 
 	/**
@@ -896,7 +907,7 @@ abstract class WC_Settings_API {
 	 * @return array
 	 */
 	public function format_settings( $value ) {
-		_deprecated_function( 'format_settings', '2.6' );
+		wc_deprecated_function( 'format_settings', '2.6' );
 		return $value;
 	}
 }
