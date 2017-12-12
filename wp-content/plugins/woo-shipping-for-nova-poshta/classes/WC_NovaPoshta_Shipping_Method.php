@@ -1,4 +1,5 @@
 <?php
+
 use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\base\Options;
 
@@ -137,8 +138,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             'cost' => 0,
             'calc_tax' => 'per_item'
         );
-        /** @noinspection PhpUndefinedFieldInspection */
-        $cityRecipient = WC()->customer->nova_poshta_city;
+        $cityRecipient = ArrayHelper::getValue(WC()->customer->get_meta_data(), 'nova_poshta_city');
 
         if (NP()->options->useFixedPriceOnDelivery) {
             $rate['cost'] = NP()->options->fixedPrice;

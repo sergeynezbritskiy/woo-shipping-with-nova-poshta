@@ -20,6 +20,11 @@ class Checkout extends Base
     private static $_instance;
 
     /**
+     * @var array
+     */
+    private $customerData;
+
+    /**
      * @return Checkout
      */
     public static function instance()
@@ -60,12 +65,9 @@ class Checkout extends Base
         if (NP()->isPost() && NP()->isNP() && NP()->isCheckout()) {
             $customer = WC()->customer;
             $fieldGroup = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
-            /** @noinspection PhpUndefinedFieldInspection */
-            $customer->nova_poshta_region = ArrayHelper::getValue($_POST, Region::key($fieldGroup), '');
-            /** @noinspection PhpUndefinedFieldInspection */
-            $customer->nova_poshta_city = ArrayHelper::getValue($_POST, City::key($fieldGroup), '');
-            /** @noinspection PhpUndefinedFieldInspection */
-            $customer->nova_poshta_warehouse = ArrayHelper::getValue($_POST, Warehouse::key($fieldGroup), '');
+            $customer->add_meta_data('nova_poshta_region', ArrayHelper::getValue($_POST, Region::key($fieldGroup)));
+            $customer->add_meta_data('nova_poshta_city', ArrayHelper::getValue($_POST, City::key($fieldGroup)));
+            $customer->add_meta_data('nova_poshta_warehouse', ArrayHelper::getValue($_POST, Warehouse::key($fieldGroup)));
         }
     }
 
@@ -143,15 +145,28 @@ class Checkout extends Base
     }
 
     /**
+     * @deprecated
      * @return bool
      */
     public function isCheckout()
     {
-        global $post;
-        $checkoutPageId = get_option('woocommerce_checkout_page_id');
-        $pageId = ArrayHelper::getValue($post, 'ID', null);
-        $this->isCheckout = $pageId && $checkoutPageId && ($pageId == $checkoutPageId);
-        return $this->isCheckout;
+        return $this->getIsCheckout();
+    }
+
+    /**
+     * @return bool
+     */
+    protected function getIsCheckout()
+    {
+        if (function_exists('is_checkout')) {
+            return is_checkout();
+        } else {
+            //for backward compatibility with woocommerce 2.x.x
+            global $post;
+            $checkoutPageId = get_option('woocommerce_checkout_page_id');
+            $pageId = ArrayHelper::getValue($post, 'ID', null);
+            return $pageId && $checkoutPageId && ($pageId == $checkoutPageId);
+        }
     }
 
     /**
@@ -213,8 +228,7 @@ class Checkout extends Base
      */
     public function getDefaultRegion()
     {
-        /** @noinspection PhpUndefinedFieldInspection */
-        return WC()->customer->nova_poshta_region;
+        return ArrayHelper::getValue($this->getCustomerData(), 'nova_poshta_region', '');
     }
 
     /**
@@ -222,8 +236,7 @@ class Checkout extends Base
      */
     public function getDefaultCity()
     {
-        /** @noinspection PhpUndefinedFieldInspection */
-        return WC()->customer->nova_poshta_city;
+        return ArrayHelper::getValue($this->getCustomerData(), 'nova_poshta_city', '');
     }
 
     /**
@@ -231,8 +244,7 @@ class Checkout extends Base
      */
     public function getDefaultWarehouse()
     {
-        /** @noinspection PhpUndefinedFieldInspection */
-        return WC()->customer->nova_poshta_warehouse;
+        return ArrayHelper::getValue($this->getCustomerData(), 'nova_poshta_warehouse', '');
     }
 
     /**
@@ -242,10 +254,8 @@ class Checkout extends Base
      */
     private function addNovaPoshtaFields($fields, $location)
     {
-        /** @noinspection PhpUndefinedFieldInspection */
-        $area = WC()->customer->nova_poshta_region;
-        /** @noinspection PhpUndefinedFieldInspection */
-        $city = WC()->customer->nova_poshta_city;
+        $area = ArrayHelper::getValue($this->getCustomerData(), 'nova_poshta_region', '');
+        $city = ArrayHelper::getValue($this->getCustomerData(), 'nova_poshta_city', '');
         $required = NP()->isGet() ?: (NP()->isNP() && NP()->isCheckout());
         $fields[Region::key($location)] = [
             'label' => __('Region', NOVA_POSHTA_DOMAIN),
@@ -284,6 +294,17 @@ class Checkout extends Base
      */
     private function __construct()
     {
+    }
+
+    /**
+     * @return array
+     */
+    protected function getCustomerData()
+    {
+        if ($this->customerData === null) {
+            $this->customerData = WC()->customer->get_meta_data();
+        }
+        return $this->customerData;
     }
 
     /**

@@ -1,6 +1,11 @@
 <?php
+
 namespace plugins\NovaPoshta\classes\base;
 
+/**
+ * Class Base
+ * @package plugins\NovaPoshta\classes\base
+ */
 class Base
 {
 
@@ -19,6 +24,7 @@ class Base
     public function __get($property)
     {
         $method = 'get' . ucwords($property);
-        return $this->$method();
+        $this->$property = $this->$method();
+        return $this->$property;
     }
 }
