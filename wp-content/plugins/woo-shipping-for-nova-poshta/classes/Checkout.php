@@ -43,6 +43,8 @@ class Checkout extends Base
         add_action('woocommerce_checkout_process', array($this, 'saveNovaPoshtaOptions'), 10, 2);
         add_action('woocommerce_checkout_update_order_meta', array($this, 'updateOrderMeta'));
 
+        add_filter('woocommerce_cart_shipping_packages', array($this, 'updatePackages'));
+
         add_filter('nova_poshta_disable_default_fields', array($this, 'disableDefaultFields'));
         add_filter('nova_poshta_disable_nova_poshta_fields', array($this, 'disableNovaPoshtaFields'));
 
@@ -60,10 +62,10 @@ class Checkout extends Base
     public function saveNovaPoshtaOptions()
     {
         if (NP()->isPost() && NP()->isNP() && NP()->isCheckout()) {
-            $fieldGroup = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
-            $this->customer->setMetadata('nova_poshta_region', ArrayHelper::getValue($_POST, Region::key($fieldGroup)));
-            $this->customer->setMetadata('nova_poshta_city', ArrayHelper::getValue($_POST, City::key($fieldGroup)));
-            $this->customer->setMetadata('nova_poshta_warehouse', ArrayHelper::getValue($_POST, Warehouse::key($fieldGroup)));
+            $location = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
+            $this->customer->setMetadata('nova_poshta_region', ArrayHelper::getValue($_POST, Region::key($location)), $location);
+            $this->customer->setMetadata('nova_poshta_city', ArrayHelper::getValue($_POST, City::key($location)), $location);
+            $this->customer->setMetadata('nova_poshta_warehouse', ArrayHelper::getValue($_POST, Warehouse::key($location)), $location);
         }
     }
 
@@ -141,6 +143,25 @@ class Checkout extends Base
     }
 
     /**
+     * @param array $packages
+     * @return array
+     */
+    public function updatePackages(array $packages)
+    {
+        if (NP()->isNP()) {
+            foreach ($packages as &$package) {
+                if ($city = $this->customer->getMetadata('nova_poshta_city', Area::SHIPPING)) {
+                    $package['destination']['city'] = City::findByRef($city)->description;
+                }
+                if ($region = $this->customer->getMetadata('nova_poshta_region', Area::SHIPPING)) {
+                    $package['destination']['state'] = Region::findByRef($region)->description;
+                }
+            }
+        }
+        return $packages;
+    }
+
+    /**
      * @return bool
      */
     protected function getIsCheckout()
@@ -215,7 +236,7 @@ class Checkout extends Base
      */
     public function getDefaultRegion()
     {
-        return $this->customer->getMetadata('nova_poshta_region');
+        return $this->customer->getMetadata('nova_poshta_region', 'shipping');
     }
 
     /**
@@ -223,7 +244,7 @@ class Checkout extends Base
      */
     public function getDefaultCity()
     {
-        return $this->customer->getMetadata('nova_poshta_city');
+        return $this->customer->getMetadata('nova_poshta_city', 'shipping');
     }
 
     /**
@@ -231,7 +252,7 @@ class Checkout extends Base
      */
     public function getDefaultWarehouse()
     {
-        return $this->customer->getMetadata('nova_poshta_warehouse');
+        return $this->customer->getMetadata('nova_poshta_warehouse', 'shipping');
     }
 
     /**
@@ -241,8 +262,8 @@ class Checkout extends Base
      */
     private function addNovaPoshtaFields($fields, $location)
     {
-        $area = $this->customer->getMetadata('nova_poshta_region');
-        $city = $this->customer->getMetadata('nova_poshta_city');
+        $area = $this->customer->getMetadata('nova_poshta_region', $location);
+        $city = $this->customer->getMetadata('nova_poshta_city', $location);
         $required = NP()->isGet() ?: (NP()->isNP() && NP()->isCheckout());
         $fields[Region::key($location)] = [
             'label' => __('Region', NOVA_POSHTA_DOMAIN),

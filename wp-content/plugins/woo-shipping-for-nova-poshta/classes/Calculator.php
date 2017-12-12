@@ -20,7 +20,8 @@ class Calculator extends Base
     public function initNovaPoshtaCalculatorOptions()
     {
         if (NP()->isNP()) {
-            Customer::instance()->setMetadata('nova_poshta_city', ArrayHelper::getValue($_POST, 'calc_nova_poshta_shipping_city'));
+            Customer::instance()->setMetadata('nova_poshta_city', ArrayHelper::getValue($_POST, 'calc_nova_poshta_shipping_city'), 'shipping');
+            Customer::instance()->setMetadata('nova_poshta_city', ArrayHelper::getValue($_POST, 'calc_nova_poshta_shipping_city'), 'billing');
         }
     }
 

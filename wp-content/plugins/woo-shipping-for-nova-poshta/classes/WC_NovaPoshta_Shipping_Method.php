@@ -13,15 +13,14 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
      * Constructor for your shipping class
      *
      * @access public
+     * @param int $instance_id
      */
-    public function __construct()
+    public function __construct($instance_id = 0)
     {
-
+        parent::__construct($instance_id);
         $this->id = NOVA_POSHTA_SHIPPING_METHOD;
         $this->method_title = __('Nova Poshta', NOVA_POSHTA_DOMAIN);
         $this->method_description = $this->getDescription();
-        $this->countries = array('UA');
-        $this->availability = 'specific';
 
         $this->init();
 
@@ -44,6 +43,10 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
     }
 
+    public function test($packages){
+
+        return $packages;
+    }
     /**
      * Initialise Gateway Settings Form Fields
      */
@@ -139,7 +142,8 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             'cost' => 0,
             'calc_tax' => 'per_item'
         );
-        $cityRecipient = Customer::instance()->getMetadata('nova_poshta_city');
+        $cityRecipient = Customer::instance()->getMetadata('nova_poshta_city', 'shipping')
+            ?: Customer::instance()->getMetadata('nova_poshta_city', '');
 
         if (NP()->options->useFixedPriceOnDelivery) {
             $rate['cost'] = NP()->options->fixedPrice;
@@ -160,6 +164,16 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         }
         // Register the rate
         $this->add_rate($rate);
+    }
+
+    /**
+     * Is this method available?
+     * @param array $package
+     * @return bool
+     */
+    public function is_available($package)
+    {
+        return $this->is_enabled();
     }
 
     /**
