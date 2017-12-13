@@ -236,7 +236,7 @@ class Checkout extends Base
      */
     public function getDefaultRegion()
     {
-        return $this->customer->getMetadata('nova_poshta_region', 'shipping');
+        return $this->customer->getMetadata('nova_poshta_region', Area::SHIPPING);
     }
 
     /**
@@ -244,7 +244,7 @@ class Checkout extends Base
      */
     public function getDefaultCity()
     {
-        return $this->customer->getMetadata('nova_poshta_city', 'shipping');
+        return $this->customer->getMetadata('nova_poshta_city', Area::SHIPPING);
     }
 
     /**
@@ -252,7 +252,7 @@ class Checkout extends Base
      */
     public function getDefaultWarehouse()
     {
-        return $this->customer->getMetadata('nova_poshta_warehouse', 'shipping');
+        return $this->customer->getMetadata('nova_poshta_warehouse', Area::SHIPPING);
     }
 
     /**

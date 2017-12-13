@@ -2,7 +2,6 @@
 
 namespace plugins\NovaPoshta\classes;
 
-use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\base\Base;
 use WC_Meta_Data;
 
@@ -36,22 +35,20 @@ class Customer extends Base
      * @param string $location
      * @return mixed
      */
-    public function getMetadata($key, $location = '')
+    public function getMetadata($key, $location)
     {
         if (method_exists($this->wooCustomer, 'get_meta_data')) {
             $data = $this->wooCustomer->get_meta_data();
             /** @var WC_Meta_Data $item */
             foreach ($data as $item) {
                 $itemData = $item->get_data();
-                if ($itemData['key'] === $key) {
-                    return $itemData['value'];
-                }
-                if ($location !== '' && $itemData['key'] === $location . '_' . $key) {
+                if ($itemData['key'] === $location . '_' . $key) {
                     return $itemData['value'];
                 }
             }
             return '';
         } else {
+            //for backward compatibility with woocommerce 2.x.x
             return $this->wooCustomer->$key;
         }
     }
@@ -62,14 +59,12 @@ class Customer extends Base
      * @param string $location
      * @return void
      */
-    public function setMetadata($key, $value, $location = '')
+    public function setMetadata($key, $value, $location)
     {
         if (method_exists($this->wooCustomer, 'add_meta_data')) {
-            $this->wooCustomer->add_meta_data($key, $value);
-            if($location !== ''){
-                $this->wooCustomer->add_meta_data($location . '_' . $key, $value);
-            }
+            $this->wooCustomer->add_meta_data($location . '_' . $key, $value);
         } else {
+            //for backward compatibility with woocommerce 2.x.x
             $this->wooCustomer->$key = $value;
         }
     }

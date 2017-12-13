@@ -1,5 +1,6 @@
 <?php
 
+use plugins\NovaPoshta\classes\Area;
 use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\base\Options;
 use plugins\NovaPoshta\classes\Customer;
@@ -142,7 +143,8 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             'cost' => 0,
             'calc_tax' => 'per_item'
         );
-        $cityRecipient = Customer::instance()->getMetadata('nova_poshta_city', 'shipping')
+        $cityRecipient = Customer::instance()->getMetadata('nova_poshta_city', Area::SHIPPING)
+            //for backward compatibility with woocommerce 2.x.x
             ?: Customer::instance()->getMetadata('nova_poshta_city', '');
 
         if (NP()->options->useFixedPriceOnDelivery) {
