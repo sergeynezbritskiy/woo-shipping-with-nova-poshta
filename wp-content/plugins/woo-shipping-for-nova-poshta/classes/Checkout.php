@@ -20,7 +20,6 @@ class Checkout extends Base
      */
     private static $_instance;
 
-
     /**
      * @return Checkout
      */
@@ -63,9 +62,30 @@ class Checkout extends Base
     {
         if (NP()->isPost() && NP()->isNP() && NP()->isCheckout()) {
             $location = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
-            $this->customer->setMetadata('nova_poshta_region', ArrayHelper::getValue($_POST, Region::key($location)), $location);
-            $this->customer->setMetadata('nova_poshta_city', ArrayHelper::getValue($_POST, City::key($location)), $location);
-            $this->customer->setMetadata('nova_poshta_warehouse', ArrayHelper::getValue($_POST, Warehouse::key($location)), $location);
+
+            $region = ArrayHelper::getValue($_POST, Region::key($location));
+            $city = ArrayHelper::getValue($_POST, City::key($location));
+            $warehouse = ArrayHelper::getValue($_POST, Warehouse::key($location));
+
+            $this->customer->setMetadata('nova_poshta_region', $region, $location);
+            $this->customer->setMetadata('nova_poshta_city', $city, $location);
+            $this->customer->setMetadata('nova_poshta_warehouse', $warehouse, $location);
+
+            $customer = WC()->customer;
+
+            if (method_exists($customer, 'set_billing_address_1')) {
+                if ($this->shipToDifferentAddress()) {
+                    $customer->set_shipping_address_1($warehouse);
+                    $customer->set_shipping_city($city);
+                    $customer->set_shipping_state($region);
+                } else {
+                    $customer->set_billing_address_1($warehouse);
+                    $customer->set_billing_city($city);
+                    $customer->set_billing_state($region);
+                }
+                $customer->save_data();
+                $customer->save_meta_data();
+            }
         }
     }
 
@@ -127,7 +147,6 @@ class Checkout extends Base
             $warehouse = new Warehouse($warehouseRef);
             update_post_meta($orderId, '_' . $fieldGroup . '_address_1', $warehouse->description);
 
-
             $shippingFieldGroup = Area::SHIPPING;
             if ($this->shipToDifferentAddress()) {
                 update_post_meta($orderId, '_' . Region::key($shippingFieldGroup), $area->ref);
@@ -150,6 +169,9 @@ class Checkout extends Base
     {
         if (NP()->isNP()) {
             foreach ($packages as &$package) {
+                if ($warehouse = $this->customer->getMetadata('nova_poshta_warehouse', Area::SHIPPING)) {
+                    $package['destination']['address_1'] = Warehouse::findByRef($warehouse)->description;
+                }
                 if ($city = $this->customer->getMetadata('nova_poshta_city', Area::SHIPPING)) {
                     $package['destination']['city'] = City::findByRef($city)->description;
                 }
@@ -183,7 +205,7 @@ class Checkout extends Base
      */
     public function disableNovaPoshtaFields($fields)
     {
-        $location = $this->shipToDifferentAddress() ? 'billing' : 'shipping';
+        $location = $this->shipToDifferentAddress() ? Area::BILLING : Area::SHIPPING;
         $fields[$location][Region::key($location)]['required'] = false;
         $fields[$location][City::key($location)]['required'] = false;
         $fields[$location][Warehouse::key($location)]['required'] = false;
@@ -196,7 +218,7 @@ class Checkout extends Base
      */
     public function disableDefaultFields($fields)
     {
-        $location = $this->shipToDifferentAddress() ? 'shipping' : 'billing';
+        $location = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
         if (array_key_exists($location . '_state', $fields[$location])) {
             $fields[$location][$location . '_state']['required'] = false;
         }
@@ -217,11 +239,11 @@ class Checkout extends Base
      */
     public function shipToDifferentAddress()
     {
-        $shipToDifferentAddress = isset($_POST['ship_to_different_address']) ? true : false;
+        $shipToDifferentAddress = isset($_POST['ship_to_different_address']);
 
         if (isset($_POST['shiptobilling'])) {
             _deprecated_argument('WC_Checkout::process_checkout()', '2.1', 'The "shiptobilling" field is deprecated. The template files are out of date');
-            $shipToDifferentAddress = $_POST['shiptobilling'] ? false : true;
+            $shipToDifferentAddress = !$_POST['shiptobilling'];
         }
 
         // Ship to billing only option
