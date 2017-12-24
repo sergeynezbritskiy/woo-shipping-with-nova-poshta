@@ -147,7 +147,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         $customer = Customer::instance();
 
 
-        $location = Checkout::instance()->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
+        $location = Checkout::instance()->getLocation();
         $cityRecipient = Customer::instance()->getMetadata('nova_poshta_city', $location)
             //for backward compatibility with woocommerce 2.x.x
             ?: Customer::instance()->getMetadata('nova_poshta_city', '');

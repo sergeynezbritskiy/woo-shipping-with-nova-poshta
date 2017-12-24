@@ -62,7 +62,7 @@ class Checkout extends Base
     public function saveNovaPoshtaOptions()
     {
         if (NP()->isPost() && NP()->isNP() && NP()->isCheckout()) {
-            $location = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
+            $location = $this->getLocation();
 
             $region = ArrayHelper::getValue($_POST, Region::key($location));
             $city = ArrayHelper::getValue($_POST, City::key($location));
@@ -131,7 +131,7 @@ class Checkout extends Base
     public function updateOrderMeta($orderId)
     {
         if (NP()->isNP() && NP()->isCheckout()) {
-            $fieldGroup = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
+            $fieldGroup = $this->getLocation();
 
             $regionKey = Region::key($fieldGroup);
             $regionRef = sanitize_text_field($_POST[$regionKey]);
@@ -168,39 +168,22 @@ class Checkout extends Base
      */
     public function updatePackages(array $packages)
     {
-        if (false && NP()->isNP()) {
-            $customer = $this->customer->wooCustomer;
-            if (method_exists($customer, 'set_billing_address_1')) {
-                if ($this->shipToDifferentAddress()) {
-                    $warehouse = $customer->get_shipping_address_1();
-                    $city = $customer->get_shipping_city();
-                    $region = $customer->get_shipping_state();
-                } else {
-                    $warehouse = $customer->get_billing_address_1();
-                    $city = $customer->get_billing_city();
-                    $region = $customer->get_billing_state();
-                }
+        if (NP()->isNP()) {
+            $location = $this->getLocation();
+            $customer = WC()->customer;
+            if ($this->isLegacyWoocommerce()) {
+                $warehouse = $this->customer->getMetadata('nova_poshta_warehouse', $location);
+                $city = $this->customer->getMetadata('nova_poshta_city', $location);
+                $region = $this->customer->getMetadata('nova_poshta_region', $location);
             } else {
-                if ($this->shipToDifferentAddress()) {
-                    $warehouse = $this->customer->getMetadata('nova_poshta_warehouse', Area::SHIPPING);
-                    $city = $this->customer->getMetadata('nova_poshta_city', Area::SHIPPING);
-                    $region = $this->customer->getMetadata('nova_poshta_region', Area::SHIPPING);
-                } else {
-                    $warehouse = $this->customer->getMetadata('nova_poshta_warehouse', Area::BILLING);
-                    $city = $this->customer->getMetadata('nova_poshta_city', Area::BILLING);
-                    $region = $this->customer->getMetadata('nova_poshta_region', Area::BILLING);
-                }
+                $warehouse = $customer->{'get_' . $location . '_address_1'}();
+                $city = $customer->{'get_' . $location . '_city'}();
+                $region = $customer->{'get_' . $location . '_state'}();
             }
             foreach ($packages as &$package) {
-                if ($warehouse) {
-                    $package['destination']['address_1'] = Warehouse::findByRef($warehouse)->description;
-                }
-                if ($city) {
-                    $package['destination']['city'] = City::findByRef($city)->description;
-                }
-                if ($region) {
-                    $package['destination']['state'] = Region::findByRef($region)->description;
-                }
+                $package['destination']['address_1'] = $warehouse;
+                $package['destination']['city'] = $city;
+                $package['destination']['state'] = $region;
             }
         }
         return $packages;
@@ -242,7 +225,7 @@ class Checkout extends Base
      */
     public function disableDefaultFields($fields)
     {
-        $location = $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
+        $location = $this->getLocation();
         if (array_key_exists($location . '_state', $fields[$location])) {
             $fields[$location][$location . '_state']['required'] = false;
         }
@@ -256,6 +239,15 @@ class Checkout extends Base
             $fields[$location][$location . '_postcode']['required'] = false;
         }
         return $fields;
+    }
+
+    /**
+     * Get address type which stores nova poshta options: either shipping or billing
+     * @return string
+     */
+    public function getLocation()
+    {
+        return $this->shipToDifferentAddress() ? Area::SHIPPING : Area::BILLING;
     }
 
     /**
@@ -275,6 +267,17 @@ class Checkout extends Base
             $shipToDifferentAddress = false;
         }
         return $shipToDifferentAddress;
+    }
+
+    /**
+     * Check Woocommerce version, does it satisfy code requirements
+     * @param string $version minimum version, lower versions of Woocommerce are legacy
+     * @return bool
+     */
+    public function isLegacyWoocommerce($version = '3.0')
+    {
+        //TODO compare with woocommerce version
+        return method_exists(WC()->customer, 'set_billing_address_1');
     }
 
     /**
