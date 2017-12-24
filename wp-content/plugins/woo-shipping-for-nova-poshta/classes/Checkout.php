@@ -57,6 +57,7 @@ class Checkout extends Base
 
     /**
      * @return void
+     * @throws \Exception
      */
     public function saveNovaPoshtaOptions()
     {
@@ -167,15 +168,37 @@ class Checkout extends Base
      */
     public function updatePackages(array $packages)
     {
-        if (NP()->isNP()) {
+        if (false && NP()->isNP()) {
+            $customer = $this->customer->wooCustomer;
+            if (method_exists($customer, 'set_billing_address_1')) {
+                if ($this->shipToDifferentAddress()) {
+                    $warehouse = $customer->get_shipping_address_1();
+                    $city = $customer->get_shipping_city();
+                    $region = $customer->get_shipping_state();
+                } else {
+                    $warehouse = $customer->get_billing_address_1();
+                    $city = $customer->get_billing_city();
+                    $region = $customer->get_billing_state();
+                }
+            } else {
+                if ($this->shipToDifferentAddress()) {
+                    $warehouse = $this->customer->getMetadata('nova_poshta_warehouse', Area::SHIPPING);
+                    $city = $this->customer->getMetadata('nova_poshta_city', Area::SHIPPING);
+                    $region = $this->customer->getMetadata('nova_poshta_region', Area::SHIPPING);
+                } else {
+                    $warehouse = $this->customer->getMetadata('nova_poshta_warehouse', Area::BILLING);
+                    $city = $this->customer->getMetadata('nova_poshta_city', Area::BILLING);
+                    $region = $this->customer->getMetadata('nova_poshta_region', Area::BILLING);
+                }
+            }
             foreach ($packages as &$package) {
-                if ($warehouse = $this->customer->getMetadata('nova_poshta_warehouse', Area::SHIPPING)) {
+                if ($warehouse) {
                     $package['destination']['address_1'] = Warehouse::findByRef($warehouse)->description;
                 }
-                if ($city = $this->customer->getMetadata('nova_poshta_city', Area::SHIPPING)) {
+                if ($city) {
                     $package['destination']['city'] = City::findByRef($city)->description;
                 }
-                if ($region = $this->customer->getMetadata('nova_poshta_region', Area::SHIPPING)) {
+                if ($region) {
                     $package['destination']['state'] = Region::findByRef($region)->description;
                 }
             }
@@ -185,6 +208,7 @@ class Checkout extends Base
 
     /**
      * @return bool
+     * @throws \Exception
      */
     protected function getIsCheckout()
     {
