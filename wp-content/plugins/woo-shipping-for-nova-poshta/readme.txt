@@ -2,8 +2,8 @@
 Contributors: snezbritskiy
 Tags: eCommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
-Tested up to: 4.6.1
-Stable tag: 1.2.1
+Tested up to: 4.9.1
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,19 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 2. The list of Nova Poshta warehouses for selected city
 3. Tracking Nova Poshta shipping within admin panel
 
+== Known issues ==
+
+1. Shipping calculator flushes shipping price when you select Nova Poshta. Is reproducing if you have more then two shipping methods available only. After you update shipping price for Nova Poshta, Nova Poshta is not selected, and when you try to select Nova Poshta, the price is flushing
+2. Uncaught exception from Nova Poshta API, if your API key is wrong or expired. This happens during database syncronization process. So when your key will expire and the time to upgrade database will come, you will get an uncaught exception and would not be able to access your site
+3. Shipping zones are not supporting.
+
+== Plugin contributing ==
+
+Source code for this plugin is stored on [Github](https://github.com/sergeynezbritskiy/woo-shipping-with-nova-poshta). It is an open source project. If you want to help to make plugin better, you can:
+1. Create an issue with your suggestion and proposition of how to improve plugin functionality
+2. Report a bug
+3. If you are a developer you can fork this project and create pull-request with your improvements
+
 == Changelog ==
 
 = 1.0.0 =
@@ -66,3 +79,5 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 * Task - improve usability, add links to settings page, review page
 * Task - improve translations
 * Task - improve logging
+= 2.0.0 =
+* Task - forward compatibility with Woocommerce 3.x
