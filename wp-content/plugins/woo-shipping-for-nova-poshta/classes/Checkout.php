@@ -171,15 +171,15 @@ class Checkout extends Base
         if (NP()->isNP()) {
             $location = $this->getLocation();
             $customer = WC()->customer;
-            if ($this->isLegacyWoocommerce()) {
-                $warehouse = $this->customer->getMetadata('nova_poshta_warehouse', $location);
-                $city = $this->customer->getMetadata('nova_poshta_city', $location);
-                $region = $this->customer->getMetadata('nova_poshta_region', $location);
-            } else {
-                $warehouse = $customer->{'get_' . $location . '_address_1'}();
-                $city = $customer->{'get_' . $location . '_city'}();
-                $region = $customer->{'get_' . $location . '_state'}();
-            }
+            $warehouse = $this->customer->getMetadata('nova_poshta_warehouse', $location);
+            $city = $this->customer->getMetadata('nova_poshta_city', $location);
+            $region = $this->customer->getMetadata('nova_poshta_region', $location);
+//            if ($this->isLegacyWoocommerce()) {
+//            } else {
+//                $warehouse = $customer->{'get_' . $location . '_address_1'}();
+//                $city = $customer->{'get_' . $location . '_city'}();
+//                $region = $customer->{'get_' . $location . '_state'}();
+//            }
             foreach ($packages as &$package) {
                 $package['destination']['address_1'] = $warehouse;
                 $package['destination']['city'] = $city;
@@ -277,7 +277,7 @@ class Checkout extends Base
     public function isLegacyWoocommerce($version = '3.0')
     {
         //TODO compare with woocommerce version
-        return method_exists(WC()->customer, 'set_billing_address_1');
+        return !method_exists(WC()->customer, 'set_billing_address_1');
     }
 
     /**
