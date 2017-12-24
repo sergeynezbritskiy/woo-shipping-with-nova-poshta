@@ -31,7 +31,7 @@ class WC_Breadcrumb {
 	public function add_crumb( $name, $link = '' ) {
 		$this->crumbs[] = array(
 			strip_tags( $name ),
-			$link
+			$link,
 		);
 	}
 
@@ -71,10 +71,10 @@ class WC_Breadcrumb {
 			'is_tag',
 			'is_author',
 			'is_date',
-			'is_tax'
+			'is_tax',
 		);
 
-		if ( ( ! is_front_page() && ! ( is_post_type_archive() && get_option( 'page_on_front' ) == wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
+		if ( ( ! is_front_page() && ! ( is_post_type_archive() && intval( get_option( 'page_on_front' ) ) === wc_get_page_id( 'shop' ) ) ) || is_paged() ) {
 			foreach ( $conditionals as $conditional ) {
 				if ( call_user_func( $conditional ) ) {
 					call_user_func( array( $this, 'add_crumbs_' . substr( $conditional, 3 ) ) );
@@ -95,7 +95,7 @@ class WC_Breadcrumb {
 	 * Prepend the shop page to shop breadcrumbs.
 	 */
 	private function prepend_shop_page() {
-		$permalinks   = get_option( 'woocommerce_permalinks' );
+		$permalinks   = wc_get_permalink_structure();
 		$shop_page_id = wc_get_page_id( 'shop' );
 		$shop_page    = get_post( $shop_page_id );
 
@@ -155,7 +155,7 @@ class WC_Breadcrumb {
 		} else {
 			$cat = current( get_the_category( $post ) );
 			if ( $cat ) {
-				$this->term_ancestors( $cat->term_id, 'post_category' );
+				$this->term_ancestors( $cat->term_id, 'category' );
 				$this->add_crumb( $cat->name, get_term_link( $cat ) );
 			}
 		}
@@ -247,8 +247,7 @@ class WC_Breadcrumb {
 		$this_category = get_category( $GLOBALS['wp_query']->get_queried_object() );
 
 		if ( 0 != $this_category->parent ) {
-			$this->term_ancestors( $this_category->parent, 'post_category' );
-			$this->add_crumb( $this_category->name, get_category_link( $this_category->term_id ) );
+			$this->term_ancestors( $this_category->term_id, 'category' );
 		}
 
 		$this->add_crumb( single_cat_title( '', false ), get_category_link( $this_category->term_id ) );
@@ -305,6 +304,8 @@ class WC_Breadcrumb {
 
 	/**
 	 * Add crumbs for a term.
+	 *
+	 * @param int    $term_id
 	 * @param string $taxonomy
 	 */
 	private function term_ancestors( $term_id, $taxonomy ) {

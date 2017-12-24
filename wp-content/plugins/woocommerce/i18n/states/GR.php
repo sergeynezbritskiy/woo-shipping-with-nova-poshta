@@ -9,6 +9,10 @@
  */
 global $states;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $states['GR'] = array(
 	'I' => __( 'Αττική', 'woocommerce' ),
 	'A' => __( 'Ανατολική Μακεδονία και Θράκη', 'woocommerce' ),
@@ -22,5 +26,5 @@ $states['GR'] = array(
 	'J' => __( 'Πελοπόννησος', 'woocommerce' ),
 	'K' => __( 'Βόρειο Αιγαίο', 'woocommerce' ),
 	'L' => __( 'Νότιο Αιγαίο', 'woocommerce' ),
-	'M' => __( 'Κρήτη', 'woocommerce' )
+	'M' => __( 'Κρήτη', 'woocommerce' ),
 );

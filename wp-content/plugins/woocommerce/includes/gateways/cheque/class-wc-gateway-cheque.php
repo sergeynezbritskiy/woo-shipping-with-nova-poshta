@@ -24,8 +24,8 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		$this->id                 = 'cheque';
 		$this->icon               = apply_filters( 'woocommerce_cheque_icon', '' );
 		$this->has_fields         = false;
-		$this->method_title       = _x( 'Check Payments', 'Check payment method', 'woocommerce' );
-		$this->method_description = __( 'Allows check payments. Why would you take checks in this day and age? Well you probably wouldn\'t but it does allow you to make test purchases for testing order emails and the \'success\' pages etc.', 'woocommerce' );
+		$this->method_title       = _x( 'Check payments', 'Check payment method', 'woocommerce' );
+		$this->method_description = __( 'Allows check payments. Why would you take checks in this day and age? Well you probably would not, but it does allow you to make test purchases for testing order emails and the success pages.', 'woocommerce' );
 
 		// Load the settings.
 		$this->init_form_fields();
@@ -53,14 +53,14 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 			'enabled' => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce' ),
 				'type'    => 'checkbox',
-				'label'   => __( 'Enable Check Payments', 'woocommerce' ),
-				'default' => 'yes'
+				'label'   => __( 'Enable check payments', 'woocommerce' ),
+				'default' => 'yes',
 			),
 			'title' => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-				'default'     => _x( 'Check Payments', 'Check payment method', 'woocommerce' ),
+				'default'     => _x( 'Check payments', 'Check payment method', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
 			'description' => array(
@@ -84,8 +84,9 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 	 * Output for the order received page.
 	 */
 	public function thankyou_page() {
-		if ( $this->instructions )
+		if ( $this->instructions ) {
 			echo wpautop( wptexturize( $this->instructions ) );
+		}
 	}
 
 	/**
@@ -97,7 +98,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 	 * @param bool $plain_text
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-		if ( $this->instructions && ! $sent_to_admin && 'cheque' === $order->payment_method && $order->has_status( 'on-hold' ) ) {
+		if ( $this->instructions && ! $sent_to_admin && 'cheque' === $order->get_payment_method() && $order->has_status( 'on-hold' ) ) {
 			echo wpautop( wptexturize( $this->instructions ) ) . PHP_EOL;
 		}
 	}
@@ -116,7 +117,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		$order->update_status( 'on-hold', _x( 'Awaiting check payment', 'Check payment method', 'woocommerce' ) );
 
 		// Reduce stock levels
-		$order->reduce_order_stock();
+		wc_reduce_stock_levels( $order_id );
 
 		// Remove cart
 		WC()->cart->empty_cart();
@@ -124,7 +125,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		// Return thankyou redirect
 		return array(
 			'result' 	=> 'success',
-			'redirect'	=> $this->get_return_url( $order )
+			'redirect'	=> $this->get_return_url( $order ),
 		);
 	}
 }

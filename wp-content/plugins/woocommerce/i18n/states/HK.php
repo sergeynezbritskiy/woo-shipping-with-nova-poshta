@@ -9,8 +9,12 @@
  */
 global $states;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $states['HK'] = array(
 	'HONG KONG'       => __( 'Hong Kong Island', 'woocommerce' ),
 	'KOWLOON'         => __( 'Kowloon', 'woocommerce' ),
-	'NEW TERRITORIES' => __( 'New Territories', 'woocommerce' )
+	'NEW TERRITORIES' => __( 'New Territories', 'woocommerce' ),
 );

@@ -23,21 +23,24 @@ class WC_Email_New_Order extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id               = 'new_order';
-		$this->title            = __( 'New order', 'woocommerce' );
-		$this->description      = __( 'New order emails are sent to chosen recipient(s) when a new order is received.', 'woocommerce' );
-		$this->heading          = __( 'New customer order', 'woocommerce' );
-		$this->subject          = __( '[{site_title}] New customer order ({order_number}) - {order_date}', 'woocommerce' );
-		$this->template_html    = 'emails/admin-new-order.php';
-		$this->template_plain   = 'emails/plain/admin-new-order.php';
+		$this->id             = 'new_order';
+		$this->title          = __( 'New order', 'woocommerce' );
+		$this->description    = __( 'New order emails are sent to chosen recipient(s) when a new order is received.', 'woocommerce' );
+		$this->template_html  = 'emails/admin-new-order.php';
+		$this->template_plain = 'emails/plain/admin-new-order.php';
+		$this->placeholders   = array(
+			'{site_title}'   => $this->get_blogname(),
+			'{order_date}'   => '',
+			'{order_number}' => '',
+		);
 
 		// Triggers for this email
-		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_pending_to_completed_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_failed_to_processing_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_failed_to_completed_notification', array( $this, 'trigger' ) );
-		add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ) );
+		add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_pending_to_completed_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_failed_to_processing_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_failed_to_completed_notification', array( $this, 'trigger' ), 10, 2 );
+		add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
 
 		// Call parent constructor
 		parent::__construct();
@@ -47,24 +50,49 @@ class WC_Email_New_Order extends WC_Email {
 	}
 
 	/**
-	 * Trigger.
+	 * Get email subject.
 	 *
-	 * @param int $order_id
+	 * @since  3.1.0
+	 * @return string
 	 */
-	public function trigger( $order_id ) {
-		if ( $order_id ) {
-			$this->object                  = wc_get_order( $order_id );
-			$this->find['order-date']      = '{order_date}';
-			$this->find['order-number']    = '{order_number}';
-			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
-			$this->replace['order-number'] = $this->object->get_order_number();
+	public function get_default_subject() {
+		return __( '[{site_title}] New customer order ({order_number}) - {order_date}', 'woocommerce' );
+	}
+
+	/**
+	 * Get email heading.
+	 *
+	 * @since  3.1.0
+	 * @return string
+	 */
+	public function get_default_heading() {
+		return __( 'New customer order', 'woocommerce' );
+	}
+
+	/**
+	 * Trigger the sending of this email.
+	 *
+	 * @param int $order_id The order ID.
+	 * @param WC_Order $order Order object.
+	 */
+	public function trigger( $order_id, $order = false ) {
+		$this->setup_locale();
+
+		if ( $order_id && ! is_a( $order, 'WC_Order' ) ) {
+			$order = wc_get_order( $order_id );
 		}
 
-		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
-			return;
+		if ( is_a( $order, 'WC_Order' ) ) {
+			$this->object                         = $order;
+			$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+			$this->placeholders['{order_number}'] = $this->object->get_order_number();
 		}
 
-		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		if ( $this->is_enabled() && $this->get_recipient() ) {
+			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+		}
+
+		$this->restore_locale();
 	}
 
 	/**
@@ -79,7 +107,7 @@ class WC_Email_New_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => true,
 			'plain_text'    => false,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 
@@ -95,7 +123,7 @@ class WC_Email_New_Order extends WC_Email {
 			'email_heading' => $this->get_heading(),
 			'sent_to_admin' => true,
 			'plain_text'    => true,
-			'email'			=> $this
+			'email'			=> $this,
 		) );
 	}
 
@@ -108,31 +136,33 @@ class WC_Email_New_Order extends WC_Email {
 				'title'         => __( 'Enable/Disable', 'woocommerce' ),
 				'type'          => 'checkbox',
 				'label'         => __( 'Enable this email notification', 'woocommerce' ),
-				'default'       => 'yes'
+				'default'       => 'yes',
 			),
 			'recipient' => array(
 				'title'         => __( 'Recipient(s)', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to <code>%s</code>.', 'woocommerce' ), esc_attr( get_option('admin_email') ) ),
+				'description'   => sprintf( __( 'Enter recipients (comma separated) for this email. Defaults to %s.', 'woocommerce' ), '<code>' . esc_attr( get_option( 'admin_email' ) ) . '</code>' ),
 				'placeholder'   => '',
 				'default'       => '',
-				'desc_tip'      => true
+				'desc_tip'      => true,
 			),
 			'subject' => array(
 				'title'         => __( 'Subject', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'This controls the email subject line. Leave blank to use the default subject: <code>%s</code>.', 'woocommerce' ), $this->subject ),
-				'placeholder'   => '',
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+				'placeholder'   => $this->get_default_subject(),
 				'default'       => '',
-				'desc_tip'      => true
 			),
 			'heading' => array(
-				'title'         => __( 'Email Heading', 'woocommerce' ),
+				'title'         => __( 'Email heading', 'woocommerce' ),
 				'type'          => 'text',
-				'description'   => sprintf( __( 'This controls the main heading contained within the email notification. Leave blank to use the default heading: <code>%s</code>.', 'woocommerce' ), $this->heading ),
-				'placeholder'   => '',
+				'desc_tip'      => true,
+				/* translators: %s: list of placeholders */
+				'description'   => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+				'placeholder'   => $this->get_default_heading(),
 				'default'       => '',
-				'desc_tip'      => true
 			),
 			'email_type' => array(
 				'title'         => __( 'Email type', 'woocommerce' ),
@@ -141,8 +171,8 @@ class WC_Email_New_Order extends WC_Email {
 				'default'       => 'html',
 				'class'         => 'email_type wc-enhanced-select',
 				'options'       => $this->get_email_type_options(),
-				'desc_tip'      => true
-			)
+				'desc_tip'      => true,
+			),
 		);
 	}
 }

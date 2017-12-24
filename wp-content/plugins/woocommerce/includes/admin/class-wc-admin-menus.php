@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Admin_Menus' ) ) :
+if ( ! class_exists( 'WC_Admin_Menus', false ) ) :
 
 /**
  * WC_Admin_Menus Class.
@@ -38,8 +38,8 @@ class WC_Admin_Menus {
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 
-		// Add endpoints custom URLs in Appearance > Menus > Pages
-		add_action( 'admin_init', array( $this, 'add_nav_menu_meta_boxes' ) );
+		// Add endpoints custom URLs in Appearance > Menus > Pages.
+		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
 
 		// Admin bar menus
 		if ( apply_filters( 'woocommerce_show_admin_bar_visit_store', true ) ) {
@@ -69,7 +69,7 @@ class WC_Admin_Menus {
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			add_submenu_page( 'woocommerce', __( 'Reports', 'woocommerce' ),  __( 'Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ) );
 		} else {
-			add_menu_page( __( 'Sales Reports', 'woocommerce' ),  __( 'Sales Reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), null, '55.6' );
+			add_menu_page( __( 'Sales reports', 'woocommerce' ),  __( 'Sales reports', 'woocommerce' ) , 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), null, '55.6' );
 		}
 	}
 
@@ -77,7 +77,7 @@ class WC_Admin_Menus {
 	 * Add menu item.
 	 */
 	public function settings_menu() {
-		$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce Settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'wc-settings', array( $this, 'settings_page' ) );
+		$settings_page = add_submenu_page( 'woocommerce', __( 'WooCommerce settings', 'woocommerce' ),  __( 'Settings', 'woocommerce' ) , 'manage_woocommerce', 'wc-settings', array( $this, 'settings_page' ) );
 
 		add_action( 'load-' . $settings_page, array( $this, 'settings_page_init' ) );
 	}
@@ -86,23 +86,47 @@ class WC_Admin_Menus {
 	 * Loads gateways and shipping methods into memory for use within settings.
 	 */
 	public function settings_page_init() {
+		global $current_tab, $current_section;
+
 		WC()->payment_gateways();
 		WC()->shipping();
+
+		// Include settings pages
+		WC_Admin_Settings::get_settings_pages();
+
+		// Get current tab/section
+		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( $_GET['tab'] );
+		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( $_REQUEST['section'] );
+
+		// Save settings if data has been posted
+		if ( ! empty( $_POST ) ) {
+			WC_Admin_Settings::save();
+		}
+
+		// Add any posted messages
+		if ( ! empty( $_GET['wc_error'] ) ) {
+			WC_Admin_Settings::add_error( stripslashes( $_GET['wc_error'] ) );
+		}
+
+		if ( ! empty( $_GET['wc_message'] ) ) {
+			WC_Admin_Settings::add_message( stripslashes( $_GET['wc_message'] ) );
+		}
 	}
 
 	/**
 	 * Add menu item.
 	 */
 	public function status_menu() {
-		add_submenu_page( 'woocommerce', __( 'WooCommerce Status', 'woocommerce' ),  __( 'System Status', 'woocommerce' ) , 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
-		register_setting( 'woocommerce_status_settings_fields', 'woocommerce_status_options' );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce status', 'woocommerce' ),  __( 'Status', 'woocommerce' ) , 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
 	}
 
 	/**
 	 * Addons menu item.
 	 */
 	public function addons_menu() {
-		add_submenu_page( 'woocommerce', __( 'WooCommerce Extensions', 'woocommerce' ),  __( 'Extensions', 'woocommerce' ) , 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		$count_html = WC_Helper_Updater::get_updates_count_html();
+		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
 	}
 
 	/**
@@ -176,7 +200,6 @@ class WC_Admin_Menus {
 			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ) ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
-
 		}
 
 		// Return order
@@ -233,46 +256,55 @@ class WC_Admin_Menus {
 	 * Adapted from http://www.johnmorrisonline.com/how-to-add-a-fully-functional-custom-meta-box-to-wordpress-navigation-menus/.
 	 */
 	public function add_nav_menu_meta_boxes() {
-		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce Endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
+		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
 	}
 
 	/**
 	 * Output menu links.
 	 */
 	public function nav_menu_links() {
-		$exclude = array( 'view-order', 'add-payment-method', 'order-pay', 'order-received' );
+		// Get items from account menu.
+		$endpoints = wc_get_account_menu_items();
+
+		// Remove dashboard item.
+		if ( isset( $endpoints['dashboard'] ) ) {
+			unset( $endpoints['dashboard'] );
+		}
+
+		// Include missing lost password.
+		$endpoints['lost-password'] = __( 'Lost password', 'woocommerce' );
+
+		$endpoints = apply_filters( 'woocommerce_custom_nav_menu_items', $endpoints );
+
 		?>
 		<div id="posttype-woocommerce-endpoints" class="posttypediv">
 			<div id="tabs-panel-woocommerce-endpoints" class="tabs-panel tabs-panel-active">
 				<ul id="woocommerce-endpoints-checklist" class="categorychecklist form-no-clear">
 					<?php
 					$i = -1;
-					foreach ( WC()->query->query_vars as $key => $value ) {
-						if ( in_array( $key, $exclude ) ) {
-							continue;
-						}
+					foreach ( $endpoints as $key => $value ) :
 						?>
 						<li>
 							<label class="menu-item-title">
-								<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="<?php echo esc_attr( $i ); ?>" /> <?php echo esc_html( $key ); ?>
+								<input type="checkbox" class="menu-item-checkbox" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-object-id]" value="<?php echo esc_attr( $i ); ?>" /> <?php echo esc_html( $value ); ?>
 							</label>
 							<input type="hidden" class="menu-item-type" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-type]" value="custom" />
-							<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_html( $key ); ?>" />
-							<input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" value="<?php echo esc_url( wc_get_endpoint_url( $key, '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" />
+							<input type="hidden" class="menu-item-title" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-title]" value="<?php echo esc_html( $value ); ?>" />
+							<input type="hidden" class="menu-item-url" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-url]" value="<?php echo esc_url( wc_get_account_endpoint_url( $key ) ); ?>" />
 							<input type="hidden" class="menu-item-classes" name="menu-item[<?php echo esc_attr( $i ); ?>][menu-item-classes]" />
 						</li>
 						<?php
-						$i --;
-					}
+						$i--;
+					endforeach;
 					?>
 				</ul>
 			</div>
 			<p class="button-controls">
 				<span class="list-controls">
-					<a href="<?php echo admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ); ?>" class="select-all"><?php _e( 'Select All', 'woocommerce' ); ?></a>
+					<a href="<?php echo admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ); ?>" class="select-all"><?php _e( 'Select all', 'woocommerce' ); ?></a>
 				</span>
 				<span class="add-to-menu">
-					<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php esc_attr_e( 'Add to Menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints">
+					<input type="submit" class="button-secondary submit-add-to-menu right" value="<?php esc_attr_e( 'Add to menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints">
 					<span class="spinner"></span>
 				</span>
 			</p>
@@ -306,7 +338,7 @@ class WC_Admin_Menus {
 			'parent' => 'site-name',
 			'id'     => 'view-store',
 			'title'  => __( 'Visit Store', 'woocommerce' ),
-			'href'   => wc_get_page_permalink( 'shop' )
+			'href'   => wc_get_page_permalink( 'shop' ),
 		) );
 	}
 }

@@ -18,11 +18,11 @@ function wc_update_200_file_paths() {
 	global $wpdb;
 
 	// Upgrade old style files paths to support multiple file paths
-	$existing_file_paths = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key = '_file_path' AND meta_value != '';" );
+	$existing_file_paths = $wpdb->get_results( "SELECT meta_value, meta_id, post_id FROM {$wpdb->postmeta} WHERE meta_key = '_file_path' AND meta_value != '';" );
 
 	if ( $existing_file_paths ) {
 
-		foreach( $existing_file_paths as $existing_file_path ) {
+		foreach ( $existing_file_paths as $existing_file_path ) {
 
 			$old_file_path = trim( $existing_file_path->meta_value );
 
@@ -47,28 +47,29 @@ function wc_update_200_permalinks() {
 
 		$base_slug 		= $shop_page_id > 0 && get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
 
-		$category_base 	= get_option('woocommerce_prepend_shop_page_to_urls') == "yes" ? trailingslashit( $base_slug ) : '';
-		$category_slug 	= get_option('woocommerce_product_category_slug') ? get_option('woocommerce_product_category_slug') : _x( 'product-category', 'slug', 'woocommerce' );
-		$tag_slug 		= get_option('woocommerce_product_tag_slug') ? get_option('woocommerce_product_tag_slug') : _x( 'product-tag', 'slug', 'woocommerce' );
+		$category_base 	= get_option( 'woocommerce_prepend_shop_page_to_urls' ) == "yes" ? trailingslashit( $base_slug ) : '';
+		$category_slug 	= get_option( 'woocommerce_product_category_slug' ) ? get_option( 'woocommerce_product_category_slug' ) : _x( 'product-category', 'slug', 'woocommerce' );
+		$tag_slug 		= get_option( 'woocommerce_product_tag_slug' ) ? get_option( 'woocommerce_product_tag_slug' ) : _x( 'product-tag', 'slug', 'woocommerce' );
 
-		if ( 'yes' == get_option('woocommerce_prepend_shop_page_to_products') ) {
+		if ( 'yes' == get_option( 'woocommerce_prepend_shop_page_to_products' ) ) {
 			$product_base = trailingslashit( $base_slug );
 		} else {
-			if ( ( $product_slug = get_option('woocommerce_product_slug') ) !== false && ! empty( $product_slug ) ) {
+			if ( ( $product_slug = get_option( 'woocommerce_product_slug' ) ) !== false && ! empty( $product_slug ) ) {
 				$product_base = trailingslashit( $product_slug );
 			} else {
-				$product_base = trailingslashit( _x('product', 'slug', 'woocommerce') );
+				$product_base = trailingslashit( _x( 'product', 'slug', 'woocommerce' ) );
 			}
 		}
 
-		if ( get_option('woocommerce_prepend_category_to_products') == 'yes' )
-			$product_base .= trailingslashit('%product_cat%');
+		if ( get_option( 'woocommerce_prepend_category_to_products' ) == 'yes' ) {
+			$product_base .= trailingslashit( '%product_cat%' );
+		}
 
 		$permalinks = array(
 			'product_base' 		=> untrailingslashit( $product_base ),
 			'category_base' 	=> untrailingslashit( $category_base . $category_slug ),
 			'attribute_base' 	=> untrailingslashit( $category_base ),
-			'tag_base' 			=> untrailingslashit( $category_base . $tag_slug )
+			'tag_base' 			=> untrailingslashit( $category_base . $tag_slug ),
 		);
 
 		update_option( 'woocommerce_permalinks', $permalinks );
@@ -101,7 +102,7 @@ function wc_update_200_taxrates() {
 	$loop = 0;
 	$tax_rates = get_option( 'woocommerce_tax_rates' );
 
-	if ( $tax_rates )
+	if ( $tax_rates ) {
 		foreach ( $tax_rates as $tax_rate ) {
 
 			foreach ( $tax_rate['countries'] as $country => $states ) {
@@ -110,8 +111,9 @@ function wc_update_200_taxrates() {
 
 				foreach ( $states as $state ) {
 
-					if ( $state == '*' )
+					if ( '*' == $state ) {
 						$state = '';
+					}
 
 					$wpdb->insert(
 						$wpdb->prefix . "woocommerce_tax_rates",
@@ -121,10 +123,10 @@ function wc_update_200_taxrates() {
 							'tax_rate'          => $tax_rate['rate'],
 							'tax_rate_name'     => $tax_rate['label'],
 							'tax_rate_priority' => 1,
-							'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
-							'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
+							'tax_rate_compound' => ( 'yes' === $tax_rate['compound'] ) ? 1 : 0,
+							'tax_rate_shipping' => ( 'yes' === $tax_rate['shipping'] ) ? 1 : 0,
 							'tax_rate_order'    => $loop,
-							'tax_rate_class'    => $tax_rate['class']
+							'tax_rate_class'    => $tax_rate['class'],
 						)
 					);
 
@@ -132,16 +134,18 @@ function wc_update_200_taxrates() {
 				}
 			}
 		}
+	}
 
 	$local_tax_rates = get_option( 'woocommerce_local_tax_rates' );
 
-	if ( $local_tax_rates )
+	if ( $local_tax_rates ) {
 		foreach ( $local_tax_rates as $tax_rate ) {
 
-			$location_type = $tax_rate['location_type'] == 'postcode' ? 'postcode' : 'city';
+			$location_type = ( 'postcode' === $tax_rate['location_type'] ) ? 'postcode' : 'city';
 
-			if ( $tax_rate['state'] == '*' )
+			if ( '*' == $tax_rate['state'] ) {
 				$tax_rate['state'] = '';
+			}
 
 			$wpdb->insert(
 				$wpdb->prefix . "woocommerce_tax_rates",
@@ -151,10 +155,10 @@ function wc_update_200_taxrates() {
 					'tax_rate'          => $tax_rate['rate'],
 					'tax_rate_name'     => $tax_rate['label'],
 					'tax_rate_priority' => 2,
-					'tax_rate_compound' => $tax_rate['compound'] == 'yes' ? 1 : 0,
-					'tax_rate_shipping' => $tax_rate['shipping'] == 'yes' ? 1 : 0,
+					'tax_rate_compound' => ( 'yes' === $tax_rate['compound'] ) ? 1 : 0,
+					'tax_rate_shipping' => ( 'yes' === $tax_rate['shipping'] ) ? 1 : 0,
 					'tax_rate_order'    => $loop,
-					'tax_rate_class'    => $tax_rate['class']
+					'tax_rate_class'    => $tax_rate['class'],
 				)
 			);
 
@@ -177,6 +181,7 @@ function wc_update_200_taxrates() {
 
 			$loop++;
 		}
+	}
 
 	update_option( 'woocommerce_tax_rates_backup', $tax_rates );
 	update_option( 'woocommerce_local_tax_rates_backup', $local_tax_rates );
@@ -190,7 +195,7 @@ function wc_update_200_line_items() {
 	// Now its time for the massive update to line items - move them to the new DB tables
 	// Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_items' WHERE meta_key = '_order_items_old'
 	$order_item_rows = $wpdb->get_results( "
-		SELECT * FROM {$wpdb->postmeta}
+		SELECT meta_value, post_id FROM {$wpdb->postmeta}
 		WHERE meta_key = '_order_items'
 	" );
 
@@ -214,7 +219,7 @@ function wc_update_200_line_items() {
 
 			$item_id = wc_add_order_item( $order_item_row->post_id, array(
 		 		'order_item_name' 		=> $order_item['name'],
-		 		'order_item_type' 		=> 'line_item'
+		 		'order_item_type' 		=> 'line_item',
 		 	) );
 
 		 	// Add line item meta
@@ -266,7 +271,7 @@ function wc_update_200_line_items() {
 	// Do the same kind of update for order_taxes - move to lines
 	// Reverse with UPDATE `wpwc_postmeta` SET meta_key = '_order_taxes' WHERE meta_key = '_order_taxes_old'
 	$order_tax_rows = $wpdb->get_results( "
-		SELECT * FROM {$wpdb->postmeta}
+		SELECT meta_value, post_id FROM {$wpdb->postmeta}
 		WHERE meta_key = '_order_taxes'
 	" );
 
@@ -275,14 +280,15 @@ function wc_update_200_line_items() {
 		$order_taxes = (array) maybe_unserialize( $order_tax_row->meta_value );
 
 		if ( ! empty( $order_taxes ) ) {
-			foreach( $order_taxes as $order_tax ) {
+			foreach ( $order_taxes as $order_tax ) {
 
-				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) )
+				if ( ! isset( $order_tax['label'] ) || ! isset( $order_tax['cart_tax'] ) || ! isset( $order_tax['shipping_tax'] ) ) {
 					continue;
+				}
 
 				$item_id = wc_add_order_item( $order_tax_row->post_id, array(
 			 		'order_item_name' 		=> $order_tax['label'],
-			 		'order_item_type' 		=> 'tax'
+			 		'order_item_type' 		=> 'tax',
 			 	) );
 
 			 	// Add line item meta
@@ -314,10 +320,10 @@ function wc_update_200_images() {
 		$old_settings = array_filter( array(
 			'width' => get_option( 'woocommerce_' . $value . '_image_width' ),
 			'height' => get_option( 'woocommerce_' . $value . '_image_height' ),
-			'crop' => get_option( 'woocommerce_' . $value . '_image_crop' )
+			'crop' => get_option( 'woocommerce_' . $value . '_image_crop' ),
 		) );
 
-		if ( ! empty(  $old_settings  ) && update_option( 'shop_' . $value . '_image_size', $old_settings ) ){
+		if ( ! empty( $old_settings ) && update_option( 'shop_' . $value . '_image_size', $old_settings ) ) {
 
 			delete_option( 'woocommerce_' . $value . '_image_width' );
 			delete_option( 'woocommerce_' . $value . '_image_height' );
@@ -338,41 +344,41 @@ function wc_update_209_brazillian_state() {
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
-			'meta_value' => 'BA'
+			'meta_value' => 'BA',
 		),
 		array(
 			'meta_key'   => '_billing_state',
-			'meta_value' => 'BH'
+			'meta_value' => 'BH',
 		)
 	);
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
-			'meta_value' => 'BA'
+			'meta_value' => 'BA',
 		),
 		array(
 			'meta_key'   => '_shipping_state',
-			'meta_value' => 'BH'
+			'meta_value' => 'BH',
 		)
 	);
 	$wpdb->update(
 		$wpdb->usermeta,
 		array(
-			'meta_value' => 'BA'
+			'meta_value' => 'BA',
 		),
 		array(
 			'meta_key'   => 'billing_state',
-			'meta_value' => 'BH'
+			'meta_value' => 'BH',
 		)
 	);
 	$wpdb->update(
 		$wpdb->usermeta,
 		array(
-			'meta_value' => 'BA'
+			'meta_value' => 'BA',
 		),
 		array(
 			'meta_key'   => 'shipping_state',
-			'meta_value' => 'BH'
+			'meta_value' => 'BH',
 		)
 	);
 }
@@ -383,23 +389,23 @@ function wc_update_209_db_version() {
 
 function wc_update_210_remove_pages() {
 	// Pages no longer used
-	wp_trash_post( get_option('woocommerce_pay_page_id') );
-	wp_trash_post( get_option('woocommerce_thanks_page_id') );
-	wp_trash_post( get_option('woocommerce_view_order_page_id') );
-	wp_trash_post( get_option('woocommerce_change_password_page_id') );
-	wp_trash_post( get_option('woocommerce_edit_address_page_id') );
-	wp_trash_post( get_option('woocommerce_lost_password_page_id') );
+	wp_trash_post( get_option( 'woocommerce_pay_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_thanks_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_view_order_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_change_password_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_edit_address_page_id' ) );
+	wp_trash_post( get_option( 'woocommerce_lost_password_page_id' ) );
 }
 
 function wc_update_210_file_paths() {
 	global $wpdb;
 
 	// Upgrade file paths to support multiple file paths + names etc
-	$existing_file_paths = $wpdb->get_results( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key = '_file_paths' AND meta_value != '';" );
+	$existing_file_paths = $wpdb->get_results( "SELECT meta_value, meta_id FROM {$wpdb->postmeta} WHERE meta_key = '_file_paths' AND meta_value != '';" );
 
 	if ( $existing_file_paths ) {
 
-		foreach( $existing_file_paths as $existing_file_path ) {
+		foreach ( $existing_file_paths as $existing_file_path ) {
 
 			$needs_update = false;
 			$new_value    = array();
@@ -411,7 +417,7 @@ function wc_update_210_file_paths() {
 						$needs_update      = true;
 						$new_value[ $key ] = array(
 							'file' => $file,
-							'name' => wc_get_filename_from_url( $file )
+							'name' => wc_get_filename_from_url( $file ),
 						);
 					} else {
 						$new_value[ $key ] = $file;
@@ -554,7 +560,7 @@ function wc_update_220_variations() {
 function wc_update_220_attributes() {
 	global $wpdb;
 	// Update taxonomy names with correct sanitized names
-	$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
+	$attribute_taxonomies = $wpdb->get_results( "SELECT attribute_name, attribute_id FROM " . $wpdb->prefix . "woocommerce_attribute_taxonomies" );
 
 	foreach ( $attribute_taxonomies as $attribute_taxonomy ) {
 		$sanitized_attribute_name = wc_sanitize_taxonomy_name( $attribute_taxonomy->attribute_name );
@@ -564,10 +570,10 @@ function wc_update_220_attributes() {
 				$wpdb->update(
 					"{$wpdb->prefix}woocommerce_attribute_taxonomies",
 					array(
-						'attribute_name' => $sanitized_attribute_name
+						'attribute_name' => $sanitized_attribute_name,
 					),
 					array(
-						'attribute_id' => $attribute_taxonomy->attribute_id
+						'attribute_id' => $attribute_taxonomy->attribute_id,
 					)
 				);
 
@@ -610,14 +616,13 @@ function wc_update_240_options() {
 }
 
 function wc_update_240_shipping_methods() {
-	global $wpdb;
 	/**
 	 * Flat Rate Shipping.
 	 * Update legacy options to new math based options.
 	 */
 	$shipping_methods = array(
 		'woocommerce_flat_rates'                        => new WC_Shipping_Legacy_Flat_Rate(),
-		'woocommerce_international_delivery_flat_rates' => new WC_Shipping_Legacy_International_Delivery()
+		'woocommerce_international_delivery_flat_rates' => new WC_Shipping_Legacy_International_Delivery(),
 	);
 	foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
 		// Stop this running more than once if routine is repeated
@@ -634,7 +639,7 @@ function wc_update_240_shipping_methods() {
 
 			foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
 				$rate_key                       = 'class_cost_' . $shipping_class->slug;
-				$math_cost_strings[ $rate_key ] = $math_cost_strings[ 'no_class_cost' ];
+				$math_cost_strings[ $rate_key ] = $math_cost_strings['no_class_cost'];
 			}
 
 			if ( $flat_rates = array_filter( (array) get_option( $flat_rate_option_key, array() ) ) ) {
@@ -658,7 +663,7 @@ function wc_update_240_shipping_methods() {
 				}
 			}
 
-			$math_cost_strings[ 'cost' ][] = $shipping_method->get_option( 'cost_per_order' );
+			$math_cost_strings['cost'][] = $shipping_method->get_option( 'cost_per_order' );
 
 			// Save settings
 			foreach ( $math_cost_strings as $option_id => $math_cost_string ) {
@@ -689,7 +694,7 @@ function wc_update_240_api_keys() {
 			'permissions'     => $user->woocommerce_api_key_permissions,
 			'consumer_key'    => wc_api_hash( $user->woocommerce_api_consumer_key ),
 			'consumer_secret' => $user->woocommerce_api_consumer_secret,
-			'truncated_key'   => substr( $user->woocommerce_api_consumer_secret, -7 )
+			'truncated_key'   => substr( $user->woocommerce_api_consumer_secret, -7 ),
 		);
 	}
 
@@ -704,7 +709,7 @@ function wc_update_240_api_keys() {
 					'%s',
 					'%s',
 					'%s',
-					'%s'
+					'%s',
 				)
 			);
 		}
@@ -720,7 +725,6 @@ function wc_update_240_api_keys() {
 }
 
 function wc_update_240_webhooks() {
-	global $wpdb;
 	/**
 	 * Webhooks.
 	 * Make sure order.update webhooks get the woocommerce_order_edit_status hook.
@@ -729,7 +733,7 @@ function wc_update_240_webhooks() {
 		'posts_per_page' => -1,
 		'post_type'      => 'shop_webhook',
 		'meta_key'       => '_topic',
-		'meta_value'     => 'order.updated'
+		'meta_value'     => 'order.updated',
 	) );
 	foreach ( $order_update_webhooks as $order_update_webhook ) {
 		$webhook = new WC_Webhook( $order_update_webhook->ID );
@@ -746,7 +750,7 @@ function wc_update_240_refunds() {
 	$refunded_orders = get_posts( array(
 		'posts_per_page' => -1,
 		'post_type'      => 'shop_order',
-		'post_status'    => array( 'wc-refunded' )
+		'post_status'    => array( 'wc-refunded' ),
 	) );
 
 	// Ensure emails are disabled during this update routine
@@ -768,10 +772,10 @@ function wc_update_240_refunds() {
 		if ( $order_total > $refunded_total ) {
 			wc_create_refund( array(
 				'amount'     => $order_total - $refunded_total,
-				'reason'     => __( 'Order Fully Refunded', 'woocommerce' ),
+				'reason'     => __( 'Order fully refunded', 'woocommerce' ),
 				'order_id'   => $refunded_order->ID,
 				'line_items' => array(),
-				'date'       => $refunded_order->post_modified
+				'date'       => $refunded_order->post_modified,
 			) );
 		}
 	}
@@ -827,11 +831,11 @@ function wc_update_250_currency() {
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
-			'meta_value' => 'LAK'
+			'meta_value' => 'LAK',
 		),
 		array(
 			'meta_key'   => '_order_currency',
-			'meta_value' => 'KIP'
+			'meta_value' => 'KIP',
 		)
 	);
 }
@@ -884,7 +888,7 @@ function wc_update_260_zone_methods() {
 	 * Migrate the old data out of woocommerce_shipping_zone_shipping_methods into the new table and port over any known options (used by table rates and flat rate boxes).
 	 */
 	if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_shipping_zone_shipping_methods';" ) ) {
-		$old_methods = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_shipping_zone_shipping_methods;" );
+		$old_methods = $wpdb->get_results( "SELECT zone_id, shipping_method_type, shipping_method_order, shipping_method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_shipping_methods;" );
 
 		if ( $old_methods ) {
 			$max_new_id = $wpdb->get_var( "SELECT MAX(instance_id) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" );
@@ -901,7 +905,7 @@ function wc_update_260_zone_methods() {
 				$wpdb->insert( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array(
 					'zone_id'      => $old_method->zone_id,
 					'method_id'    => $old_method->shipping_method_type,
-					'method_order' => $old_method->shipping_method_order
+					'method_order' => $old_method->shipping_method_order,
 				) );
 
 				$new_instance_id = $wpdb->insert_id;
@@ -921,20 +925,20 @@ function wc_update_260_zone_methods() {
 					$wpdb->update(
 						$wpdb->prefix . 'woocommerce_shipping_table_rates',
 						array(
-							'shipping_method_id' => $new_instance_id
+							'shipping_method_id' => $new_instance_id,
 						),
 						array(
-							'shipping_method_id' => $old_method->shipping_method_id
+							'shipping_method_id' => $old_method->shipping_method_id,
 						)
 					);
 				} elseif ( 'flat_rate_boxes' === $old_method->shipping_method_type ) {
 					$wpdb->update(
 						$wpdb->prefix . 'woocommerce_shipping_flat_rate_boxes',
 						array(
-							'shipping_method_id' => $new_instance_id
+							'shipping_method_id' => $new_instance_id,
 						),
 						array(
-							'shipping_method_id' => $old_method->shipping_method_id
+							'shipping_method_id' => $old_method->shipping_method_id,
 						)
 					);
 				}
@@ -969,4 +973,251 @@ function wc_update_260_refunds() {
 
 function wc_update_260_db_version() {
 	WC_Install::update_db_version( '2.6.0' );
+}
+
+function wc_update_300_webhooks() {
+	/**
+	 * Make sure product.update webhooks get the woocommerce_product_quick_edit_save
+	 * and woocommerce_product_bulk_edit_save hooks.
+	 */
+	$product_update_webhooks = get_posts( array(
+		'posts_per_page' => -1,
+		'post_type'      => 'shop_webhook',
+		'meta_key'       => '_topic',
+		'meta_value'     => 'product.updated',
+	) );
+	foreach ( $product_update_webhooks as $product_update_webhook ) {
+		$webhook = new WC_Webhook( $product_update_webhook->ID );
+		$webhook->set_topic( 'product.updated' );
+	}
+}
+
+/**
+ * Add an index to the field comment_type to improve the response time of the query
+ * used by WC_Comments::wp_count_comments() to get the number of comments by type.
+ */
+function wc_update_300_comment_type_index() {
+	global $wpdb;
+
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
+
+	if ( is_null( $index_exists ) ) {
+		// Add an index to the field comment_type to improve the response time of the query
+		// used by WC_Comments::wp_count_comments() to get the number of comments by type.
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+	}
+}
+
+function wc_update_300_grouped_products() {
+	global $wpdb;
+	$parents = $wpdb->get_col( "SELECT DISTINCT( post_parent ) FROM {$wpdb->posts} WHERE post_parent > 0 AND post_type = 'product';" );
+	foreach ( $parents as $parent_id ) {
+		$parent = wc_get_product( $parent_id );
+		if ( $parent && $parent->is_type( 'grouped' ) ) {
+			$children_ids = get_posts( array(
+				'post_parent'    => $parent_id,
+				'posts_per_page' => -1,
+				'post_type'      => 'product',
+				'fields'         => 'ids',
+			) );
+			update_post_meta( $parent_id, '_children', $children_ids );
+
+			// Update children to remove the parent.
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_parent' => 0,
+				),
+				array(
+					'post_parent' => $parent_id,
+				)
+			);
+		}
+	}
+}
+
+function wc_update_300_settings() {
+	$woocommerce_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+	if ( '' === $woocommerce_shipping_tax_class ) {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+	} elseif ( 'standard' === $woocommerce_shipping_tax_class ) {
+		update_option( 'woocommerce_shipping_tax_class', '' );
+	}
+}
+
+/**
+ * Convert meta values into term for product visibility.
+ */
+function wc_update_300_product_visibility() {
+	global $wpdb;
+
+	WC_Install::create_terms();
+
+	if ( $featured_term = get_term_by( 'name', 'featured', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_featured' AND meta_value = 'yes';", $featured_term->term_taxonomy_id ) );
+	}
+
+	if ( $exclude_search_term = get_term_by( 'name', 'exclude-from-search', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'catalog');", $exclude_search_term->term_taxonomy_id ) );
+	}
+
+	if ( $exclude_catalog_term = get_term_by( 'name', 'exclude-from-catalog', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_visibility' AND meta_value IN ('hidden', 'search');", $exclude_catalog_term->term_taxonomy_id ) );
+	}
+
+	if ( $outofstock_term = get_term_by( 'name', 'outofstock', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = 'outofstock';", $outofstock_term->term_taxonomy_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-1', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 1;", $rating_term->term_taxonomy_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-2', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 2;", $rating_term->term_taxonomy_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-3', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 3;", $rating_term->term_taxonomy_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-4', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 4;", $rating_term->term_taxonomy_id ) );
+	}
+
+	if ( $rating_term = get_term_by( 'name', 'rated-5', 'product_visibility' ) ) {
+		$wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->term_relationships} SELECT post_id, %d, 0 FROM {$wpdb->postmeta} WHERE meta_key = '_wc_average_rating' AND ROUND( meta_value ) = 5;", $rating_term->term_taxonomy_id ) );
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_300_db_version() {
+	WC_Install::update_db_version( '3.0.0' );
+}
+
+/**
+ * Add an index to the downloadable product permissions table to improve performance of update_user_by_order_id.
+ */
+function wc_update_310_downloadable_products() {
+	global $wpdb;
+
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE column_name = 'order_id' and key_name = 'order_id'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX order_id (order_id)" );
+	}
+}
+
+/**
+ * Find old order notes and ensure they have the correct type for exclusion.
+ */
+function wc_update_310_old_comments() {
+	global $wpdb;
+
+	$wpdb->query( "UPDATE $wpdb->comments comments LEFT JOIN $wpdb->posts as posts ON comments.comment_post_ID = posts.ID SET comment_type = 'order_note' WHERE posts.post_type = 'shop_order' AND comment_type = '';" );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_310_db_version() {
+	WC_Install::update_db_version( '3.1.0' );
+}
+
+/**
+ * Update shop_manager capabilities.
+ */
+function wc_update_312_shop_manager_capabilities() {
+	$role = get_role( 'shop_manager' );
+	$role->remove_cap( 'unfiltered_html' );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_312_db_version() {
+	WC_Install::update_db_version( '3.1.2' );
+}
+
+/**
+ * Update state codes for Mexico.
+ */
+function wc_update_320_mexican_states() {
+	global $wpdb;
+
+	$mx_states = array(
+		'Distrito Federal'    => 'CMX',
+		'Jalisco'             => 'JAL',
+		'Nuevo Leon'          => 'NLE',
+		'Aguascalientes'      => 'AGS',
+		'Baja California'     => 'BCN',
+		'Baja California Sur' => 'BCS',
+		'Campeche'            => 'CAM',
+		'Chiapas'             => 'CHP',
+		'Chihuahua'           => 'CHH',
+		'Coahuila'            => 'COA',
+		'Colima'              => 'COL',
+		'Durango'             => 'DGO',
+		'Guanajuato'          => 'GTO',
+		'Guerrero'            => 'GRO',
+		'Hidalgo'             => 'HGO',
+		'Estado de Mexico'    => 'MEX',
+		'Michoacan'           => 'MIC',
+		'Morelos'             => 'MOR',
+		'Nayarit'             => 'NAY',
+		'Oaxaca'              => 'OAX',
+		'Puebla'              => 'PUE',
+		'Queretaro'           => 'QRO',
+		'Quintana Roo'        => 'ROO',
+		'San Luis Potosi'     => 'SLP',
+		'Sinaloa'             => 'SIN',
+		'Sonora'              => 'SON',
+		'Tabasco'             => 'TAB',
+		'Tamaulipas'          => 'TMP',
+		'Tlaxcala'            => 'TLA',
+		'Veracruz'            => 'VER',
+		'Yucatan'             => 'YUC',
+		'Zacatecas'           => 'ZAC',
+	);
+
+	foreach ( $mx_states as $old => $new ) {
+		$wpdb->query(
+			$wpdb->prepare(
+				"
+					UPDATE $wpdb->postmeta
+					SET meta_value = %s
+		 			WHERE meta_key IN ( '_billing_state', '_shipping_state' )
+		 			AND meta_value = %s
+				",
+				$new, $old
+			)
+		);
+		$wpdb->update(
+			"{$wpdb->prefix}woocommerce_shipping_zone_locations",
+			array(
+				'location_code' => 'MX:' . $new,
+			),
+			array(
+				'location_code' => 'MX:' . $old,
+			)
+		);
+		$wpdb->update(
+			"{$wpdb->prefix}woocommerce_tax_rates",
+			array(
+				'tax_rate_state' => strtoupper( $new ),
+			),
+			array(
+				'tax_rate_state' => strtoupper( $old ),
+			)
+		);
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_320_db_version() {
+	WC_Install::update_db_version( '3.2.0' );
 }

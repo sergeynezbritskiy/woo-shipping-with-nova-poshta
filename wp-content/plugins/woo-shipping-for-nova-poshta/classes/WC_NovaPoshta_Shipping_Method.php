@@ -1,6 +1,10 @@
 <?php
+
+use plugins\NovaPoshta\classes\Area;
 use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\base\Options;
+use plugins\NovaPoshta\classes\Checkout;
+use plugins\NovaPoshta\classes\Customer;
 
 /**
  * Class WC_NovaPoshta_Shipping_Method
@@ -11,15 +15,14 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
      * Constructor for your shipping class
      *
      * @access public
+     * @param int $instance_id
      */
-    public function __construct()
+    public function __construct($instance_id = 0)
     {
-
+        parent::__construct($instance_id);
         $this->id = NOVA_POSHTA_SHIPPING_METHOD;
         $this->method_title = __('Nova Poshta', NOVA_POSHTA_DOMAIN);
         $this->method_description = $this->getDescription();
-        $this->countries = array('UA');
-        $this->availability = 'specific';
 
         $this->init();
 
@@ -42,6 +45,10 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
     }
 
+    public function test($packages){
+
+        return $packages;
+    }
     /**
      * Initialise Gateway Settings Form Fields
      */
@@ -137,8 +144,13 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             'cost' => 0,
             'calc_tax' => 'per_item'
         );
-        /** @noinspection PhpUndefinedFieldInspection */
-        $cityRecipient = WC()->customer->nova_poshta_city;
+        $customer = Customer::instance();
+
+
+        $location = Checkout::instance()->getLocation();
+        $cityRecipient = Customer::instance()->getMetadata('nova_poshta_city', $location)
+            //for backward compatibility with woocommerce 2.x.x
+            ?: Customer::instance()->getMetadata('nova_poshta_city', '');
 
         if (NP()->options->useFixedPriceOnDelivery) {
             $rate['cost'] = NP()->options->fixedPrice;
@@ -147,6 +159,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             $serviceType = 'WarehouseWarehouse';
             /** @noinspection PhpUndefinedFieldInspection */
             $cartWeight = max(1, WC()->cart->cart_contents_weight);
+            /** @noinspection PhpUndefinedFieldInspection */
             $cartTotal = max(1, WC()->cart->cart_contents_total);
             try {
                 $result = NP()->api->getDocumentPrice($citySender, $cityRecipient, $serviceType, $cartWeight, $cartTotal);
@@ -158,6 +171,16 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         }
         // Register the rate
         $this->add_rate($rate);
+    }
+
+    /**
+     * Is this method available?
+     * @param array $package
+     * @return bool
+     */
+    public function is_available($package)
+    {
+        return $this->is_enabled();
     }
 
     /**

@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * International Delivery - Based on the Flat Rate Shipping Method.
  *
- * This class is here for backwards commpatility for methods existing before zones existed.
+ * This class is here for backwards compatibility for methods existing before zones existed.
  *
  * @deprecated  2.6.0
  * @version		2.4.0
@@ -20,8 +20,8 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 	 */
 	public function __construct() {
 		$this->id                 = 'legacy_international_delivery';
-		$this->method_title       = __( 'International Flat Rate (Legacy)', 'woocommerce' );
-		$this->method_description = sprintf( __( '<strong>This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping Zones</a>.</strong>', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) );
+		$this->method_title       = __( 'International flat rate (legacy)', 'woocommerce' );
+		$this->method_description = '<strong>' . sprintf( __( 'This method is deprecated in 2.6.0 and will be removed in future versions - we recommend disabling it and instead setting up a new rate within your <a href="%s">Shipping zones</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ) . '</strong>';
 		$this->init();
 
 		add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -50,7 +50,7 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 			'options'		=> array(
 				'including' => __( 'Selected countries', 'woocommerce' ),
 				'excluding' => __( 'Excluding selected countries', 'woocommerce' ),
-			)
+			),
 		);
 	}
 
@@ -73,6 +73,6 @@ class WC_Shipping_Legacy_International_Delivery extends WC_Shipping_Legacy_Flat_
 				return false;
 			}
 		}
-		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
+		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package, $this );
 	}
 }

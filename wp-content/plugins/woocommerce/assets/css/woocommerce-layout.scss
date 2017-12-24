@@ -6,14 +6,21 @@
 /**
  * Imports
  */
-@import "bourbon";
-@import "mixins";
-@import "variables";
+@import 'mixins';
+@import 'variables';
 
 /**
  * Styling begins
  */
 .woocommerce, .woocommerce-page {
+
+	.woocommerce-message,
+	.woocommerce-error,
+	.woocommerce-info {
+		.button {
+			float: right;
+		}
+	}
 
 	/**
 	 * General layout styles
@@ -296,9 +303,16 @@
 
 		.form-row-first,
 		.form-row-last {
-			float: left;
 			width: 47%;
 			overflow: visible;
+		}
+
+		.form-row-first {
+			float: left;
+
+			/*rtl:raw:
+			float: right;
+			*/
 		}
 
 		.form-row-last {
@@ -326,6 +340,23 @@
 		#place_order {
 			float: right;
 		}
+	}
+
+	.woocommerce-billing-fields,
+	.woocommerce-shipping-fields {
+		@include clearfix();
+	}
+
+	.woocommerce-terms-and-conditions {
+		margin-bottom: 1.618em;
+		padding: 1.618em;
+	}
+
+	/**
+	 * oEmbeds
+	 */
+	.woocommerce-oembed {
+		position: relative;
 	}
 }
 
@@ -378,14 +409,6 @@
 
 		div.product.hentry.has-post-thumbnail {
 			margin-top: 0;
-		}
-
-		.product {
-			.images {
-				img {
-					margin-bottom: 1em;
-				}
-			}
 		}
 	}
 }
@@ -545,15 +568,6 @@
 				float: right;
 			}
 			.col-2 {
-				float: left;
-			}
-		}
-		form {
-			.form-row-first,
-			.form-row-last {
-				float: right;
-			}
-			.form-row-last {
 				float: left;
 			}
 		}

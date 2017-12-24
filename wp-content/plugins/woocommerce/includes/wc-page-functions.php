@@ -45,18 +45,18 @@ add_filter( 'the_title', 'wc_page_endpoint_title' );
  */
 function wc_get_page_id( $page ) {
 
-	if ( $page == 'pay' || $page == 'thanks' ) {
-		_deprecated_argument( __FUNCTION__, '2.1', 'The "pay" and "thanks" pages are no-longer used - an endpoint is added to the checkout instead. To get a valid link use the WC_Order::get_checkout_payment_url() or WC_Order::get_checkout_order_received_url() methods instead.' );
+	if ( 'pay' == $page || 'thanks' == $page ) {
+		wc_deprecated_argument( __FUNCTION__, '2.1', 'The "pay" and "thanks" pages are no-longer used - an endpoint is added to the checkout instead. To get a valid link use the WC_Order::get_checkout_payment_url() or WC_Order::get_checkout_order_received_url() methods instead.' );
 
 		$page = 'checkout';
 	}
-	if ( $page == 'change_password' || $page == 'edit_address' || $page == 'lost_password' ) {
-		_deprecated_argument( __FUNCTION__, '2.1', 'The "change_password", "edit_address" and "lost_password" pages are no-longer used - an endpoint is added to the my-account instead. To get a valid link use the wc_customer_edit_account_url() function instead.' );
+	if ( 'change_password' === $page || 'edit_address' === $page || 'lost_password' === $page ) {
+		wc_deprecated_argument( __FUNCTION__, '2.1', 'The "change_password", "edit_address" and "lost_password" pages are no-longer used - an endpoint is added to the my-account instead. To get a valid link use the wc_customer_edit_account_url() function instead.' );
 
 		$page = 'myaccount';
 	}
 
-	$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option('woocommerce_' . $page . '_page_id' ) );
+	$page = apply_filters( 'woocommerce_get_' . $page . '_page_id', get_option( 'woocommerce_' . $page . '_page_id' ) );
 
 	return $page ? absint( $page ) : -1;
 }
@@ -91,7 +91,7 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 
 	// Map endpoint to options
 	$endpoint = ! empty( WC()->query->query_vars[ $endpoint ] ) ? WC()->query->query_vars[ $endpoint ] : $endpoint;
-	$value    = ( 'edit-address' == $endpoint ) ? wc_edit_address_i18n( $value ) : $value;
+	$value    = ( get_option( 'woocommerce_myaccount_edit_address_endpoint', 'edit-address' ) === $endpoint ) ? wc_edit_address_i18n( $value ) : $value;
 
 	if ( get_option( 'permalink_structure' ) ) {
 		if ( strstr( $permalink, '?' ) ) {
@@ -111,17 +111,21 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 /**
  * Hide menu items conditionally.
  *
- * @param array $items
+ * @param array $items Navigation items.
  * @return array
  */
 function wc_nav_menu_items( $items ) {
 	if ( ! is_user_logged_in() ) {
 		$customer_logout = get_option( 'woocommerce_logout_endpoint', 'customer-logout' );
 
-		if ( ! empty( $customer_logout ) ) {
+		if ( ! empty( $customer_logout ) && ! empty( $items ) && is_array( $items ) ) {
 			foreach ( $items as $key => $item ) {
-				$path = parse_url( $item->url, PHP_URL_PATH );
+				if ( empty( $item->url ) ) {
+					continue;
+				}
+				$path  = parse_url( $item->url, PHP_URL_PATH );
 				$query = parse_url( $item->url, PHP_URL_QUERY );
+
 				if ( strstr( $path, $customer_logout ) || strstr( $query, $customer_logout ) ) {
 					unset( $items[ $key ] );
 				}
@@ -146,38 +150,39 @@ function wc_nav_menu_item_classes( $menu_items ) {
 		return $menu_items;
 	}
 
-	$shop_page 		= (int) wc_get_page_id('shop');
+	$shop_page 		= (int) wc_get_page_id( 'shop' );
 	$page_for_posts = (int) get_option( 'page_for_posts' );
 
-	foreach ( (array) $menu_items as $key => $menu_item ) {
+	if ( ! empty( $menu_items ) && is_array( $menu_items ) ) {
+		foreach ( $menu_items as $key => $menu_item ) {
 
-		$classes = (array) $menu_item->classes;
+			$classes = (array) $menu_item->classes;
 
-		// Unset active class for blog page
-		if ( $page_for_posts == $menu_item->object_id ) {
-			$menu_items[$key]->current = false;
+			// Unset active class for blog page
+			if ( $page_for_posts == $menu_item->object_id ) {
+				$menu_items[ $key ]->current = false;
 
-			if ( in_array( 'current_page_parent', $classes ) ) {
-				unset( $classes[ array_search('current_page_parent', $classes) ] );
+				if ( in_array( 'current_page_parent', $classes ) ) {
+					unset( $classes[ array_search( 'current_page_parent', $classes ) ] );
+				}
+
+				if ( in_array( 'current-menu-item', $classes ) ) {
+					unset( $classes[ array_search( 'current-menu-item', $classes ) ] );
+				}
+
+			// Set active state if this is the shop page link
+			} elseif ( is_shop() && $shop_page == $menu_item->object_id && 'page' === $menu_item->object ) {
+				$menu_items[ $key ]->current = true;
+				$classes[] = 'current-menu-item';
+				$classes[] = 'current_page_item';
+
+			// Set parent state if this is a product page
+			} elseif ( is_singular( 'product' ) && $shop_page == $menu_item->object_id ) {
+				$classes[] = 'current_page_parent';
 			}
 
-			if ( in_array( 'current-menu-item', $classes ) ) {
-				unset( $classes[ array_search('current-menu-item', $classes) ] );
-			}
-
-		// Set active state if this is the shop page link
-		} elseif ( is_shop() && $shop_page == $menu_item->object_id && 'page' === $menu_item->object ) {
-			$menu_items[ $key ]->current = true;
-			$classes[] = 'current-menu-item';
-			$classes[] = 'current_page_item';
-
-		// Set parent state if this is a product page
-		} elseif ( is_singular( 'product' ) && $shop_page == $menu_item->object_id ) {
-			$classes[] = 'current_page_parent';
+			$menu_items[ $key ]->classes = array_unique( $classes );
 		}
-
-		$menu_items[ $key ]->classes = array_unique( $classes );
-
 	}
 
 	return $menu_items;
@@ -188,7 +193,7 @@ add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_item_classes', 2 );
 /**
  * Fix active class in wp_list_pages for shop page.
  *
- * https://github.com/woothemes/woocommerce/issues/177.
+ * https://github.com/woocommerce/woocommerce/issues/177.
  *
  * @author Jessor, Peter Sterling
  * @param string $pages

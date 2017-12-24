@@ -39,7 +39,7 @@ class WC_API_Coupons extends WC_API_Resource {
 		);
 
 		# GET /coupons/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_coupons_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -73,10 +73,11 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$coupons = array();
 
-		foreach( $query->posts as $coupon_id ) {
+		foreach ( $query->posts as $coupon_id ) {
 
-			if ( ! $this->is_readable( $coupon_id ) )
+			if ( ! $this->is_readable( $coupon_id ) ) {
 				continue;
+			}
 
 			$coupons[] = current( $this->get_coupon( $coupon_id, $fields ) );
 		}
@@ -90,49 +91,47 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get the coupon for the given ID
 	 *
 	 * @since 2.1
+	 *
 	 * @param int $id the coupon ID
 	 * @param string $fields fields to include in response
+	 *
 	 * @return array|WP_Error
+	 * @throws WC_API_Exception
 	 */
 	public function get_coupon( $id, $fields = null ) {
-		global $wpdb;
-
 		$id = $this->validate_request( $id, 'shop_coupon', 'read' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
-		// get the coupon code
-		$code = $wpdb->get_var( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE id = %s AND post_type = 'shop_coupon' AND post_status = 'publish'", $id ) );
+		$coupon = new WC_Coupon( $id );
 
-		if ( is_null( $code ) )
-			return new WP_Error( 'woocommerce_api_invalid_coupon_id', __( 'Invalid coupon ID', 'woocommerce' ), array( 'status' => 404 ) );
-
-		$coupon = new WC_Coupon( $code );
-
-		$coupon_post = get_post( $coupon->id );
+		if ( 0 === $coupon->get_id() ) {
+			throw new WC_API_Exception( 'woocommerce_api_invalid_coupon_id', __( 'Invalid coupon ID', 'woocommerce' ), 404 );
+		}
 
 		$coupon_data = array(
-			'id'                           => $coupon->id,
-			'code'                         => $coupon->code,
-			'type'                         => $coupon->type,
-			'created_at'                   => $this->server->format_datetime( $coupon_post->post_date_gmt ),
-			'updated_at'                   => $this->server->format_datetime( $coupon_post->post_modified_gmt ),
-			'amount'                       => wc_format_decimal( $coupon->amount, 2 ),
-			'individual_use'               => ( 'yes' === $coupon->individual_use ),
-			'product_ids'                  => array_map( 'absint', (array) $coupon->product_ids ),
-			'exclude_product_ids'          => array_map( 'absint', (array) $coupon->exclude_product_ids ),
-			'usage_limit'                  => ( ! empty( $coupon->usage_limit ) ) ? $coupon->usage_limit : null,
-			'usage_limit_per_user'         => ( ! empty( $coupon->usage_limit_per_user ) ) ? $coupon->usage_limit_per_user : null,
-			'limit_usage_to_x_items'       => (int) $coupon->limit_usage_to_x_items,
-			'usage_count'                  => (int) $coupon->usage_count,
-			'expiry_date'                  => $this->server->format_datetime( $coupon->expiry_date ),
-			'enable_free_shipping'         => $coupon->enable_free_shipping(),
-			'product_category_ids'         => array_map( 'absint', (array) $coupon->product_categories ),
-			'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->exclude_product_categories ),
-			'exclude_sale_items'           => $coupon->exclude_sale_items(),
-			'minimum_amount'               => wc_format_decimal( $coupon->minimum_amount, 2 ),
-			'customer_emails'              => $coupon->customer_email,
+			'id'                           => $coupon->get_id(),
+			'code'                         => $coupon->get_code(),
+			'type'                         => $coupon->get_discount_type(),
+			'created_at'                   => $this->server->format_datetime( $coupon->get_date_created() ? $coupon->get_date_created()->getTimestamp() : 0 ), // API gives UTC times.
+			'updated_at'                   => $this->server->format_datetime( $coupon->get_date_modified() ? $coupon->get_date_modified()->getTimestamp() : 0 ), // API gives UTC times.
+			'amount'                       => wc_format_decimal( $coupon->get_amount(), 2 ),
+			'individual_use'               => $coupon->get_individual_use(),
+			'product_ids'                  => array_map( 'absint', (array) $coupon->get_product_ids() ),
+			'exclude_product_ids'          => array_map( 'absint', (array) $coupon->get_excluded_product_ids() ),
+			'usage_limit'                  => $coupon->get_usage_limit() ? $coupon->get_usage_limit() : null,
+			'usage_limit_per_user'         => $coupon->get_usage_limit_per_user() ? $coupon->get_usage_limit_per_user() : null,
+			'limit_usage_to_x_items'       => (int) $coupon->get_limit_usage_to_x_items(),
+			'usage_count'                  => (int) $coupon->get_usage_count(),
+			'expiry_date'                  => $this->server->format_datetime( $coupon->get_date_expires() ? $coupon->get_date_expires()->getTimestamp() : 0 ), // API gives UTC times.
+			'enable_free_shipping'         => $coupon->get_free_shipping(),
+			'product_category_ids'         => array_map( 'absint', (array) $coupon->get_product_categories() ),
+			'exclude_product_category_ids' => array_map( 'absint', (array) $coupon->get_excluded_product_categories() ),
+			'exclude_sale_items'           => $coupon->get_exclude_sale_items(),
+			'minimum_amount'               => wc_format_decimal( $coupon->get_minimum_amount(), 2 ),
+			'customer_emails'              => $coupon->get_email_restrictions(),
 		);
 
 		return array( 'coupon' => apply_filters( 'woocommerce_api_coupon_response', $coupon_data, $coupon, $fields, $this->server ) );
@@ -142,15 +141,18 @@ class WC_API_Coupons extends WC_API_Resource {
 	 * Get the total number of coupons
 	 *
 	 * @since 2.1
+	 *
 	 * @param array $filter
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_coupons_count( $filter = array() ) {
 
 		$query = $this->query_coupons( $filter );
 
-		if ( ! current_user_can( 'read_private_shop_coupons' ) )
+		if ( ! current_user_can( 'read_private_shop_coupons' ) ) {
 			return new WP_Error( 'woocommerce_api_user_cannot_read_coupons_count', __( 'You do not have permission to read the coupons count', 'woocommerce' ), array( 'status' => 401 ) );
+		}
 
 		return array( 'count' => (int) $query->found_posts );
 	}
@@ -168,8 +170,9 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		$id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC LIMIT 1;", $code ) );
 
-		if ( is_null( $id ) )
+		if ( is_null( $id ) ) {
 			return new WP_Error( 'woocommerce_api_invalid_coupon_code', __( 'Invalid coupon code', 'woocommerce' ), array( 'status' => 404 ) );
+		}
 
 		return $this->get_coupon( $id, $fields );
 	}
@@ -177,7 +180,6 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Create a coupon
 	 *
-	 * @TODO implement in 2.2
 	 * @param array $data
 	 * @return array
 	 */
@@ -189,17 +191,17 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Edit a coupon
 	 *
-	 * @TODO implement in 2.2
 	 * @param int $id the coupon ID
 	 * @param array $data
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function edit_coupon( $id, $data ) {
 
 		$id = $this->validate_request( $id, 'shop_coupon', 'edit' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
 		return $this->get_coupon( $id );
 	}
@@ -207,17 +209,17 @@ class WC_API_Coupons extends WC_API_Resource {
 	/**
 	 * Delete a coupon
 	 *
-	 * @TODO enable along with PUT/POST in 2.2
 	 * @param int $id the coupon ID
 	 * @param bool $force true to permanently delete coupon, false to move to trash
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_coupon( $id, $force = false ) {
 
 		$id = $this->validate_request( $id, 'shop_coupon', 'delete' );
 
-		if ( is_wp_error( $id ) )
+		if ( is_wp_error( $id ) ) {
 			return $id;
+		}
 
 		return $this->delete( $id, 'shop_coupon', ( 'true' === $force ) );
 	}
@@ -242,5 +244,4 @@ class WC_API_Coupons extends WC_API_Resource {
 
 		return new WP_Query( $query_args );
 	}
-
 }

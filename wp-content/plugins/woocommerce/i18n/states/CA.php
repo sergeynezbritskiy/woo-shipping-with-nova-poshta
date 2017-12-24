@@ -9,6 +9,10 @@
  */
 global $states;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 $states['CA'] = array(
 	'AB' => __( 'Alberta', 'woocommerce' ),
 	'BC' => __( 'British Columbia', 'woocommerce' ),
@@ -22,5 +26,5 @@ $states['CA'] = array(
 	'PE' => __( 'Prince Edward Island', 'woocommerce' ),
 	'QC' => __( 'Quebec', 'woocommerce' ),
 	'SK' => __( 'Saskatchewan', 'woocommerce' ),
-	'YT' => __( 'Yukon Territory', 'woocommerce' )
+	'YT' => __( 'Yukon Territory', 'woocommerce' ),
 );

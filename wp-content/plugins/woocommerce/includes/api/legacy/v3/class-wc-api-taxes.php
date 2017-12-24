@@ -39,7 +39,7 @@ class WC_API_Taxes extends WC_API_Resource {
 		);
 
 		# GET /taxes/count
-		$routes[ $this->base . '/count'] = array(
+		$routes[ $this->base . '/count' ] = array(
 			array( array( $this, 'get_taxes_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -57,7 +57,7 @@ class WC_API_Taxes extends WC_API_Resource {
 		);
 
 		# GET /taxes/classes/count
-		$routes[ $this->base . '/classes/count'] = array(
+		$routes[ $this->base . '/classes/count' ] = array(
 			array( array( $this, 'get_tax_classes_count' ), WC_API_Server::READABLE ),
 		);
 
@@ -147,7 +147,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				'compound' => (bool) $tax['tax_rate_compound'],
 				'shipping' => (bool) $tax['tax_rate_shipping'],
 				'order'    => (int) $tax['tax_rate_order'],
-				'class'    => $tax['tax_rate_class'] ? $tax['tax_rate_class'] : 'standard'
+				'class'    => $tax['tax_rate_class'] ? $tax['tax_rate_class'] : 'standard',
 			);
 
 			// Get locales from a tax rate
@@ -176,7 +176,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param array $data
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function create_tax( $data ) {
 		try {
@@ -246,7 +246,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @param int $id The tax ID
 	 * @param array $data
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function edit_tax( $id, $data ) {
 		try {
@@ -281,7 +281,7 @@ class WC_API_Taxes extends WC_API_Resource {
 				'tax_rate_compound',
 				'tax_rate_shipping',
 				'tax_rate_order',
-				'tax_rate_class'
+				'tax_rate_class',
 			);
 
 			foreach ( $data as $key => $value ) {
@@ -297,7 +297,7 @@ class WC_API_Taxes extends WC_API_Resource {
 					continue;
 				}
 
-				// Fix compund and shipping values
+				// Fix compound and shipping values
 				if ( in_array( $key, array( 'compound', 'shipping' ) ) ) {
 					$value = $value ? 1 : 0;
 				}
@@ -332,7 +332,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param int $id The tax ID
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_tax( $id ) {
 		global $wpdb;
@@ -365,7 +365,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 * @param string $class
 	 * @param array $filter
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_taxes_count( $class = null, $filter = array() ) {
 		try {
@@ -436,7 +436,7 @@ class WC_API_Taxes extends WC_API_Resource {
 
 		return array(
 			'results' => $results,
-			'headers' => $headers
+			'headers' => $headers,
 		);
 	}
 
@@ -449,7 +449,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param array $data
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function bulk( $data ) {
 		try {
@@ -462,7 +462,7 @@ class WC_API_Taxes extends WC_API_Resource {
 
 			// Limit bulk operation
 			if ( count( $data ) > $limit ) {
-				throw new WC_API_Exception( 'woocommerce_api_taxes_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request', 'woocommerce' ), $limit ), 413 );
+				throw new WC_API_Exception( 'woocommerce_api_taxes_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), 413 );
 			}
 
 			$taxes = array();
@@ -475,28 +475,28 @@ class WC_API_Taxes extends WC_API_Resource {
 					$tax_id = intval( $_tax['id'] );
 				}
 
-				// Tax rate exists / edit tax rate
 				if ( $tax_id ) {
+
+					// Tax rate exists / edit tax rate
 					$edit = $this->edit_tax( $tax_id, array( 'tax' => $_tax ) );
 
 					if ( is_wp_error( $edit ) ) {
 						$taxes[] = array(
 							'id'    => $tax_id,
-							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() )
+							'error' => array( 'code' => $edit->get_error_code(), 'message' => $edit->get_error_message() ),
 						);
 					} else {
 						$taxes[] = $edit['tax'];
 					}
-				}
+				} else {
 
-				// Tax rate don't exists / create tax rate
-				else {
+					// Tax rate don't exists / create tax rate
 					$new = $this->create_tax( array( 'tax' => $_tax ) );
 
 					if ( is_wp_error( $new ) ) {
 						$taxes[] = array(
 							'id'    => $tax_id,
-							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() )
+							'error' => array( 'code' => $new->get_error_code(), 'message' => $new->get_error_message() ),
 						);
 					} else {
 						$taxes[] = $new['tax'];
@@ -517,7 +517,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param string $fields
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_tax_classes( $fields = null ) {
 		try {
@@ -531,7 +531,7 @@ class WC_API_Taxes extends WC_API_Resource {
 			// Add standard class
 			$tax_classes[] = array(
 				'slug' => 'standard',
-				'name' => __( 'Standard Rate', 'woocommerce' )
+				'name' => __( 'Standard rate', 'woocommerce' ),
 			);
 
 			$classes = WC_Tax::get_tax_classes();
@@ -539,7 +539,7 @@ class WC_API_Taxes extends WC_API_Resource {
 			foreach ( $classes as $class ) {
 				$tax_classes[] = apply_filters( 'woocommerce_api_tax_class_response', array(
 					'slug' => sanitize_title( $class ),
-					'name' => $class
+					'name' => $class,
 				), $class, $fields, $this );
 			}
 
@@ -556,7 +556,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param array $data
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function create_tax_class( $data ) {
 		try {
@@ -605,8 +605,8 @@ class WC_API_Taxes extends WC_API_Resource {
 			return array(
 				'tax_class' => array(
 					'slug' => $slug,
-					'name' => $name
-				)
+					'name' => $name,
+				),
 			);
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -620,7 +620,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @param int $slug The tax class slug
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_tax_class( $slug ) {
 		global $wpdb;
@@ -673,7 +673,7 @@ class WC_API_Taxes extends WC_API_Resource {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_tax_classes_count() {
 		try {
