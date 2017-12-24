@@ -170,16 +170,9 @@ class Checkout extends Base
     {
         if (NP()->isNP()) {
             $location = $this->getLocation();
-            $customer = WC()->customer;
             $warehouse = $this->customer->getMetadata('nova_poshta_warehouse', $location);
             $city = $this->customer->getMetadata('nova_poshta_city', $location);
             $region = $this->customer->getMetadata('nova_poshta_region', $location);
-//            if ($this->isLegacyWoocommerce()) {
-//            } else {
-//                $warehouse = $customer->{'get_' . $location . '_address_1'}();
-//                $city = $customer->{'get_' . $location . '_city'}();
-//                $region = $customer->{'get_' . $location . '_state'}();
-//            }
             foreach ($packages as &$package) {
                 $package['destination']['address_1'] = $warehouse;
                 $package['destination']['city'] = $city;
