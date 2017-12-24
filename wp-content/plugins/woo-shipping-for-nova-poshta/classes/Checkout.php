@@ -71,22 +71,6 @@ class Checkout extends Base
             $this->customer->setMetadata('nova_poshta_region', $region, $location);
             $this->customer->setMetadata('nova_poshta_city', $city, $location);
             $this->customer->setMetadata('nova_poshta_warehouse', $warehouse, $location);
-
-            $customer = WC()->customer;
-
-            if (method_exists($customer, 'set_billing_address_1')) {
-                if ($this->shipToDifferentAddress()) {
-                    $customer->set_shipping_address_1($warehouse);
-                    $customer->set_shipping_city($city);
-                    $customer->set_shipping_state($region);
-                } else {
-                    $customer->set_billing_address_1($warehouse);
-                    $customer->set_billing_city($city);
-                    $customer->set_billing_state($region);
-                }
-                $customer->save_data();
-                $customer->save_meta_data();
-            }
         }
     }
 
@@ -148,6 +132,7 @@ class Checkout extends Base
             $warehouse = new Warehouse($warehouseRef);
             update_post_meta($orderId, '_' . $fieldGroup . '_address_1', $warehouse->description);
 
+            //TODO this part should be refactored
             $shippingFieldGroup = Area::SHIPPING;
             if ($this->shipToDifferentAddress()) {
                 update_post_meta($orderId, '_' . Region::key($shippingFieldGroup), $area->ref);
@@ -158,7 +143,6 @@ class Checkout extends Base
                 update_post_meta($orderId, '_' . $shippingFieldGroup . '_city', $city->description);
                 update_post_meta($orderId, '_' . $shippingFieldGroup . '_address_1', $warehouse->description);
             }
-
         }
     }
 
@@ -180,23 +164,6 @@ class Checkout extends Base
             }
         }
         return $packages;
-    }
-
-    /**
-     * @return bool
-     * @throws \Exception
-     */
-    protected function getIsCheckout()
-    {
-        if (function_exists('is_checkout')) {
-            return is_checkout();
-        } else {
-            //for backward compatibility with woocommerce 2.x.x
-            global $post;
-            $checkoutPageId = get_option('woocommerce_checkout_page_id');
-            $pageId = ArrayHelper::getValue($post, 'ID', null);
-            return $pageId && $checkoutPageId && ($pageId == $checkoutPageId);
-        }
     }
 
     /**
@@ -255,7 +222,7 @@ class Checkout extends Base
             $shipToDifferentAddress = !$_POST['shiptobilling'];
         }
 
-        // Ship to billing only option
+        // Ship to billing option only
         if (wc_ship_to_billing_address_only()) {
             $shipToDifferentAddress = false;
         }
@@ -298,6 +265,31 @@ class Checkout extends Base
     }
 
     /**
+     * @return bool
+     * @throws \Exception
+     */
+    protected function getIsCheckout()
+    {
+        if (function_exists('is_checkout')) {
+            return is_checkout();
+        } else {
+            //for backward compatibility with woocommerce 2.x.x
+            global $post;
+            $checkoutPageId = get_option('woocommerce_checkout_page_id');
+            $pageId = ArrayHelper::getValue($post, 'ID', null);
+            return $pageId && $checkoutPageId && ($pageId == $checkoutPageId);
+        }
+    }
+
+    /**
+     * @return Customer
+     */
+    protected function getCustomer()
+    {
+        return Customer::instance();
+    }
+
+    /**
      * @param array $fields
      * @param string $location
      * @return array
@@ -335,14 +327,6 @@ class Checkout extends Base
             'custom_attributes' => array(),
         ];
         return $fields;
-    }
-
-    /**
-     * @return Customer
-     */
-    protected function getCustomer()
-    {
-        return Customer::instance();
     }
 
     /**
