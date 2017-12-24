@@ -65,3 +65,4 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 * Bug - fix issue with deactivating hook for applications with wpdb prefix not wp_
 * Task - improve usability, add links to settings page, review page
 * Task - improve translations
+* Task - improve logging

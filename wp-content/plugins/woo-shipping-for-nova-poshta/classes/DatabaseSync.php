@@ -27,6 +27,7 @@ class DatabaseSync extends Base
      */
     public function synchroniseLocations()
     {
+
         if ($this->requiresUpdate()) {
             $this->log->info("Synchronization required", Log::LOCATIONS_UPDATE);
             $this->db->query('START TRANSACTION');
@@ -37,11 +38,11 @@ class DatabaseSync extends Base
             $this->setLocationsLastUpdateDate($this->updatedAt);
 
             if (!$this->db->last_error) {
-                $this->log->info("Synchronization finished successfully", Log::LOCATIONS_UPDATE);
                 $this->db->query('COMMIT');
+                $this->log->info("Synchronization finished successfully", Log::LOCATIONS_UPDATE);
             } else {
-                $this->log->error("Synchronization failed. Rollback.", Log::LOCATIONS_UPDATE);
                 $this->db->query('ROLLBACK');
+                $this->log->error("Synchronization failed. Rollback.", Log::LOCATIONS_UPDATE);
             }
             $this->log->info("", Log::LOCATIONS_UPDATE);
         }
@@ -160,9 +161,16 @@ class DatabaseSync extends Base
 
         if ($warehousesHashNew !== $warehousesHashOld) {
             $insert = array();
+            $count = 0;
+            $rowsAffected = 0;
+            while ($warehousesSlice = array_slice($warehouses, $offset, $batchSize)) {
+                $offset += $batchSize;
+                $this->updateWarehousesBatch($warehousesSlice);
+            }
             foreach ($warehouses as $warehouse) {
+                $count++;
                 $insert[] = $this->db->prepare(
-                    "('%s', '%s', '%s', '%s', '%s', %d)",
+                    "(%s, %s, %s, %s, %s, %d)",
                     $type,
                     $warehouse['Ref'],
                     $warehouse['Description'],
@@ -170,21 +178,23 @@ class DatabaseSync extends Base
                     $warehouse['CityRef'],
                     $updatedAt
                 );
+                if ($count % 100 === 0) {
+                    $queryInsert = "INSERT INTO $table (`area_type`, `ref`, `description`, `description_ru`, `parent_area_ref`, `updated_at`) VALUES ";
+                    $queryInsert .= implode(",", $insert);
+                    $queryInsert .= " ON DUPLICATE KEY UPDATE 
+                    `area_type` = '$type',
+                    `ref` = VALUES(`ref`), 
+                    `description` = VALUES(`description`), 
+                    `description_ru`=VALUES(`description_ru`), 
+                    `parent_area_ref`=VALUES(`parent_area_ref`), 
+                    `updated_at` = VALUES(`updated_at`)";
+                    $rowsAffected += $this->db->query($queryInsert);
+                    $insert = array();
+                }
             }
-            $queryInsert = "INSERT INTO $table (`area_type`, `ref`, `description`, `description_ru`, `parent_area_ref`, `updated_at`) VALUES ";
-            $queryInsert .= implode(",", $insert);
-            $queryInsert .= " ON DUPLICATE KEY UPDATE 
-            `area_type` = '$type',
-            `ref` = VALUES(`ref`), 
-            `description` = VALUES(`description`), 
-            `description_ru`=VALUES(`description_ru`), 
-            `parent_area_ref`=VALUES(`parent_area_ref`), 
-            `updated_at` = VALUES(`updated_at`)";
-
             $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d AND `area_type`=%s", $updatedAt, $type);
-
             $this->setWarehousesHash($warehousesHashNew);
-            $rowsAffected = $this->db->query($queryInsert);
+
             $rowsDeleted = $this->db->query($queryDelete);
             $this->log->info("Warehouses were successfully updated, affected $rowsAffected rows, deleted $rowsDeleted rows", Log::LOCATIONS_UPDATE);
         } else {
