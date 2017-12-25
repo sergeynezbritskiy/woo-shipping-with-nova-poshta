@@ -3,7 +3,7 @@
 Plugin Name: Woo Shipping for Nova Poshta
 Plugin URI: https://ru.wordpress.org/plugins/woo-shipping-for-nova-poshta
 Description: Plugin for administrating Nova Poshta shipping method within Woocommerce Plugin
-Version: 2.0.0
+Version: 2.0.1
 Author: Sergey Nezbritskiy
 */
 

@@ -3,7 +3,7 @@ Contributors: snezbritskiy
 Tags: eCommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
 Tested up to: 4.9.1
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,3 +81,5 @@ Source code for this plugin is stored on [Github](https://github.com/sergeynezbr
 * Task - improve logging
 = 2.0.0 =
 * Task - forward compatibility with Woocommerce 3.x
+= 2.0.1 =
+* Bug - hotfix, revert DatabaseSync class to previous version because of fatal error
