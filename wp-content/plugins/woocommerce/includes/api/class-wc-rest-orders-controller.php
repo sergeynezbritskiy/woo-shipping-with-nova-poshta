@@ -153,7 +153,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 		// Add SKU and PRICE to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku(): null;
-			$data['price'] = $item->get_total() / max( 1, $item->get_quantity() );
+			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 		}
 
 		// Format taxes.
@@ -281,12 +281,13 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$this->request = $request;
-		$data          = $this->get_formatted_item_data( $object );
-		$context       = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data          = $this->add_additional_fields_to_object( $data, $request );
-		$data          = $this->filter_response_by_context( $data, $context );
-		$response      = rest_ensure_response( $data );
+		$this->request       = $request;
+		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
+		$data                = $this->get_formatted_item_data( $object );
+		$context             = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data                = $this->add_additional_fields_to_object( $data, $request );
+		$data                = $this->filter_response_by_context( $data, $context );
+		$response            = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $object, $request ) );
 
 		/**
@@ -487,12 +488,19 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 				return $object;
 			}
 
-			if ( $creating ) {
+			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 				// Make sure customer exists.
-				if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
+				if ( false === get_user_by( 'id', $request['customer_id'] ) ) {
 					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 				}
 
+				// Make sure customer is part of blog.
+				if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id_network',__( 'Customer ID does not belong to this site.', 'woocommerce' ), 400 );
+				}
+			}
+
+			if ( $creating ) {
 				$object->set_created_via( 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 				$object->calculate_totals();
@@ -1642,7 +1650,7 @@ class WC_REST_Orders_Controller extends WC_REST_Legacy_Orders_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['dp'] = array(
-			'default'           => 2,
+			'default'           => wc_get_price_decimals(),
 			'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',

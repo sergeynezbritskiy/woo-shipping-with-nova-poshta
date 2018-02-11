@@ -177,6 +177,9 @@ class WC_Emails {
 		add_action( 'woocommerce_product_on_backorder_notification', array( $this, 'backorder' ) );
 		add_action( 'woocommerce_created_customer_notification', array( $this, 'customer_new_account' ), 10, 3 );
 
+		// Hook for replacing {site_title} in email-footer.
+		add_filter( 'woocommerce_email_footer_text' , array( $this, 'email_footer_replace_site_title' ) );
+
 		// Let 3rd parties unhook the above via this hook
 		do_action( 'woocommerce_email', $this );
 	}
@@ -249,6 +252,17 @@ class WC_Emails {
 	 */
 	public function email_footer() {
 		wc_get_template( 'emails/email-footer.php' );
+	}
+
+	/**
+	 * Filter callback to replace {site_title} in email footer
+	 *
+	 * @since  3.3.0
+	 * @param  string $string Email footer text.
+	 * @return string         Email footer text with any replacements done.
+	 */
+	public function email_footer_replace_site_title( $string ) {
+		return str_replace( '{site_title}', $this->get_blogname(), $string );
 	}
 
 	/**
@@ -468,9 +482,9 @@ class WC_Emails {
 			return;
 		}
 		if ( $plain_text ) {
-			wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order ) );
+			wc_get_template( 'emails/plain/email-addresses.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin ) );
 		} else {
-			wc_get_template( 'emails/email-addresses.php', array( 'order' => $order ) );
+			wc_get_template( 'emails/email-addresses.php', array( 'order' => $order, 'sent_to_admin' => $sent_to_admin ) );
 		}
 	}
 
@@ -544,15 +558,19 @@ class WC_Emails {
 			'order_id' => '',
 		) );
 
-		extract( $args );
-
-		if ( ! $product || ! $quantity || ! ( $order = wc_get_order( $order_id ) ) ) {
+		$order = wc_get_order( $args['order_id'] );
+		if (
+			! $args['product'] ||
+			! is_object( $args['product'] ) ||
+			! $args['quantity'] ||
+			! $order
+		) {
 			return;
 		}
 
 		$subject = sprintf( '[%s] %s', $this->get_blogname(), __( 'Product backorder', 'woocommerce' ) );
-		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $quantity, html_entity_decode( strip_tags( $product->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
-
+		$message = sprintf( __( '%1$s units of %2$s have been backordered in order #%3$s.', 'woocommerce' ), $args['quantity'], html_entity_decode( strip_tags( $args['product']->get_formatted_name() ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $order->get_order_number() );
+		
 		wp_mail(
 			apply_filters( 'woocommerce_email_recipient_backorder', get_option( 'woocommerce_stock_email_recipient' ), $args ),
 			apply_filters( 'woocommerce_email_subject_backorder', $subject, $args ),

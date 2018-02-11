@@ -1,5 +1,6 @@
 /* global wp, woocommerce_admin_meta_boxes_variations, woocommerce_admin, accounting */
 jQuery( function( $ ) {
+    'use strict';
 
 	/**
 	 * Variations actions
@@ -61,9 +62,11 @@ jQuery( function( $ ) {
 		 */
 		variable_manage_stock: function() {
 			$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_manage_stock' ).hide();
+			$( this ).closest( '.woocommerce_variation' ).find( '.hide_if_variation_manage_stock' ).show();
 
 			if ( $( this ).is( ':checked' ) ) {
 				$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_manage_stock' ).show();
+				$( this ).closest( '.woocommerce_variation' ).find( '.hide_if_variation_manage_stock' ).hide();
 			}
 		},
 

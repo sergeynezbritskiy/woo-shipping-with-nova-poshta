@@ -63,9 +63,12 @@ final class WC_Cart_Fees {
 		}
 
 		$this->cart = $cart;
-		add_action( 'woocommerce_cart_emptied', array( $this, 'remove_all_fees' ) );
-		add_action( 'woocommerce_cart_reset', array( $this, 'remove_all_fees' ) );
 	}
+
+	/**
+	 * Register methods for this object on the appropriate WordPress hooks.
+	 */
+	public function init() {}
 
 	/**
 	 * Add a fee. Fee IDs must be unique.
