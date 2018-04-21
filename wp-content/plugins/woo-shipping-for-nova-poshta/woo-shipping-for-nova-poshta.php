@@ -322,8 +322,7 @@ class NovaPoshta extends Base
      */
     protected function getOptions()
     {
-        $this->options = Options::instance();
-        return $this->options;
+        return Options::instance();
     }
 
     /**
@@ -331,8 +330,7 @@ class NovaPoshta extends Base
      */
     protected function getLog()
     {
-        $this->log = Log::instance();
-        return $this->log;
+        return Log::instance();
     }
 
     /**
@@ -341,8 +339,7 @@ class NovaPoshta extends Base
     protected function getDb()
     {
         global $wpdb;
-        $this->db = $wpdb;
-        return $this->db;
+        return $wpdb;
     }
 
     /**
@@ -350,8 +347,7 @@ class NovaPoshta extends Base
      */
     protected function getApi()
     {
-        $this->api = NovaPoshtaApi::instance();
-        return $this->api;
+        return NovaPoshtaApi::instance();
     }
 
     /**

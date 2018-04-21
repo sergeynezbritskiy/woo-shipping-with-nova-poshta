@@ -103,7 +103,7 @@ class Log extends Base
     private static $_instance;
 
     /**
-     * @return Database
+     * @return Log
      */
     public static function instance()
     {
@@ -125,9 +125,9 @@ class Log extends Base
      */
     public function getLogger()
     {
-        $this->logger = new Logger('main');
-        $this->logger->pushHandler(new StreamHandler('path/to/your.log', Logger::WARNING));
-        return $this->logger;
+        $logger = new Logger('main');
+        $logger->pushHandler(new StreamHandler('path/to/your.log', Logger::WARNING));
+        return $logger;
     }
 
     /**
