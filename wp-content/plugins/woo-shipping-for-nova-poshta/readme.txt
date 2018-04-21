@@ -63,26 +63,26 @@ Source code for this plugin is stored on [Github](https://github.com/sergeynezbr
 * Task - rename plugin according to Wordpress.org conventions
 = 1.1.3 =
 * Task - refactoring code, fix NovaPoshta::isNP() method
-* Bug - fix calculating shipping costs for products with empty weight
+* Bugfix - fix calculating shipping costs for products with empty weight
 = 1.1.4 =
-* Bug - fix translations
+* Bugfix - fix translations
 * Task - check compatibility with WooCommerce 2.6.4
 = 1.1.5 =
-* Bug - fix problem with updating addresses within My Account
+* Bugfix - fix problem with updating addresses within My Account
 * Task - refactoring of class Checkout, proper ordering methods and properties
 = 1.2.0 =
 * Task - add backward compatibility up to PHP 5.4.1
 = 1.2.1 =
-* Bug - fix problem with wrong database charset and collation
-* Bug - fix issue with deactivating hook for applications with wpdb prefix not wp_
+* Bugfix - fix problem with wrong database charset and collation
+* Bugfix - fix issue with deactivating hook for applications with wpdb prefix not wp_
 * Task - improve usability, add links to settings page, review page
 * Task - improve translations
 * Task - improve logging
 = 2.0.0 =
 * Task - forward compatibility with Woocommerce 3.x
 = 2.0.1 =
-* Bug - hotfix, revert DatabaseSync class to previous version because of fatal error
+* Bugfix - hotfix, revert DatabaseSync class to previous version because of fatal error
 = 2.0.2 =
-* Bug - handle exception related to expired or wrong API key during synchronisation database
+* Bugfix - handle exception related to expired or wrong API key during synchronisation database
 * Task - refactoring in order to increase readability
 * Task - avoid removing "Choose an option" from warehouses dropdown on Region change
