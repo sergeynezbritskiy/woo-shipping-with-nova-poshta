@@ -1,4 +1,5 @@
 <?php
+
 namespace plugins\NovaPoshta\classes\base;
 
 /**
@@ -55,8 +56,7 @@ class Options extends Base
      */
     protected function getUseFixedPriceOnDelivery()
     {
-        $this->useFixedPriceOnDelivery = $this->shippingMethodSettings[self::USE_FIXED_PRICE_ON_DELIVERY];
-        return $this->useFixedPriceOnDelivery === 'yes';
+        return filter_var($this->shippingMethodSettings[self::USE_FIXED_PRICE_ON_DELIVERY], FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -64,11 +64,7 @@ class Options extends Base
      */
     protected function getFixedPrice()
     {
-        $this->fixedPrice = null;
-        if ($this->useFixedPriceOnDelivery) {
-            $this->fixedPrice = (float)$this->shippingMethodSettings[self::FIXED_PRICE];
-        }
-        return $this->fixedPrice;
+        return $this->useFixedPriceOnDelivery ? (float)$this->shippingMethodSettings[self::FIXED_PRICE] : null;
     }
 
     /**
@@ -76,8 +72,7 @@ class Options extends Base
      */
     public function getLocationsLastUpdateDate()
     {
-        $this->locationsLastUpdateDate = $this->getOption('locations_last_update_date') ?: 0;
-        return $this->locationsLastUpdateDate;
+        return $this->getOption('locations_last_update_date') ?: 0;
     }
 
     /**
@@ -94,8 +89,7 @@ class Options extends Base
      */
     public function getAreasHash()
     {
-        $this->areasHash = $this->getOption('areas_hash') ?: '';
-        return $this->areasHash;
+        return $this->getOption('areas_hash') ?: '';
     }
 
     /**
@@ -112,8 +106,7 @@ class Options extends Base
      */
     public function getCitiesHash()
     {
-        $this->citiesHash = $this->getOption('cities_hash') ?: '';
-        return $this->citiesHash;
+        return $this->getOption('cities_hash') ?: '';
     }
 
     /**
@@ -130,8 +123,7 @@ class Options extends Base
      */
     public function getWarehousesHash()
     {
-        $this->warehousesHash = $this->getOption('warehouses_hash') ?: '';
-        return $this->warehousesHash;
+        return $this->getOption('warehouses_hash') ?: '';
     }
 
     /**
@@ -148,8 +140,7 @@ class Options extends Base
      */
     protected function getShippingMethodSettings()
     {
-        $this->shippingMethodSettings = get_site_option('woocommerce_nova_poshta_shipping_method_settings');
-        return $this->shippingMethodSettings;
+        return get_site_option('woocommerce_nova_poshta_shipping_method_settings');
     }
 
     /**
@@ -157,8 +148,7 @@ class Options extends Base
      */
     protected function getSenderArea()
     {
-        $this->senderArea = $this->shippingMethodSettings[self::AREA];
-        return $this->senderArea;
+        return $this->shippingMethodSettings[self::AREA];
     }
 
     /**
@@ -166,8 +156,7 @@ class Options extends Base
      */
     protected function getSenderCity()
     {
-        $this->senderCity = $this->shippingMethodSettings[self::CITY];
-        return $this->senderCity;
+        return $this->shippingMethodSettings[self::CITY];
     }
 
     /**
@@ -175,14 +164,12 @@ class Options extends Base
      */
     protected function getSenderWarehouse()
     {
-        $this->senderWarehouse = $this->shippingMethodSettings[self::WAREHOUSE];
-        return $this->senderWarehouse;
+        return $this->shippingMethodSettings[self::WAREHOUSE];
     }
 
     protected function getPluginRated()
     {
-        $this->pluginRated = (bool)$this->getOption(self::OPTION_PLUGIN_RATED);
-        return $this->pluginRated;
+        return filter_var($this->getOption(self::OPTION_PLUGIN_RATED), FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -190,8 +177,7 @@ class Options extends Base
      */
     protected function getApiKey()
     {
-        $this->apiKey = $this->shippingMethodSettings[self::API_KEY];
-        return $this->apiKey;
+        return $this->shippingMethodSettings[self::API_KEY];
     }
 
     /**
@@ -199,8 +185,7 @@ class Options extends Base
      */
     public function isDebug()
     {
-        $isDebug = ArrayHelper::getValue($this->shippingMethodSettings, self::DEBUG);
-        return $isDebug === 'yes';
+        return filter_var(ArrayHelper::getValue($this->shippingMethodSettings, self::DEBUG), FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -265,4 +250,5 @@ class Options extends Base
     private function __clone()
     {
     }
+
 }

@@ -28,8 +28,7 @@ class NovaPoshtaApi extends Base
      */
     protected function getApiKey()
     {
-        $this->apiKey = NP()->options->apiKey;
-        return $this->apiKey;
+        return NP()->options->apiKey;
     }
 
     /**

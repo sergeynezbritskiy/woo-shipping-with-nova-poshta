@@ -139,7 +139,7 @@ var NovaPoshtaOptions = (function ($) {
                                     .text(value)
                                 );
                         });
-                        billingWarehouseSelect.find('option').remove();
+                        billingWarehouseSelect.find('option:not(:first-child)').remove();
 
                     } catch (s) {
                         console.log("Error. Response from server was: " + json);
@@ -206,7 +206,7 @@ var NovaPoshtaOptions = (function ($) {
                                     .text(value)
                                 );
                         });
-                        shippingWarehouseSelect.find('option').remove();
+                        shippingWarehouseSelect.find('option:not(:first-child)').remove();
 
                     } catch (s) {
                         console.log("Error. Response from server was: " + json);

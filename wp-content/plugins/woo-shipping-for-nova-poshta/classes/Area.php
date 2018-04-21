@@ -45,6 +45,7 @@ class Area extends Base
     public static function key()
     {
         _doing_it_wrong("Area Type", "You should not call this method from abstract class", "1.0.0");
+        return '';
     }
 
 
@@ -180,8 +181,7 @@ class Area extends Base
      */
     protected function getLocale()
     {
-        $this->locale = get_locale();
-        return $this->locale;
+        return get_locale();
     }
 
     /**
@@ -191,8 +191,7 @@ class Area extends Base
     {
         $table = static::table();
         $query = NP()->db->prepare("SELECT * FROM $table WHERE Ref = %s AND `area_type` = %s", $this->ref, static::key());
-        $this->content = NP()->db->get_row($query);
-        return $this->content;
+        return NP()->db->get_row($query);
     }
 
     /**
@@ -200,10 +199,9 @@ class Area extends Base
      */
     protected function getDescription()
     {
-        $this->description = (($this->locale == NovaPoshta::LOCALE_RU) && $this->content->description_ru)
+        return (($this->locale == NovaPoshta::LOCALE_RU) && $this->content->description_ru)
             ? $this->content->description_ru
             : $this->content->description;
-        return $this->description;
     }
 
     /**
@@ -211,7 +209,6 @@ class Area extends Base
      */
     protected function getRef()
     {
-        $this->ref = $this->content->ref;
-        return $this->ref;
+        return $this->content->ref;
     }
 }

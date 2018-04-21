@@ -1,11 +1,13 @@
 <?php
-/*
-Plugin Name: Woo Shipping for Nova Poshta
-Plugin URI: https://ru.wordpress.org/plugins/woo-shipping-for-nova-poshta
-Description: Plugin for administrating Nova Poshta shipping method within Woocommerce Plugin
-Version: 2.0.1
-Author: Sergey Nezbritskiy
-*/
+/**
+ * Plugin Name: Woo Shipping for Nova Poshta
+ * Plugin URI: https://ru.wordpress.org/plugins/woo-shipping-for-nova-poshta
+ * Description: Plugin for administrating Nova Poshta shipping method within Woocommerce Plugin
+ * Version: 2.0.2
+ * Author: Sergey Nezbritskiy
+ * Text Domain: woo-shipping-for-nova-poshta
+ * Domain Path: /i18n/
+ */
 
 /*  Copyright 2016 Altair Solutions, Ltd (email: support@altair-solutions.com.ua)
 
@@ -322,8 +324,7 @@ class NovaPoshta extends Base
      */
     protected function getOptions()
     {
-        $this->options = Options::instance();
-        return $this->options;
+        return Options::instance();
     }
 
     /**
@@ -331,8 +332,7 @@ class NovaPoshta extends Base
      */
     protected function getLog()
     {
-        $this->log = Log::instance();
-        return $this->log;
+        return Log::instance();
     }
 
     /**
@@ -341,8 +341,7 @@ class NovaPoshta extends Base
     protected function getDb()
     {
         global $wpdb;
-        $this->db = $wpdb;
-        return $this->db;
+        return $wpdb;
     }
 
     /**
@@ -350,8 +349,7 @@ class NovaPoshta extends Base
      */
     protected function getApi()
     {
-        $this->api = NovaPoshtaApi::instance();
-        return $this->api;
+        return NovaPoshtaApi::instance();
     }
 
     /**
