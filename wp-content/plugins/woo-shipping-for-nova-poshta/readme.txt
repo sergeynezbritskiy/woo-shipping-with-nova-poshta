@@ -3,7 +3,7 @@ Contributors: snezbritskiy
 Tags: eCommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
 Tested up to: 4.9.1
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,8 +44,7 @@ Automatic updates should work like a charm; as always though, ensure you backup 
 == Known issues ==
 
 1. Shipping calculator flushes shipping price when you select Nova Poshta. Is reproducing if you have more then two shipping methods available only. After you update shipping price for Nova Poshta, Nova Poshta is not selected, and when you try to select Nova Poshta, the price is flushing
-2. Uncaught exception from Nova Poshta API, if your API key is wrong or expired. This happens during database syncronization process. So when your key will expire and the time to upgrade database will come, you will get an uncaught exception and would not be able to access your site
-3. Shipping zones are not supporting.
+2. Shipping zones are not supporting.
 
 == Plugin contributing ==
 
@@ -83,3 +82,7 @@ Source code for this plugin is stored on [Github](https://github.com/sergeynezbr
 * Task - forward compatibility with Woocommerce 3.x
 = 2.0.1 =
 * Bug - hotfix, revert DatabaseSync class to previous version because of fatal error
+= 2.0.2 =
+* Bug - handle exception related to expired or wrong API key during synchronisation database
+* Task - refactoring in order to increase readability
+* Task - avoid removing "Choose an option" from warehouses dropdown on Region change
