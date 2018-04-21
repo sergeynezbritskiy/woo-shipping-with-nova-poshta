@@ -1,4 +1,5 @@
 <?php
+
 namespace plugins\NovaPoshta\classes;
 
 use plugins\NovaPoshta\classes\base\Base;
@@ -28,21 +29,28 @@ class DatabaseSync extends Base
     public function synchroniseLocations()
     {
         if ($this->requiresUpdate()) {
+
             $this->log->info("Synchronization required", Log::LOCATIONS_UPDATE);
             $this->db->query('START TRANSACTION');
 
-            $this->updateAreas();
-            $this->updateCities();
-            $this->updateWarehouses();
-            $this->setLocationsLastUpdateDate($this->updatedAt);
-
-            if (!$this->db->last_error) {
-                $this->log->info("Synchronization finished successfully", Log::LOCATIONS_UPDATE);
-                $this->db->query('COMMIT');
-            } else {
-                $this->log->error("Synchronization failed. Rollback.", Log::LOCATIONS_UPDATE);
+            try {
+                $this->updateAreas();
+                $this->updateCities();
+                $this->updateWarehouses();
+                $this->setLocationsLastUpdateDate($this->updatedAt);
+                if (!$this->db->last_error) {
+                    $this->log->info("Synchronization finished successfully", Log::LOCATIONS_UPDATE);
+                    $this->db->query('COMMIT');
+                } else {
+                    $this->log->error("Synchronization failed. Rollback.", Log::LOCATIONS_UPDATE);
+                    $this->db->query('ROLLBACK');
+                }
+            } catch (\Exception $e) {
+                $this->addError($e);
+                $this->log->error("Synchronization failed. " . $e->getMessage(), Log::LOCATIONS_UPDATE);
                 $this->db->query('ROLLBACK');
             }
+
             $this->log->info("", Log::LOCATIONS_UPDATE);
         }
     }
@@ -319,6 +327,18 @@ class DatabaseSync extends Base
     }
 
     /**
+     * @param \Exception $exception
+     */
+    private function addError(\Exception $exception)
+    {
+        add_action('admin_notices', function () use ($exception) {
+            $class = 'notice notice-error';
+            $message = esc_html('Nova Poshta synchronisation failed: ' . $exception->getMessage());
+            printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), $message);
+        });
+    }
+
+    /**
      * @access private
      */
     private function __construct()
@@ -331,4 +351,5 @@ class DatabaseSync extends Base
     private function __clone()
     {
     }
+
 }
