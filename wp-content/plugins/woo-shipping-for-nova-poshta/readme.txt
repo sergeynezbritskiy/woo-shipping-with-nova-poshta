@@ -3,7 +3,7 @@ Contributors: snezbritskiy
 Tags: eCommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
 Tested up to: 4.9.1
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,3 +86,5 @@ Source code for this plugin is stored on [Github](https://github.com/sergeynezbr
 * Bugfix - handle exception related to expired or wrong API key during synchronisation database
 * Task - refactoring in order to increase readability
 * Task - avoid removing "Choose an option" from warehouses dropdown on Region change
+= 2.0.3 =
+* Bugfix - restore missing composer dependencies
