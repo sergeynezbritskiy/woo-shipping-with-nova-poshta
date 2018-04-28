@@ -7,7 +7,7 @@
 # Publish new release
  
 * gulp build
-* glup svn:tag --tag="{your-version-tag}"
+* glup svn:tag --t="{your-version-tag}"
 * gulp svn:push
 * cd svn.wordpress.org
 * svn add tags/{your-version-tag}
