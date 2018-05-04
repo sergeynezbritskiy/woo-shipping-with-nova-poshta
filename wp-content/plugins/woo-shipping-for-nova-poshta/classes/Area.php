@@ -156,11 +156,14 @@ class Area extends Base
         $areaRef = ArrayHelper::getValue($_POST, 'parent_area_ref', null);
         $name = $_POST['name'];
         $areas = self::findByNameSuggestionAndParentArea($name, $areaRef);
+        $result = [];
         foreach ($areas as $area) {
-            $area->getRef();
-            $area->getDescription();
+            $result[] = [
+                'ref' => $area->ref,
+                'description' => $area->description,
+            ];
         }
-        echo json_encode($areas);
+        echo json_encode($result);
         exit;
     }
 
