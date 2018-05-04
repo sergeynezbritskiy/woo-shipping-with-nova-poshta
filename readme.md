@@ -5,7 +5,10 @@
 * svn co https://plugins.svn.wordpress.org/woo-shipping-for-nova-poshta svn.wordpress.org
 
 # Publish new release
- 
+
+* cd wp-content/plugins/woo-shipping-for-nova-poshta
+* composer install
+* cd ../../../
 * gulp build
 * glup svn:tag --t="{your-version-tag}"
 * gulp svn:push
