@@ -31,11 +31,14 @@ class City extends Area
         }else{
             $areas = self::findByNameSuggestionAndParentArea($name, $areaRef);
         }
+        $result = [];
         foreach ($areas as $area) {
-            $area->getRef();
-            $area->getDescription();
+            $result[] = [
+                'ref' => $area->ref,
+                'description' => $area->description,
+            ];
         }
-        echo json_encode($areas);
+        echo json_encode($result);
         exit;
     }
 }
