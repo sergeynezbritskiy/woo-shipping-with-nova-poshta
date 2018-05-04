@@ -23,7 +23,11 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         $this->id = NOVA_POSHTA_SHIPPING_METHOD;
         $this->method_title = __('Nova Poshta', NOVA_POSHTA_DOMAIN);
         $this->method_description = $this->getDescription();
-        $this->supports = array_merge($this->supports, ['shipping-zones']);
+        $this->supports = array_merge($this->supports, [
+            'shipping-zones',
+            'instance-settings',
+//            'instance-settings-modal',
+        ]);
 
         $this->init();
 

@@ -256,7 +256,7 @@ class NovaPoshta extends Base
      */
     public function addNovaPoshtaShippingMethod($methods)
     {
-        $methods[] = 'WC_NovaPoshta_Shipping_Method';
+        $methods[NOVA_POSHTA_SHIPPING_METHOD] = 'WC_NovaPoshta_Shipping_Method';
         return $methods;
     }
 
