@@ -23,17 +23,17 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         $this->id = NOVA_POSHTA_SHIPPING_METHOD;
         $this->method_title = __('Nova Poshta', NOVA_POSHTA_DOMAIN);
         $this->method_description = $this->getDescription();
-        $this->supports = array_merge($this->supports, [
+        $this->supports = [
+            'settings',
             'shipping-zones',
             'instance-settings',
-//            'instance-settings-modal',
-        ]);
+        ];
 
         $this->init();
 
         // Get setting values
-        $this->title = $this->settings['title'];
-        $this->enabled = $this->settings['enabled'];
+        $this->title = $this->get_option('title');
+        $this->enabled = $this->get_option('enabled');
     }
 
     /**
@@ -55,6 +55,14 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
      */
     public function init_form_fields()
     {
+        $this->instance_form_fields = array(
+            'title' => array(
+                'title' => __('Nova Poshta', NOVA_POSHTA_DOMAIN),
+                'type' => 'text',
+                'description' => __('This controls the title which the user sees during checkout.', NOVA_POSHTA_DOMAIN),
+                'default' => __('Nova Poshta', NOVA_POSHTA_DOMAIN)
+            ),
+        );
         $this->form_fields = array(
             'enabled' => array(
                 'title' => __('Enable/Disable', NOVA_POSHTA_DOMAIN),
@@ -62,12 +70,6 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
                 'type' => 'checkbox',
                 'description' => '',
                 'default' => 'no'
-            ),
-            'title' => array(
-                'title' => __('Nova Poshta', NOVA_POSHTA_DOMAIN),
-                'type' => 'text',
-                'description' => __('This controls the title which the user sees during checkout.', NOVA_POSHTA_DOMAIN),
-                'default' => __('Nova Poshta', NOVA_POSHTA_DOMAIN)
             ),
             Options::DEBUG => array(
                 'title' => __('Enable Debug Mode', NOVA_POSHTA_DOMAIN),
@@ -199,4 +201,5 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         }
         return implode($descriptions, '<br>');
     }
+
 }
