@@ -54,6 +54,7 @@ require_once __DIR__ . '/autoload.php';
  * @property NovaPoshtaApi api
  * @property Options options
  * @property Log log
+ * @property string pluginVersion
  */
 class NovaPoshta extends Base
 {
@@ -276,7 +277,7 @@ class NovaPoshta extends Base
      */
     public function activatePlugin()
     {
-        Database::instance()->createTables();
+        Database::instance()->upgrade();
         DatabaseSync::instance()->synchroniseLocations();
     }
 
@@ -285,7 +286,7 @@ class NovaPoshta extends Base
      */
     public function deactivatePlugin()
     {
-        Database::instance()->dropTables();
+        Database::instance()->downgrade();
         Options::instance()->clearOptions();
     }
 
@@ -350,6 +351,16 @@ class NovaPoshta extends Base
     protected function getApi()
     {
         return NovaPoshtaApi::instance();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getPluginVersion()
+    {
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        $pluginData = get_plugin_data(__FILE__);
+        return $pluginData['Version'];
     }
 
     /**

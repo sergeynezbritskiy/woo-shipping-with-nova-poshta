@@ -38,52 +38,24 @@ class Database extends Base
         return self::$_instance;
     }
 
-    public function createTables()
+    /**
+     * Database upgrade entry point
+     */
+    public function upgrade()
     {
-        $this->createTableAreas();
+        if (version_compare(NP()->pluginVersion, '2.1.0', '>=')) {
+            $this->dropTableByName($this->db->prefix . 'nova_poshta_area');
+        }
+        $this->dropTables();
+        $this->createTables();
     }
 
-    public function dropTables()
+    /**
+     * Database downgrade entry point
+     */
+    public function downgrade()
     {
-        $this->dropTableAreas();
-    }
-
-    private function createTableAreas()
-    {
-        $table = Area::table();
-        $region = Area::KEY_REGION;
-        $city = Area::KEY_CITY;
-        $warehouse = Area::KEY_WAREHOUSE;
-
-        // http://stackoverflow.com/questions/766809/whats-the-difference-between-utf8-general-ci-and-utf8-unicode-ci
-        $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
-
-        $query = <<<QUERY
-            CREATE TABLE IF NOT EXISTS {$table} (
-                `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-                `ref` VARCHAR(50) NOT NULL,
-                `area_type` ENUM('$region','$city','$warehouse') NOT NULL,
-                `description` TINYTEXT NOT NULL,
-                `description_ru` TINYTEXT,
-                `parent_area_ref` VARCHAR(50) DEFAULT NULL,
-                `updated_at` INT(10) UNSIGNED NOT NULL,
-                `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY `id` (`id`),
-                UNIQUE KEY `uk_ref` (`ref`)
-            ){$tableOptions}
-QUERY;
-        $this->db->query($query);
-    }
-
-    private function dropTableAreas()
-    {
-        $this->dropTableByName(Area::table());
-    }
-
-    private function dropTableByName($table)
-    {
-        $query = "DROP TABLE IF EXISTS {$table}";
-        $this->db->query($query);
+        $this->dropTables();
     }
 
     /**
@@ -91,8 +63,73 @@ QUERY;
      */
     protected function getDb()
     {
-        global $wpdb;
-        return $wpdb;
+        return NP()->db;
+    }
+
+    private function dropTables()
+    {
+        $this->dropTableByName(Warehouse::table());
+        $this->dropTableByName(City::table());
+        $this->dropTableByName(Region::table());
+    }
+
+    private function createTables()
+    {
+        $regionTableName = Region::table();
+        $cityTableName = City::table();
+        $warehouseTableName = Warehouse::table();
+
+        if ($this->db->has_cap('collation')) {
+            $collate = $this->db->get_charset_collate();
+        } else {
+            $collate = '';
+        }
+
+        $regionQuery = <<<AREA
+CREATE TABLE {$regionTableName} (
+    `ref` VARCHAR(50) NOT NULL,
+    `description` VARCHAR(256) NOT NULL,
+    `description_ru` VARCHAR(256) NOT NULL,
+    `updated_at` INT(10) UNSIGNED NOT NULL,
+    PRIMARY KEY (`ref`)
+) $collate;
+AREA;
+        $cityQuery = <<<CITY
+CREATE TABLE {$cityTableName} (
+    `ref` VARCHAR(50) NOT NULL,
+    `description` VARCHAR(256) NOT NULL,
+    `description_ru` VARCHAR(256) NOT NULL,
+    `parent_ref` VARCHAR(50) NOT NULL,
+    `updated_at` INT(10) UNSIGNED NOT NULL,
+    PRIMARY KEY (`ref`),
+    FOREIGN KEY (`parent_ref`) REFERENCES {$regionTableName}(`ref`) ON DELETE CASCADE 
+) $collate;
+CITY;
+        $warehouseQuery = <<<WAREHOUSE
+CREATE TABLE {$warehouseTableName} (
+    `ref` VARCHAR(50) NOT NULL,
+    `description` VARCHAR(256) NOT NULL,
+    `description_ru` VARCHAR(256) NOT NULL,
+    `parent_ref` VARCHAR(50) NOT NULL,
+    `updated_at` INT(10) UNSIGNED NOT NULL,
+    PRIMARY KEY (`ref`),
+    FOREIGN KEY (`parent_ref`) REFERENCES {$cityTableName}(`ref`) ON DELETE CASCADE 
+) $collate;
+WAREHOUSE;
+
+        $this->db->query($regionQuery);
+        $this->db->query($cityQuery);
+        $this->db->query($warehouseQuery);
+
+    }
+
+    /**
+     * @param string $table
+     */
+    private function dropTableByName($table)
+    {
+        $query = "DROP TABLE IF EXISTS {$table}";
+        $this->db->query($query);
     }
 
     /**

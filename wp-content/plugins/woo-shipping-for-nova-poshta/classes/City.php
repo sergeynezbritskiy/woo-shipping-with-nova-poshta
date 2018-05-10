@@ -11,6 +11,14 @@ class City extends Area
 {
 
     /**
+     * @return string
+     */
+    public static function table()
+    {
+        return NP()->db->prefix . 'nova_poshta_city';
+    }
+
+    /**
      * @param string $type
      * @return string
      */

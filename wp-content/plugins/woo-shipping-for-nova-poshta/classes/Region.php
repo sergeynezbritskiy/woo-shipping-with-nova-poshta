@@ -8,6 +8,15 @@ namespace plugins\NovaPoshta\classes;
  */
 class Region extends Area
 {
+
+    /**
+     * @return string
+     */
+    public static function table()
+    {
+        return NP()->db->prefix . 'nova_poshta_region';
+    }
+
     /**
      * @param string $type
      * @return string

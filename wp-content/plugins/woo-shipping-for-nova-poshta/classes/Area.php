@@ -64,7 +64,8 @@ class Area extends Base
      */
     public static function table()
     {
-        return NP()->db->prefix . 'nova_poshta_area';
+        _doing_it_wrong("Area table", "You have to override this method in child classes", "2.1.0");
+        return '';
     }
 
     /**
