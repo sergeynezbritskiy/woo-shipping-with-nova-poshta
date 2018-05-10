@@ -16,6 +16,7 @@ use wpdb;
  * @property int $locationsLastUpdateDate
  * @property int updatedAt
  * @property Log log
+ * @property array areas
  */
 class DatabaseSync extends Base
 {
@@ -93,7 +94,7 @@ class DatabaseSync extends Base
                 "('%s', '%s', '%s', %d)",
                 $area['Ref'],
                 $area['Description'],
-                $area['Description'],
+                $this->getDescriptionRu($area),
                 $updatedAt
             );
         }
@@ -123,7 +124,7 @@ class DatabaseSync extends Base
         $rowsAffected = 0;
         $limit = 300;
         while (count($cities = NP()->api->getCities($page++, $limit)) > 0) {
-            $rowsAffected += $this->saveCities($cities, $updatedAt);
+            $rowsAffected += $this->saveCitiesPage($cities, $updatedAt);
         }
 
         $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d", $updatedAt);
@@ -132,7 +133,7 @@ class DatabaseSync extends Base
         $this->log->info("Cities were successfully updated, affected $rowsAffected rows, deleted $rowsDeleted rows", Log::LOCATIONS_UPDATE);
     }
 
-    private function saveCities($cities, $updatedAt)
+    private function saveCitiesPage($cities, $updatedAt)
     {
         $table = City::table();
         $insert = array();
@@ -169,7 +170,7 @@ class DatabaseSync extends Base
         $page = 1;
         $limit = 300;
         while (count($warehouses = NP()->api->getWarehouses(null, $page++, $limit)) > 0) {
-            $rowsAffected += $this->saveWarehouses($warehouses, $updatedAt);
+            $rowsAffected += $this->updateWarehousesPage($warehouses, $updatedAt);
         }
 
         $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d", $updatedAt);
@@ -178,7 +179,7 @@ class DatabaseSync extends Base
         $this->log->info("Warehouses were successfully updated, affected $rowsAffected rows, deleted $rowsDeleted rows", Log::LOCATIONS_UPDATE);
     }
 
-    private function saveWarehouses($warehouses, $updatedAt)
+    private function updateWarehousesPage($warehouses, $updatedAt)
     {
         $table = Warehouse::table();
         $insert = array();
@@ -202,6 +203,14 @@ class DatabaseSync extends Base
             `updated_at` = VALUES(`updated_at`)';
         return $this->db->query($queryInsert);
 
+    }
+
+    /**
+     * @return array
+     */
+    protected function getAreas()
+    {
+        return require NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'vendor/lis-dev/nova-poshta-api-2/src/Delivery/NovaPoshtaApi2Areas.php';
     }
 
     /**
@@ -304,6 +313,16 @@ class DatabaseSync extends Base
     {
         NP()->options->setWarehousesHash($hash);
         $this->warehousesHash = $hash;
+    }
+
+    private function getDescriptionRu($area)
+    {
+        $areas = $this->areas;
+        if (array_key_exists($area['Ref'], $areas)) {
+            return $areas[$area['Ref']]['AreaRu'];
+        } else {
+            return $area['Description'];
+        }
     }
 
     /**
