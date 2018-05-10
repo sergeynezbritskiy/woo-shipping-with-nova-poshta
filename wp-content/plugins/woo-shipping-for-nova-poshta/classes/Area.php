@@ -74,7 +74,7 @@ class Area extends Base
     public static function findAll()
     {
         $table = static::table();
-        $query = NP()->db->prepare("SELECT * FROM $table WHERE `area_type` = %s", static::key());
+        $query = "SELECT * FROM $table";
         return self::findByQuery($query);
     }
 
@@ -84,7 +84,7 @@ class Area extends Base
      */
     public static function findByParentAreaRef($areaRef)
     {
-        $query = NP()->db->prepare("SELECT * FROM " . static::table() . " WHERE `parent_area_ref` = '%s' AND `area_type`='%s'", $areaRef, static::key());
+        $query = NP()->db->prepare("SELECT * FROM " . static::table() . " WHERE `parent_ref` = '%s' ", $areaRef);
         return self::findByQuery($query);
     }
 
@@ -97,10 +97,9 @@ class Area extends Base
         $table = static::table();
         $a = '%';
         $query = NP()->db->prepare(
-            "SELECT * FROM $table WHERE (`description` LIKE CONCAT(%s, %s, %s) OR `description_ru` LIKE CONCAT(%s, %s, %s)) AND (`area_type`=%s)",
+            "SELECT * FROM $table WHERE (`description` LIKE CONCAT(%s, %s, %s) OR `description_ru` LIKE CONCAT(%s, %s, %s))",
             $a, $name, $a,
-            $a, $name, $a,
-            static::key()
+            $a, $name, $a
         );
         return self::findByQuery($query);
     }
@@ -131,7 +130,7 @@ class Area extends Base
     public static function findByRef($ref)
     {
         $table = static::table();
-        $query = NP()->db->prepare("SELECT * FROM $table WHERE Ref = %s AND `area_type` = %s", $ref, static::key());
+        $query = NP()->db->prepare("SELECT * FROM $table WHERE ref = %s", $ref);
         $result = NP()->db->get_row($query);
         return new static($result);
     }
@@ -141,7 +140,7 @@ class Area extends Base
      */
     public static function ajaxGetAreasListByParentAreaRef()
     {
-        $areaRef = $_POST['parent_area_ref'];
+        $areaRef = $_POST['parent_ref'];
         $cities = static::findByParentAreaRef($areaRef);
         $optionsList = OptionsHelper::getList($cities);
         echo json_encode($optionsList);
@@ -193,7 +192,7 @@ class Area extends Base
     protected function getContent()
     {
         $table = static::table();
-        $query = NP()->db->prepare("SELECT * FROM $table WHERE Ref = %s AND `area_type` = %s", $this->ref, static::key());
+        $query = NP()->db->prepare("SELECT * FROM $table WHERE ref = %s", $this->ref);
         return NP()->db->get_row($query);
     }
 

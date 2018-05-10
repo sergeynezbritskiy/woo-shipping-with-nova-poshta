@@ -123,7 +123,7 @@ var NovaPoshtaOptions = (function ($) {
                 method: "POST",
                 data: {
                     'action': NovaPoshtaHelper.getCitiesAction,
-                    'parent_area_ref': areaRef
+                    'parent_ref': areaRef
                 },
                 success: function (json) {
                     try {
@@ -157,7 +157,7 @@ var NovaPoshtaOptions = (function ($) {
                 method: "POST",
                 data: {
                     'action': NovaPoshtaHelper.getWarehousesAction,
-                    'parent_area_ref': cityRef
+                    'parent_ref': cityRef
                 },
                 success: function (json) {
                     try {
@@ -190,7 +190,7 @@ var NovaPoshtaOptions = (function ($) {
                 method: "POST",
                 data: {
                     'action': NovaPoshtaHelper.getCitiesAction,
-                    'parent_area_ref': areaRef
+                    'parent_ref': areaRef
                 },
                 success: function (json) {
                     try {
@@ -224,7 +224,7 @@ var NovaPoshtaOptions = (function ($) {
                 method: "POST",
                 data: {
                     'action': NovaPoshtaHelper.getWarehousesAction,
-                    'parent_area_ref': cityRef
+                    'parent_ref': cityRef
                 },
                 success: function (json) {
                     try {
