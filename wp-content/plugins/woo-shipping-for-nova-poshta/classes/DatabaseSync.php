@@ -28,13 +28,13 @@ class DatabaseSync extends Base
      */
     public function synchroniseLocations()
     {
-        if (false && $this->requiresUpdate()) {
+        if ($this->requiresUpdate()) {
 
             $this->log->info("Synchronization required", Log::LOCATIONS_UPDATE);
             $this->db->query('START TRANSACTION');
 
             try {
-                //  $this->updateAreas();
+                $this->updateAreas();
                 $this->updateCities();
                 $this->updateWarehouses();
                 $this->setLocationsLastUpdateDate($this->updatedAt);
@@ -60,7 +60,6 @@ class DatabaseSync extends Base
      */
     private function requiresUpdate()
     {
-        if (true) return true;
         return ($this->locationsLastUpdateDate + $this->interval) < time();
     }
 
