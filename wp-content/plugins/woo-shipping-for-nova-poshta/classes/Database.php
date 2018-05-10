@@ -66,18 +66,8 @@ class Database extends Base
         return NP()->db;
     }
 
-    private function dropTables()
-    {
-        $this->dropTableByName(Warehouse::table());
-        $this->dropTableByName(City::table());
-        $this->dropTableByName(Region::table());
-    }
-
     private function createTables()
     {
-        $regionTableName = Region::table();
-        $cityTableName = City::table();
-        $warehouseTableName = Warehouse::table();
 
         if ($this->db->has_cap('collation')) {
             $collate = $this->db->get_charset_collate();
@@ -85,42 +75,62 @@ class Database extends Base
             $collate = '';
         }
 
+        /*
+         * create Regions table
+         */
+        $regionTableName = Region::table();
         $regionQuery = <<<AREA
-CREATE TABLE {$regionTableName} (
-    `ref` VARCHAR(50) NOT NULL,
-    `description` VARCHAR(256) NOT NULL,
-    `description_ru` VARCHAR(256) NOT NULL,
-    `updated_at` INT(10) UNSIGNED NOT NULL,
-    PRIMARY KEY (`ref`)
-) $collate;
+            CREATE TABLE {$regionTableName} (
+                `ref` VARCHAR(50) NOT NULL,
+                `description` VARCHAR(256) NOT NULL,
+                `description_ru` VARCHAR(256) NOT NULL,
+                `updated_at` INT(10) UNSIGNED NOT NULL,
+                PRIMARY KEY (`ref`)
+            ) $collate;
 AREA;
-        $cityQuery = <<<CITY
-CREATE TABLE {$cityTableName} (
-    `ref` VARCHAR(50) NOT NULL,
-    `description` VARCHAR(256) NOT NULL,
-    `description_ru` VARCHAR(256) NOT NULL,
-    `parent_ref` VARCHAR(50) NOT NULL,
-    `updated_at` INT(10) UNSIGNED NOT NULL,
-    PRIMARY KEY (`ref`),
-    FOREIGN KEY (`parent_ref`) REFERENCES {$regionTableName}(`ref`) ON DELETE CASCADE 
-) $collate;
-CITY;
-        $warehouseQuery = <<<WAREHOUSE
-CREATE TABLE {$warehouseTableName} (
-    `ref` VARCHAR(50) NOT NULL,
-    `description` VARCHAR(256) NOT NULL,
-    `description_ru` VARCHAR(256) NOT NULL,
-    `parent_ref` VARCHAR(50) NOT NULL,
-    `updated_at` INT(10) UNSIGNED NOT NULL,
-    PRIMARY KEY (`ref`),
-    FOREIGN KEY (`parent_ref`) REFERENCES {$cityTableName}(`ref`) ON DELETE CASCADE 
-) $collate;
-WAREHOUSE;
-
         $this->db->query($regionQuery);
+
+        /*
+         * Create cities table
+         */
+        $cityTableName = City::table();
+        $cityQuery = <<<CITY
+            CREATE TABLE {$cityTableName} (
+                `ref` VARCHAR(50) NOT NULL,
+                `description` VARCHAR(256) NOT NULL,
+                `description_ru` VARCHAR(256) NOT NULL,
+                `parent_ref` VARCHAR(50) NOT NULL,
+                `updated_at` INT(10) UNSIGNED NOT NULL,
+                PRIMARY KEY (`ref`),
+                FOREIGN KEY (`parent_ref`) REFERENCES {$regionTableName}(`ref`) ON DELETE CASCADE 
+            ) $collate;
+CITY;
         $this->db->query($cityQuery);
+
+        /*
+         * create warehouses table
+         */
+        $warehouseTableName = Warehouse::table();
+        $warehouseQuery = <<<WAREHOUSE
+            CREATE TABLE {$warehouseTableName} (
+                `ref` VARCHAR(50) NOT NULL,
+                `description` VARCHAR(256) NOT NULL,
+                `description_ru` VARCHAR(256) NOT NULL,
+                `parent_ref` VARCHAR(50) NOT NULL,
+                `updated_at` INT(10) UNSIGNED NOT NULL,
+                PRIMARY KEY (`ref`),
+                FOREIGN KEY (`parent_ref`) REFERENCES {$cityTableName}(`ref`) ON DELETE CASCADE 
+            ) $collate;
+WAREHOUSE;
         $this->db->query($warehouseQuery);
 
+    }
+
+    private function dropTables()
+    {
+        $this->dropTableByName(Warehouse::table());
+        $this->dropTableByName(City::table());
+        $this->dropTableByName(Region::table());
     }
 
     /**
