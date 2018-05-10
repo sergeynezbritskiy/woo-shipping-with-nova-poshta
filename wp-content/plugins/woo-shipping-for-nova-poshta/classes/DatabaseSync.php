@@ -2,23 +2,13 @@
 
 namespace plugins\NovaPoshta\classes;
 
-use plugins\NovaPoshta\classes\base\Base;
-use wpdb;
+use plugins\NovaPoshta\classes\base\DatabaseSync as BaseDatabaseSync;
 
 /**
  * Class DatabaseSync
  * @package plugins\NovaPoshta\classes
- * @property int interval
- * @property wpdb db
- * @property string $areasHash
- * @property string citiesHash
- * @property string warehousesHash
- * @property int $locationsLastUpdateDate
- * @property int updatedAt
- * @property Log log
- * @property array areas
  */
-class DatabaseSync extends Base
+class DatabaseSync extends BaseDatabaseSync
 {
 
     /**
@@ -121,10 +111,10 @@ class DatabaseSync extends Base
         $table = City::table();
         $updatedAt = $this->updatedAt;
         $page = 1;
-        $rowsAffected = 0;
         $limit = 300;
+        $rowsAffected = 0;
         while (count($cities = NP()->api->getCities($page++, $limit)) > 0) {
-            $rowsAffected += $this->saveCitiesPage($cities, $updatedAt);
+            $rowsAffected += $this->saveCitiesPage($cities);
         }
 
         $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d", $updatedAt);
@@ -133,9 +123,14 @@ class DatabaseSync extends Base
         $this->log->info("Cities were successfully updated, affected $rowsAffected rows, deleted $rowsDeleted rows", Log::LOCATIONS_UPDATE);
     }
 
-    private function saveCitiesPage($cities, $updatedAt)
+    /**
+     * @param array $cities
+     * @return int
+     */
+    private function saveCitiesPage($cities)
     {
         $table = City::table();
+        $updatedAt = $this->updatedAt;
         $insert = array();
         foreach ($cities as $city) {
             $insert[] = $this->db->prepare(
@@ -165,12 +160,11 @@ class DatabaseSync extends Base
     {
         $table = Warehouse::table();
         $updatedAt = $this->updatedAt;
-
         $rowsAffected = 0;
         $page = 1;
         $limit = 300;
         while (count($warehouses = NP()->api->getWarehouses(null, $page++, $limit)) > 0) {
-            $rowsAffected += $this->updateWarehousesPage($warehouses, $updatedAt);
+            $rowsAffected += $this->updateWarehousesPage($warehouses);
         }
 
         $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d", $updatedAt);
@@ -179,9 +173,14 @@ class DatabaseSync extends Base
         $this->log->info("Warehouses were successfully updated, affected $rowsAffected rows, deleted $rowsDeleted rows", Log::LOCATIONS_UPDATE);
     }
 
-    private function updateWarehousesPage($warehouses, $updatedAt)
+    /**
+     * @param array $warehouses
+     * @return int
+     */
+    private function updateWarehousesPage($warehouses)
     {
         $table = Warehouse::table();
+        $updatedAt = $this->updatedAt;
         $insert = array();
         foreach ($warehouses as $warehouse) {
             $insert[] = $this->db->prepare(
@@ -206,48 +205,6 @@ class DatabaseSync extends Base
     }
 
     /**
-     * @return array
-     */
-    protected function getAreas()
-    {
-        return require NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'vendor/lis-dev/nova-poshta-api-2/src/Delivery/NovaPoshtaApi2Areas.php';
-    }
-
-    /**
-     * @return int
-     */
-    protected function getInterval()
-    {
-        //604800 = 60*60*24*7 (update every week)
-        //86400 =60*60*24 (update every day)
-        return 86400;
-    }
-
-    /**
-     * @return Log
-     */
-    protected function getLog()
-    {
-        return NP()->log;
-    }
-
-    /**
-     * @return wpdb
-     */
-    protected function getDb()
-    {
-        return NP()->db;
-    }
-
-    /**
-     * @return int
-     */
-    protected function getLocationsLastUpdateDate()
-    {
-        return NP()->options->locationsLastUpdateDate;
-    }
-
-    /**
      * @param int $value
      */
     private function setLocationsLastUpdateDate($value)
@@ -257,64 +214,9 @@ class DatabaseSync extends Base
     }
 
     /**
-     * @return int
-     */
-    protected function getUpdatedAt()
-    {
-        return time();
-    }
-
-    /**
+     * @param array $area
      * @return string
      */
-    protected function getAreasHash()
-    {
-        return NP()->options->areasHash;
-    }
-
-    /**
-     * @param string $hash
-     */
-    protected function setAreasHash($hash)
-    {
-        NP()->options->setAreasHash($hash);
-        $this->areasHash = $hash;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getCitiesHash()
-    {
-        return NP()->options->citiesHash;
-    }
-
-    /**
-     * @param string $hash
-     */
-    protected function setCitiesHash($hash)
-    {
-        NP()->options->setCitiesHash($hash);
-        $this->citiesHash = $hash;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getWarehousesHash()
-    {
-        return NP()->options->getWarehousesHash();
-    }
-
-    /**
-     * @param string $hash
-     */
-    protected function setWarehousesHash($hash)
-    {
-        NP()->options->setWarehousesHash($hash);
-        $this->warehousesHash = $hash;
-    }
-
     private function getDescriptionRu($area)
     {
         $areas = $this->areas;
