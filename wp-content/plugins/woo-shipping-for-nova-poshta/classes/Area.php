@@ -114,13 +114,12 @@ class Area extends Base
     {
         $table = static::table();
         $a = '%';
-        $parentAreaCond = (is_null($parentRef)) ? " AND (`parent_area_ref` IS NULL)" : " AND (`parent_area_ref` = '$parentRef')";
+        $parentAreaCond = $parentRef !== null ? " AND (`parent_ref` = '$parentRef')" : "";
         $query = NP()->db->prepare(
-            "SELECT * FROM $table WHERE (`description` LIKE CONCAT(%s, %s, %s) OR `description_ru` LIKE CONCAT(%s, %s, %s)) AND (`area_type`=%s) 
+            "SELECT * FROM $table WHERE (`description` LIKE CONCAT(%s, %s, %s) OR `description_ru` LIKE CONCAT(%s, %s, %s))
             $parentAreaCond",
             $a, $name, $a,
-            $a, $name, $a,
-            static::key()
+            $a, $name, $a
         );
         return self::findByQuery($query);
     }
@@ -154,7 +153,7 @@ class Area extends Base
      */
     public static function ajaxGetAreasByNameSuggestion()
     {
-        $areaRef = ArrayHelper::getValue($_POST, 'parent_area_ref', null);
+        $areaRef = ArrayHelper::getValue($_POST, 'parent_ref', null);
         $name = $_POST['name'];
         $areas = self::findByNameSuggestionAndParentArea($name, $areaRef);
         $result = [];
