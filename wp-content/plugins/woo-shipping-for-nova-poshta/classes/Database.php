@@ -23,13 +23,19 @@ class Database extends Base
 {
 
     /**
-     * @return wpdb
+     * @var self
      */
-    public function getDb()
+    private static $_instance;
+
+    /**
+     * @return Database
+     */
+    public static function instance()
     {
-        global $wpdb;
-        $this->db = $wpdb;
-        return $this->db;
+        if (self::$_instance == null) {
+            self::$_instance = new self();
+        }
+        return self::$_instance;
     }
 
     public function createTables()
@@ -80,24 +86,13 @@ QUERY;
         $this->db->query($query);
     }
 
-    /**-------------------------------------*/
-    /*******Singleton pattern elements*******/
-    /**-------------------------------------*/
-
     /**
-     * @var self
+     * @return wpdb
      */
-    private static $_instance;
-
-    /**
-     * @return Database
-     */
-    public static function instance()
+    protected function getDb()
     {
-        if (self::$_instance == null) {
-            self::$_instance = new self();
-        }
-        return self::$_instance;
+        global $wpdb;
+        return $wpdb;
     }
 
     /**
@@ -113,4 +108,5 @@ QUERY;
     private function __clone()
     {
     }
+
 }
