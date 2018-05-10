@@ -315,7 +315,7 @@ class NovaPoshta extends Base
     public function pluginActionLinks($links)
     {
         $href = admin_url('admin.php?page=wc-settings&tab=shipping&section=' . NOVA_POSHTA_SHIPPING_METHOD);
-        $settingsLink = sprintf('<a href="%s" title="%s">%s</a>', $href, esc_attr(__('View Plugin Settings', NOVA_POSHTA_DOMAIN)), __('Settings', NOVA_POSHTA_DOMAIN));
+        $settingsLink = sprintf('<a href="' . $href . '" title="%s">%s</a>', esc_attr(__('View Plugin Settings', NOVA_POSHTA_DOMAIN)), __('Settings', NOVA_POSHTA_DOMAIN));
         array_unshift($links, $settingsLink);
         return $links;
     }
