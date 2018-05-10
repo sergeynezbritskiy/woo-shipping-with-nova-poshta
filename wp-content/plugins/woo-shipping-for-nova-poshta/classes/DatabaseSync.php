@@ -51,7 +51,7 @@ class DatabaseSync extends Base
 
             try {
                 $this->updateRegions();
-//                $this->updateCities();
+                $this->updateCities();
 //                $this->updateWarehouses();
                 $this->setLocationsLastUpdateDate($this->updatedAt);
                 if (!$this->db->last_error) {
