@@ -46,24 +46,24 @@ class DatabaseSync extends Base
     {
         if ($this->requiresUpdate()) {
 
-            $this->log->info("Synchronization required", Log::LOCATIONS_UPDATE);
+            $this->log->info('Synchronization required', Log::LOCATIONS_UPDATE);
             $this->db->query('START TRANSACTION');
-
             try {
                 $this->updateRegions();
                 $this->updateCities();
                 $this->updateWarehouses();
                 $this->setLocationsLastUpdateDate($this->updatedAt);
                 if (!$this->db->last_error) {
-                    $this->log->info("Synchronization finished successfully", Log::LOCATIONS_UPDATE);
+                    $this->log->info('Synchronization finished successfully', Log::LOCATIONS_UPDATE);
                     $this->db->query('COMMIT');
                 } else {
-                    $this->log->error("Synchronization failed. Rollback.", Log::LOCATIONS_UPDATE);
+                    $this->addError('Synchronization failed. Rollback.');
+                    $this->log->error('Synchronization failed. Rollback.', Log::LOCATIONS_UPDATE);
                     $this->db->query('ROLLBACK');
                 }
             } catch (\Exception $e) {
-                $this->addError($e);
-                $this->log->error("Synchronization failed. " . $e->getMessage(), Log::LOCATIONS_UPDATE);
+                $this->addError($e->getMessage());
+                $this->log->error('Synchronization failed. ' . $e->getMessage(), Log::LOCATIONS_UPDATE);
                 $this->db->query('ROLLBACK');
             }
 
@@ -98,12 +98,12 @@ class DatabaseSync extends Base
             );
         }
         $queryInsert = "INSERT INTO $table (`ref`, `description`, `description_ru`, `updated_at`) VALUES ";
-        $queryInsert .= implode(",", $insert);
-        $queryInsert .= " ON DUPLICATE KEY UPDATE 
+        $queryInsert .= implode(',', $insert);
+        $queryInsert .= ' ON DUPLICATE KEY UPDATE 
             `ref` = VALUES(`ref`), 
             `description` = VALUES(`description`), 
             `description_ru` = VALUES(`description_ru`), 
-            `updated_at` = VALUES(`updated_at`)";
+            `updated_at` = VALUES(`updated_at`)';
 
         $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d", $updatedAt);
 
@@ -148,12 +148,12 @@ class DatabaseSync extends Base
         }
         $queryInsert = "INSERT INTO $table (`ref`, `description`, `description_ru`, `parent_ref`, `updated_at`) VALUES ";
         $queryInsert .= implode(",", $insert);
-        $queryInsert .= " ON DUPLICATE KEY UPDATE 
+        $queryInsert .= ' ON DUPLICATE KEY UPDATE 
             `ref` = VALUES(`ref`),
             `description` = VALUES(`description`),
             `description_ru`=VALUES(`description_ru`),
             `parent_ref`=VALUES(`parent_ref`),
-            `updated_at` = VALUES(`updated_at`)";
+            `updated_at` = VALUES(`updated_at`)';
         return $this->db->query($queryInsert);
     }
 
@@ -194,12 +194,12 @@ class DatabaseSync extends Base
         }
         $queryInsert = "INSERT INTO $table (`ref`, `description`, `description_ru`, `parent_ref`, `updated_at`) VALUES ";
         $queryInsert .= implode(",", $insert);
-        $queryInsert .= " ON DUPLICATE KEY UPDATE 
+        $queryInsert .= ' ON DUPLICATE KEY UPDATE 
             `ref` = VALUES(`ref`), 
             `description` = VALUES(`description`), 
             `description_ru`=VALUES(`description_ru`), 
             `parent_ref`=VALUES(`parent_ref`), 
-            `updated_at` = VALUES(`updated_at`)";
+            `updated_at` = VALUES(`updated_at`)';
         return $this->db->query($queryInsert);
 
     }
@@ -307,13 +307,13 @@ class DatabaseSync extends Base
     }
 
     /**
-     * @param \Exception $exception
+     * @param string $message
      */
-    private function addError(\Exception $exception)
+    private function addError($message)
     {
-        add_action('admin_notices', function () use ($exception) {
+        add_action('admin_notices', function () use ($message) {
             $class = 'notice notice-error';
-            $message = esc_html('Nova Poshta synchronisation failed: ' . $exception->getMessage());
+            $message = esc_html('Nova Poshta synchronisation failed: ' . $message);
             printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), $message);
         });
     }
