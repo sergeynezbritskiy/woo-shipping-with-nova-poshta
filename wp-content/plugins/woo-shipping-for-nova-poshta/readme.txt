@@ -3,7 +3,7 @@ Contributors: snezbritskiy
 Tags: eCommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
 Tested up to: 4.9.1
-Stable tag: 2.0.4
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,3 +90,5 @@ Source code for this plugin is stored on [Github](https://github.com/sergeynezbr
 * Bugfix - restore missing composer dependencies
 = 2.0.4 =
 * Bugfix - fix ajax autocomplete in admin area
+= 2.1.0. =
+* Task - upgrade database, improve database performance, speed and memory usage
