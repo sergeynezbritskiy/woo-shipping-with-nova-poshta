@@ -21,6 +21,22 @@ class DatabaseSync extends Base
 {
 
     /**
+     * @var DatabaseSync
+     */
+    private static $_instance;
+
+    /**
+     * @return DatabaseSync
+     */
+    public static function instance()
+    {
+        if (self::$_instance == null) {
+            self::$_instance = new self();
+        }
+        return self::$_instance;
+    }
+
+    /**
      * Synchronize Nova Poshta areas, cities and warehouses
      * Synchronization every $this->interval but before insert
      * data to table check location has in order to identify any
@@ -207,8 +223,7 @@ class DatabaseSync extends Base
     {
         //604800 = 60*60*24*7 (update every week)
         //86400 =60*60*24 (update every day)
-        $this->interval = 86400;
-        return $this->interval;
+        return 86400;
     }
 
     /**
@@ -216,8 +231,7 @@ class DatabaseSync extends Base
      */
     protected function getLog()
     {
-        $this->log = NP()->log;
-        return $this->log;
+        return NP()->log;
     }
 
     /**
@@ -225,8 +239,7 @@ class DatabaseSync extends Base
      */
     protected function getDb()
     {
-        $this->db = NP()->db;
-        return $this->db;
+        return NP()->db;
     }
 
     /**
@@ -234,8 +247,7 @@ class DatabaseSync extends Base
      */
     protected function getLocationsLastUpdateDate()
     {
-        $this->locationsLastUpdateDate = NP()->options->locationsLastUpdateDate;
-        return $this->locationsLastUpdateDate;
+        return NP()->options->locationsLastUpdateDate;
     }
 
     /**
@@ -252,8 +264,7 @@ class DatabaseSync extends Base
      */
     protected function getUpdatedAt()
     {
-        $this->updatedAt = time();
-        return $this->updatedAt;
+        return time();
     }
 
     /**
@@ -261,8 +272,7 @@ class DatabaseSync extends Base
      */
     protected function getAreasHash()
     {
-        $this->areasHash = NP()->options->areasHash;
-        return $this->areasHash;
+        return NP()->options->areasHash;
     }
 
     /**
@@ -279,8 +289,7 @@ class DatabaseSync extends Base
      */
     protected function getCitiesHash()
     {
-        $this->citiesHash = NP()->options->citiesHash;
-        return $this->citiesHash;
+        return NP()->options->citiesHash;
     }
 
     /**
@@ -297,8 +306,7 @@ class DatabaseSync extends Base
      */
     protected function getWarehousesHash()
     {
-        $this->warehousesHash = NP()->options->getWarehousesHash();
-        return $this->warehousesHash;
+        return NP()->options->getWarehousesHash();
     }
 
     /**
@@ -308,22 +316,6 @@ class DatabaseSync extends Base
     {
         NP()->options->setWarehousesHash($hash);
         $this->warehousesHash = $hash;
-    }
-
-    /**
-     * @var DatabaseSync
-     */
-    private static $_instance;
-
-    /**
-     * @return DatabaseSync
-     */
-    public static function instance()
-    {
-        if (self::$_instance == null) {
-            self::$_instance = new self();
-        }
-        return self::$_instance;
     }
 
     /**
