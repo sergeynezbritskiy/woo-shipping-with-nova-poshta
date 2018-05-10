@@ -10,9 +10,6 @@ use wpdb;
  * @package plugins\NovaPoshta\classes\base
  * @property int interval
  * @property wpdb db
- * @property string $areasHash
- * @property string citiesHash
- * @property string warehousesHash
  * @property int $locationsLastUpdateDate
  * @property int updatedAt
  * @property Log log
@@ -70,57 +67,6 @@ abstract class DatabaseSync extends Base
     protected function getUpdatedAt()
     {
         return time();
-    }
-
-    /**
-     * @return string
-     */
-    protected function getAreasHash()
-    {
-        return NP()->options->areasHash;
-    }
-
-    /**
-     * @param string $hash
-     */
-    protected function setAreasHash($hash)
-    {
-        NP()->options->setAreasHash($hash);
-        $this->areasHash = $hash;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getCitiesHash()
-    {
-        return NP()->options->citiesHash;
-    }
-
-    /**
-     * @param string $hash
-     */
-    protected function setCitiesHash($hash)
-    {
-        NP()->options->setCitiesHash($hash);
-        $this->citiesHash = $hash;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getWarehousesHash()
-    {
-        return NP()->options->getWarehousesHash();
-    }
-
-    /**
-     * @param string $hash
-     */
-    protected function setWarehousesHash($hash)
-    {
-        NP()->options->setWarehousesHash($hash);
-        $this->warehousesHash = $hash;
     }
 
 }
