@@ -67,7 +67,7 @@ class DatabaseSync extends BaseDatabaseSync
      */
     private function requiresUpdate()
     {
-        return true;//($this->locationsLastUpdateDate + $this->interval) < time();
+        return ($this->locationsLastUpdateDate + $this->interval) < time();
     }
 
     /**
