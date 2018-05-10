@@ -14,7 +14,7 @@ class Region extends Area
      */
     public static function table()
     {
-        return NP()->db->prefix . 'nova_poshta_region';
+        return NP()->db->prefix . self::KEY_REGION;
     }
 
     /**

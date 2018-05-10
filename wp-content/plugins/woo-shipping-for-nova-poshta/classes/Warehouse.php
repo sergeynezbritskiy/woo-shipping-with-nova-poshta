@@ -14,7 +14,7 @@ class Warehouse extends Area
      */
     public static function table()
     {
-        return NP()->db->prefix . 'nova_poshta_warehouse';
+        return NP()->db->prefix . self::KEY_WAREHOUSE;
     }
 
     /**

@@ -16,7 +16,7 @@ class City extends Area
      */
     public static function table()
     {
-        return NP()->db->prefix . 'nova_poshta_city';
+        return NP()->db->prefix . self::KEY_CITY;
     }
 
     /**
