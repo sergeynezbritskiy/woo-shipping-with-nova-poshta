@@ -50,7 +50,7 @@ class DatabaseSync extends Base
             $this->db->query('START TRANSACTION');
 
             try {
-                $this->updateRegions();
+                //$this->updateRegions();
                 $this->updateCities();
 //                $this->updateWarehouses();
                 $this->setLocationsLastUpdateDate($this->updatedAt);
@@ -117,46 +117,43 @@ class DatabaseSync extends Base
      */
     private function updateCities()
     {
-        $type = Area::KEY_CITY;
-        $cities = NP()->api->getCities();
-        $table = Area::table();
-        $citiesHashOld = $this->citiesHash;
-        $citiesHashNew = md5(serialize($cities));
+        $table = City::table();
         $updatedAt = $this->updatedAt;
+        $page = 1;
+        $rowsAffected = 0;
+        while (count($cities = NP()->api->getCities($page++)) > 0) {
+            $rowsAffected += $this->saveCities($cities, $updatedAt);
+        }
 
+        $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d", $updatedAt);
+        $rowsDeleted = $this->db->query($queryDelete);
 
-        if ($citiesHashNew !== $citiesHashOld) {
-            $insert = array();
-            foreach ($cities as $city) {
-                $insert[] = $this->db->prepare(
-                    "('%s', '%s', '%s', '%s', '%s', %d)",
-                    $type,
-                    $city['Ref'],
-                    $city['Description'],
-                    $city['DescriptionRu'],
-                    $city['Area'],
-                    $updatedAt
-                );
-            }
-            $queryInsert = "INSERT INTO $table (`area_type`, `ref`, `description`, `description_ru`, `parent_area_ref`, `updated_at`) VALUES ";
-            $queryInsert .= implode(",", $insert);
-            $queryInsert .= " ON DUPLICATE KEY UPDATE 
-            `area_type` = '$type',
+        $this->log->info("Cities were successfully updated, affected $rowsAffected rows, deleted $rowsDeleted rows", Log::LOCATIONS_UPDATE);
+    }
+
+    private function saveCities($cities, $updatedAt)
+    {
+        $table = City::table();
+        $insert = array();
+        foreach ($cities as $city) {
+            $insert[] = $this->db->prepare(
+                "('%s', '%s', '%s', '%s', %d)",
+                $city['Ref'],
+                $city['Description'],
+                $city['DescriptionRu'],
+                $city['Area'],
+                $updatedAt
+            );
+        }
+        $queryInsert = "INSERT INTO $table (`ref`, `description`, `description_ru`, `parent_ref`, `updated_at`) VALUES ";
+        $queryInsert .= implode(",", $insert);
+        $queryInsert .= " ON DUPLICATE KEY UPDATE 
             `ref` = VALUES(`ref`),
             `description` = VALUES(`description`),
             `description_ru`=VALUES(`description_ru`),
-            `parent_area_ref`=VALUES(`parent_area_ref`),
+            `parent_ref`=VALUES(`parent_ref`),
             `updated_at` = VALUES(`updated_at`)";
-
-            $queryDelete = $this->db->prepare("DELETE FROM $table WHERE `updated_at` < %d AND `area_type` = %s", $updatedAt, $type);
-
-            $this->setCitiesHash($citiesHashNew);
-            $rowsAffected = $this->db->query($queryInsert);
-            $rowsDeleted = $this->db->query($queryDelete);
-            $this->log->info("Cities were successfully updated, affected $rowsAffected rows, deleted $rowsDeleted rows", Log::LOCATIONS_UPDATE);
-        } else {
-            $this->log->info("Cities are up-to-date, synchronization does not required", Log::LOCATIONS_UPDATE);
-        }
+        return $this->db->query($queryInsert);
     }
 
     /**

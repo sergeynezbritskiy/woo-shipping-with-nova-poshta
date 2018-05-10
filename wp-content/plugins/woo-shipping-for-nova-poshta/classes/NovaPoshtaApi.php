@@ -12,7 +12,7 @@ use plugins\NovaPoshta\classes\base\Base;
  * @property string apiKey
  * @property NovaPoshtaApi2 api
  * @method getAreas()
- * @method getCities()
+ * @method getCities($page = 0, $findByString = '', $ref = '')
  * @method getWarehouses($city = null)
  * @method newInternetDocument($sender, $recipient, $params)
  * @method getCounterparties($counterpartyProperty, $page, $findByString, $cityRef)
