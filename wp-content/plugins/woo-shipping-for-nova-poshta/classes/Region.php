@@ -25,4 +25,5 @@ class Region extends Area
     {
         return parent::_key(self::KEY_REGION, $type);
     }
+
 }

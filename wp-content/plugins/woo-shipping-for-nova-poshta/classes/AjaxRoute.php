@@ -49,11 +49,11 @@ class AjaxRoute extends Base
     public static function getHandlers()
     {
         return array(
-            self::GET_CITIES_ROUTE => array(City::getClass(), 'ajaxGetAreasListByParentAreaRef'),
-            self::GET_WAREHOUSES_ROUTE => array(Warehouse::getClass(), 'ajaxGetAreasListByParentAreaRef'),
+            self::GET_CITIES_ROUTE => array(City::getClass(), 'ajaxGetAreasByNameSuggestion'),
+            self::GET_WAREHOUSES_ROUTE => array(Warehouse::getClass(), 'ajaxGetAreasByNameSuggestion'),
 
             self::GET_REGIONS_BY_NAME_SUGGESTION => array(Region::getClass(), 'ajaxGetAreasByNameSuggestion'),
-            self::GET_CITIES_BY_NAME_SUGGESTION => array(City::getClass(), 'ajaxGetCitiesByNameSuggestion'),
+            self::GET_CITIES_BY_NAME_SUGGESTION => array(City::getClass(), 'ajaxGetAreasByNameSuggestion'),
             self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array(Warehouse::getClass(), 'ajaxGetAreasByNameSuggestion'),
         );
     }
