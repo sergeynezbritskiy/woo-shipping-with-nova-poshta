@@ -24,7 +24,7 @@ abstract class DatabaseSync extends Base
     protected function getAreas()
     {
         /** @noinspection PhpIncludeInspection */
-        return require NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'vendor/lis-dev/nova-poshta-api-2/src/Delivery/NovaPoshtaApi2Areas.php';
+        return require NOVA_POSHTA_SHIPPING_PLUGIN_DIR . 'vendor/sergeynezbritskiy/nova-poshta-api-2/src/Delivery/NovaPoshtaApi2Areas.php';
     }
 
     /**
