@@ -27,39 +27,6 @@ class Area extends Base
     const SHIPPING = 'shipping';
 
     /**
-     * Location constructor.
-     * @param $ref
-     */
-    public function __construct($ref)
-    {
-        if (is_string($ref)) {
-            $this->ref = $ref;
-        } else {
-            $this->content = json_decode(json_encode($ref));
-        }
-    }
-
-    /**
-     * @return string
-     */
-    public static function key()
-    {
-        _doing_it_wrong("Area Type", "You should not call this method from abstract class", "1.0.0");
-        return '';
-    }
-
-
-    /**
-     * @param string $name
-     * @param string $type
-     * @return string
-     */
-    protected static function _key($name, $type)
-    {
-        return $type ? $type . '_' . $name : $name;
-    }
-
-    /**
      * @return string
      */
     public static function table()
@@ -112,6 +79,37 @@ class Area extends Base
     }
 
     /**
+     * @param string $query
+     * @return Area[]
+     */
+    public static function findByQuery($query)
+    {
+        $result = NP()->db->get_results($query);
+        return array_map(function ($location) {
+            return new static($location);
+        }, $result);
+    }
+
+    /**
+     * @return string
+     */
+    public static function key()
+    {
+        _doing_it_wrong("Area Type", "You should not call this method from abstract class", "1.0.0");
+        return '';
+    }
+
+    /**
+     * @param string $name
+     * @param string $type
+     * @return string
+     */
+    protected static function _key($name, $type)
+    {
+        return $type ? $type . '_' . $name : $name;
+    }
+
+    /**
      * @param string $parentRef
      * @return string
      */
@@ -132,15 +130,16 @@ class Area extends Base
     }
 
     /**
-     * @param string $query
-     * @return Area[]
+     * Location constructor.
+     * @param $ref
      */
-    public static function findByQuery($query)
+    public function __construct($ref)
     {
-        $result = NP()->db->get_results($query);
-        return array_map(function ($location) {
-            return new static($location);
-        }, $result);
+        if (is_string($ref)) {
+            $this->ref = $ref;
+        } else {
+            $this->content = json_decode(json_encode($ref));
+        }
     }
 
     /**
