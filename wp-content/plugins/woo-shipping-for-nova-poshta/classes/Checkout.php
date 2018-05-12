@@ -235,7 +235,8 @@ class Checkout extends Base
      * @param string $version minimum version, lower versions of Woocommerce are legacy
      * @return bool
      */
-    public function isLegacyWoocommerce($version = '3.0')
+    public function isLegacyWoocommerce(/** @noinspection PhpUnusedParameterInspection */
+        $version = '3.0')
     {
         //TODO compare with woocommerce version
         return !method_exists(WC()->customer, 'set_billing_address_1');

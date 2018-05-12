@@ -1,6 +1,5 @@
 <?php
 
-use plugins\NovaPoshta\classes\Area;
 use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\base\Options;
 use plugins\NovaPoshta\classes\Checkout;
@@ -45,10 +44,12 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
     }
 
-    public function test($packages){
+    public function test($packages)
+    {
 
         return $packages;
     }
+
     /**
      * Initialise Gateway Settings Form Fields
      */
@@ -144,8 +145,6 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             'cost' => 0,
             'calc_tax' => 'per_item'
         );
-        $customer = Customer::instance();
-
 
         $location = Checkout::instance()->getLocation();
         $cityRecipient = Customer::instance()->getMetadata('nova_poshta_city', $location)
@@ -189,7 +188,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
     private function getDescription()
     {
         $href = "https://wordpress.org/support/view/plugin-reviews/woo-shipping-for-nova-poshta?filter=5#postform";
-        $link = sprintf('<a href="%s" target="_blank" class="np-rating-link">&#9733;&#9733;&#9733;&#9733;&#9733;</a>', $href);
+        $link = '<a href="' . $href . '" target="_blank" class="np-rating-link">&#9733;&#9733;&#9733;&#9733;&#9733;</a>';
 
         $descriptions = array();
         $descriptions[] = __('Shipping with popular Ukrainian logistic company Nova Poshta', NOVA_POSHTA_DOMAIN);
