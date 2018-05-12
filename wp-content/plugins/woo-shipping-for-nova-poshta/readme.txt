@@ -3,7 +3,7 @@ Contributors: snezbritskiy
 Tags: eCommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
 Tested up to: 4.9.1
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -95,3 +95,5 @@ Source code for this plugin is stored on [Github](https://github.com/sergeynezbr
 * Task - ensure that synchronisation with Nova Poshta API will start after plugin activation
 * Task - add regions russian names
 * Task - add mysql indexes for better database performance
+= 2.1.1. =
+* Task - ensure that database structure is up to date
