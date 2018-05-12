@@ -3,6 +3,7 @@
 namespace plugins\NovaPoshta\classes;
 
 use plugins\NovaPoshta\classes\base\Base;
+use plugins\NovaPoshta\classes\repository\AreaRepositoryFactory;
 
 /**
  * Class AjaxRoute
@@ -48,13 +49,16 @@ class AjaxRoute extends Base
      */
     public static function getHandlers()
     {
+        $factory = AreaRepositoryFactory::instance();
         return array(
-            self::GET_CITIES_ROUTE => array(City::getClass(), 'ajaxGetAreasByNameSuggestion'),
-            self::GET_WAREHOUSES_ROUTE => array(Warehouse::getClass(), 'ajaxGetAreasByNameSuggestion'),
+            //autocomplete in checkout on frontend
+            self::GET_CITIES_ROUTE => array($factory->cityRepo(), 'ajaxGetAreasByNameSuggestion'),
+            self::GET_WAREHOUSES_ROUTE => array($factory->warehouseRepo(), 'ajaxGetAreasByNameSuggestion'),
 
-            self::GET_REGIONS_BY_NAME_SUGGESTION => array(Region::getClass(), 'ajaxGetAreasByNameSuggestion'),
-            self::GET_CITIES_BY_NAME_SUGGESTION => array(City::getClass(), 'ajaxGetAreasByNameSuggestion'),
-            self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array(Warehouse::getClass(), 'ajaxGetAreasByNameSuggestion'),
+            //autocomplete by name in admin dashboard
+            self::GET_REGIONS_BY_NAME_SUGGESTION => array($factory->regionRepo(), 'ajaxGetAreasByNameSuggestion'),
+            self::GET_CITIES_BY_NAME_SUGGESTION => array($factory->cityRepo(), 'ajaxGetAreasByNameSuggestion'),
+            self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array($factory->warehouseRepo(), 'ajaxGetAreasByNameSuggestion'),
         );
     }
 

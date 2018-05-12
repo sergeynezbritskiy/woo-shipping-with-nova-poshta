@@ -5,6 +5,7 @@ namespace plugins\NovaPoshta\classes;
 use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\base\Base;
 use plugins\NovaPoshta\classes\base\OptionsHelper;
+use plugins\NovaPoshta\classes\repository\AreaRepositoryFactory;
 
 /**
  * Class Calculator
@@ -296,6 +297,7 @@ class Checkout extends Base
      */
     private function addNovaPoshtaFields($fields, $location)
     {
+        $factory = AreaRepositoryFactory::instance();
         $area = $this->customer->getMetadata('nova_poshta_region', $location);
         $city = $this->customer->getMetadata('nova_poshta_city', $location);
         $required = NP()->isGet() ?: (NP()->isNP() && NP()->isCheckout());
@@ -304,7 +306,7 @@ class Checkout extends Base
             'type' => 'select',
             'required' => $required,
             'default' => '',
-            'options' => OptionsHelper::getList(Region::findAll()),
+            'options' => OptionsHelper::getList($factory->regionRepo()->findAll()),
             'class' => array(),
             'custom_attributes' => array(),
         ];
@@ -312,7 +314,7 @@ class Checkout extends Base
             'label' => __('City', NOVA_POSHTA_DOMAIN),
             'type' => 'select',
             'required' => $required,
-            'options' => OptionsHelper::getList(City::findByParentRefAndNameSuggestion($area)),
+            'options' => OptionsHelper::getList($factory->cityRepo()->findByParentRefAndNameSuggestion($area)),
             'class' => array(),
             'value' => '',
             'custom_attributes' => array(),
@@ -321,7 +323,7 @@ class Checkout extends Base
             'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
             'type' => 'select',
             'required' => $required,
-            'options' => OptionsHelper::getList(Warehouse::findByParentRefAndNameSuggestion($city)),
+            'options' => OptionsHelper::getList($factory->warehouseRepo()->findByParentRefAndNameSuggestion($city)),
             'class' => array(),
             'value' => '',
             'custom_attributes' => array(),

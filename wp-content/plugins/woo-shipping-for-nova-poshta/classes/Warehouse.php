@@ -26,14 +26,4 @@ class Warehouse extends Area
         return parent::_key(self::KEY_WAREHOUSE, $type);
     }
 
-    /**
-     * @param string $name
-     * @return string
-     */
-    protected static function getNameSearchCriteria($name)
-    {
-        NP()->db->escape_by_ref($name);
-        return sprintf("(`description` LIKE CONCAT('%%', '%s', '%%') OR `description_ru` LIKE CONCAT('%%', '%s', '%%'))", $name, $name);
-    }
-
 }
