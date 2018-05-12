@@ -54,11 +54,6 @@ class AjaxRoute extends Base
             //autocomplete in checkout on frontend
             self::GET_CITIES_ROUTE => array($factory->cityRepo(), 'ajaxGetAreasByNameSuggestion'),
             self::GET_WAREHOUSES_ROUTE => array($factory->warehouseRepo(), 'ajaxGetAreasByNameSuggestion'),
-
-            //autocomplete by name in admin dashboard
-            self::GET_REGIONS_BY_NAME_SUGGESTION => array($factory->regionRepo(), 'ajaxGetAreasByNameSuggestion'),
-            self::GET_CITIES_BY_NAME_SUGGESTION => array($factory->cityRepo(), 'ajaxGetAreasByNameSuggestion'),
-            self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array($factory->warehouseRepo(), 'ajaxGetAreasByNameSuggestion'),
         );
     }
 
@@ -67,8 +62,12 @@ class AjaxRoute extends Base
      */
     public static function getAdminHandlers()
     {
+        $factory = AreaRepositoryFactory::instance();
         return array(
             self::MARK_PLUGIN_AS_RATED => array(NP()->options, 'ajaxPluginRate'),
+            self::GET_REGIONS_BY_NAME_SUGGESTION => array($factory->regionRepo(), 'ajaxGetAreasByNameSuggestion'),
+            self::GET_CITIES_BY_NAME_SUGGESTION => array($factory->cityRepo(), 'ajaxGetAreasByNameSuggestion'),
+            self::GET_WAREHOUSES_BY_NAME_SUGGESTION => array($factory->warehouseRepo(), 'ajaxGetAreasByNameSuggestion'),
         );
     }
 
