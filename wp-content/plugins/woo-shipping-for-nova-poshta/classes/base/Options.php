@@ -7,9 +7,6 @@ namespace plugins\NovaPoshta\classes\base;
  * @package plugins\NovaPoshta\classes\base
  *
  * @property int locationsLastUpdateDate
- * @property string areasHash
- * @property string citiesHash
- * @property string warehousesHash
  * @property array shippingMethodSettings
  * @property string senderArea
  * @property string senderCity
@@ -82,57 +79,6 @@ class Options extends Base
     {
         $this->setOption('locations_last_update_date', $value);
         $this->locationsLastUpdateDate = $value;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAreasHash()
-    {
-        return $this->getOption('areas_hash') ?: '';
-    }
-
-    /**
-     * @param string $value
-     */
-    public function setAreasHash($value)
-    {
-        $this->setOption('areas_hash', $value);
-        $this->areasHash = $value;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCitiesHash()
-    {
-        return $this->getOption('cities_hash') ?: '';
-    }
-
-    /**
-     * @param string $citiesHash
-     */
-    public function setCitiesHash($citiesHash)
-    {
-        $this->setOption('cities_hash', $citiesHash);
-        $this->citiesHash = $citiesHash;
-    }
-
-    /**
-     * @return string
-     */
-    public function getWarehousesHash()
-    {
-        return $this->getOption('warehouses_hash') ?: '';
-    }
-
-    /**
-     * @param string $warehousesHash
-     */
-    public function setWarehousesHash($warehousesHash)
-    {
-        $this->setOption('warehouses_hash', $warehousesHash);
-        $this->warehousesHash = $warehousesHash;
     }
 
     /**

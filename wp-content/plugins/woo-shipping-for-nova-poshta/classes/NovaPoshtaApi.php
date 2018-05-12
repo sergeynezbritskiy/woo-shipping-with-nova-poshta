@@ -12,8 +12,8 @@ use plugins\NovaPoshta\classes\base\Base;
  * @property string apiKey
  * @property NovaPoshtaApi2 api
  * @method getAreas()
- * @method getCities()
- * @method getWarehouses($city = null)
+ * @method getCities($page = 0, $limit, $findByString = '', $ref = '')
+ * @method getWarehouses($city = null, $page = null, $limit = null)
  * @method newInternetDocument($sender, $recipient, $params)
  * @method getCounterparties($counterpartyProperty, $page, $findByString, $cityRef)
  * @method getDocument($ref)

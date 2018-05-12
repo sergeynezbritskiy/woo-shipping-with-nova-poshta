@@ -1,6 +1,6 @@
 {
     "require": {
-        "lis-dev/nova-poshta-api-2": "dev-master",
-        "monolog/monolog": "^1.19"
+        "monolog/monolog": "^1.19",
+        "sergeynezbritskiy/nova-poshta-api-2": "^0.1.1"
     }
 }

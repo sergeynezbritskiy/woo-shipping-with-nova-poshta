@@ -3,6 +3,7 @@
 namespace plugins\NovaPoshta\classes;
 
 use plugins\NovaPoshta\classes\base\Base;
+use plugins\NovaPoshta\classes\repository\AreaRepositoryFactory;
 use wpdb;
 
 /**
@@ -23,68 +24,6 @@ class Database extends Base
 {
 
     /**
-     * @return wpdb
-     */
-    public function getDb()
-    {
-        global $wpdb;
-        $this->db = $wpdb;
-        return $this->db;
-    }
-
-    public function createTables()
-    {
-        $this->createTableAreas();
-    }
-
-    public function dropTables()
-    {
-        $this->dropTableAreas();
-    }
-
-    private function createTableAreas()
-    {
-        $table = Area::table();
-        $region = Area::KEY_REGION;
-        $city = Area::KEY_CITY;
-        $warehouse = Area::KEY_WAREHOUSE;
-
-        // http://stackoverflow.com/questions/766809/whats-the-difference-between-utf8-general-ci-and-utf8-unicode-ci
-        $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
-
-        $query = <<<QUERY
-            CREATE TABLE IF NOT EXISTS {$table} (
-                `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-                `ref` VARCHAR(50) NOT NULL,
-                `area_type` ENUM('$region','$city','$warehouse') NOT NULL,
-                `description` TINYTEXT NOT NULL,
-                `description_ru` TINYTEXT,
-                `parent_area_ref` VARCHAR(50) DEFAULT NULL,
-                `updated_at` INT(10) UNSIGNED NOT NULL,
-                `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY `id` (`id`),
-                UNIQUE KEY `uk_ref` (`ref`)
-            ){$tableOptions}
-QUERY;
-        $this->db->query($query);
-    }
-
-    private function dropTableAreas()
-    {
-        $this->dropTableByName(Area::table());
-    }
-
-    private function dropTableByName($table)
-    {
-        $query = "DROP TABLE IF EXISTS {$table}";
-        $this->db->query($query);
-    }
-
-    /**-------------------------------------*/
-    /*******Singleton pattern elements*******/
-    /**-------------------------------------*/
-
-    /**
      * @var self
      */
     private static $_instance;
@@ -101,6 +40,112 @@ QUERY;
     }
 
     /**
+     * Database upgrade entry point
+     */
+    public function upgrade()
+    {
+        if (version_compare(NP()->pluginVersion, '2.1.0', '>=')) {
+            $this->dropTableByName($this->db->prefix . 'nova_poshta_area');
+        }
+        $this->dropTables();
+        $this->createTables();
+    }
+
+    /**
+     * Database downgrade entry point
+     */
+    public function downgrade()
+    {
+        $this->dropTables();
+    }
+
+    /**
+     * @return wpdb
+     */
+    protected function getDb()
+    {
+        return NP()->db;
+    }
+
+    private function createTables()
+    {
+        $factory = AreaRepositoryFactory::instance();
+        if ($this->db->has_cap('collation')) {
+            $collate = $this->db->get_charset_collate();
+        } else {
+            $collate = '';
+        }
+
+        /*
+         * create Regions table
+         */
+        $regionTableName = $factory->regionRepo()->table();
+        $regionQuery = <<<AREA
+            CREATE TABLE {$regionTableName} (
+                `ref` VARCHAR(50) NOT NULL,
+                `description` VARCHAR(256) NOT NULL,
+                `description_ru` VARCHAR(256) NOT NULL,
+                `updated_at` INT(10) UNSIGNED NOT NULL,
+                PRIMARY KEY (`ref`)
+            ) $collate;
+AREA;
+        $this->db->query($regionQuery);
+
+        /*
+         * Create cities table
+         */
+        $cityTableName = $factory->cityRepo()->table();
+        $cityQuery = <<<CITY
+            CREATE TABLE {$cityTableName} (
+                `ref` VARCHAR(50) NOT NULL,
+                `description` VARCHAR(256) NOT NULL,
+                `description_ru` VARCHAR(256) NOT NULL,
+                `parent_ref` VARCHAR(50) NOT NULL,
+                `updated_at` INT(10) UNSIGNED NOT NULL,
+                PRIMARY KEY (`ref`),
+                FOREIGN KEY (`parent_ref`) REFERENCES {$regionTableName}(`ref`) ON DELETE CASCADE 
+            ) $collate;
+CITY;
+        $this->db->query($cityQuery);
+
+        /*
+         * create warehouses table
+         */
+        $warehouseTableName = $factory->warehouseRepo()->table();
+        $warehouseQuery = <<<WAREHOUSE
+            CREATE TABLE {$warehouseTableName} (
+                `ref` VARCHAR(50) NOT NULL,
+                `description` VARCHAR(256) NOT NULL,
+                `description_ru` VARCHAR(256) NOT NULL,
+                `parent_ref` VARCHAR(50) NOT NULL,
+                `updated_at` INT(10) UNSIGNED NOT NULL,
+                PRIMARY KEY (`ref`),
+                FOREIGN KEY (`parent_ref`) REFERENCES {$cityTableName}(`ref`) ON DELETE CASCADE 
+            ) $collate;
+WAREHOUSE;
+        $this->db->query($warehouseQuery);
+
+    }
+
+    private function dropTables()
+    {
+        $factory = AreaRepositoryFactory::instance();
+        $factory->cityRepo()->table();
+        $this->dropTableByName($factory->warehouseRepo()->table());
+        $this->dropTableByName($factory->cityRepo()->table());
+        $this->dropTableByName($factory->regionRepo()->table());
+    }
+
+    /**
+     * @param string $table
+     */
+    private function dropTableByName($table)
+    {
+        $query = "DROP TABLE IF EXISTS {$table}";
+        $this->db->query($query);
+    }
+
+    /**
      * @access private
      */
     private function __construct()
@@ -113,4 +158,5 @@ QUERY;
     private function __clone()
     {
     }
+
 }
