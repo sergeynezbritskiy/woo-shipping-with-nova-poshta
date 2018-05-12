@@ -296,7 +296,7 @@ class NovaPoshta extends Base
         if (version_compare($this->pluginVersion, get_site_option('nova_poshta_db_version'), '>')) {
             Database::instance()->upgrade();
             DatabaseSync::instance()->synchroniseLocations();
-            add_site_option('nova_poshta_db_version', '2.1.1');
+            update_site_option('nova_poshta_db_version', $this->pluginVersion);
         }
     }
 
