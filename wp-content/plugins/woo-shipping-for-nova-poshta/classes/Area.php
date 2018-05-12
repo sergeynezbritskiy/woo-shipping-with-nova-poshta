@@ -42,22 +42,22 @@ abstract class Area extends Base
     }
 
     /**
-     * @return string
-     */
-    public static function key()
-    {
-        _doing_it_wrong("Area Type", "You should not call this method from abstract class", "1.0.0");
-        return '';
-    }
-
-    /**
-     * @param string $name
      * @param string $type
      * @return string
      */
-    protected static function _key($name, $type)
+    public static function key($type = null)
     {
-        return $type ? $type . '_' . $name : $name;
+        $key = static::_key();
+        return $type ? $type . '_' . $key : $key;
+    }
+
+    /**
+     * @return string
+     */
+    protected static function _key()
+    {
+        _doing_it_wrong("Area Type", "You should not call this method from abstract class", "1.0.0");
+        return '';
     }
 
     /**

@@ -51,7 +51,6 @@ class AjaxRoute extends Base
     {
         $factory = AreaRepositoryFactory::instance();
         return array(
-            //autocomplete in checkout on frontend
             self::GET_CITIES_ROUTE => array($factory->cityRepo(), 'ajaxGetAreasByNameSuggestion'),
             self::GET_WAREHOUSES_ROUTE => array($factory->warehouseRepo(), 'ajaxGetAreasByNameSuggestion'),
         );
