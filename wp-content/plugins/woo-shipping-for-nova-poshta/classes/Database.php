@@ -86,7 +86,9 @@ class Database extends Base
                 `description` VARCHAR(256) NOT NULL,
                 `description_ru` VARCHAR(256) NOT NULL,
                 `updated_at` INT(10) UNSIGNED NOT NULL,
-                PRIMARY KEY (`ref`)
+                PRIMARY KEY (`ref`),
+                KEY (`description`),
+                KEY (`description_ru`)
             ) $collate;
 AREA;
         $this->db->query($regionQuery);
@@ -103,6 +105,8 @@ AREA;
                 `parent_ref` VARCHAR(50) NOT NULL,
                 `updated_at` INT(10) UNSIGNED NOT NULL,
                 PRIMARY KEY (`ref`),
+                KEY (`parent_ref`, `description`),
+                KEY (`parent_ref`, `description_ru`),
                 FOREIGN KEY (`parent_ref`) REFERENCES {$regionTableName}(`ref`) ON DELETE CASCADE 
             ) $collate;
 CITY;
