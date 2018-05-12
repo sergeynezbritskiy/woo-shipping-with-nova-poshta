@@ -123,13 +123,13 @@ var NovaPoshtaOptions = (function ($) {
                 method: "POST",
                 data: {
                     'action': NovaPoshtaHelper.getCitiesAction,
-                    'parent_area_ref': areaRef
+                    'parent_ref': areaRef
                 },
                 success: function (json) {
                     try {
                         var data = JSON.parse(json);
                         billingCitySelect
-                            .find('option')
+                            .find('option:not(:first-child)')
                             .remove();
 
                         $.each(data, function (key, value) {
@@ -157,13 +157,13 @@ var NovaPoshtaOptions = (function ($) {
                 method: "POST",
                 data: {
                     'action': NovaPoshtaHelper.getWarehousesAction,
-                    'parent_area_ref': cityRef
+                    'parent_ref': cityRef
                 },
                 success: function (json) {
                     try {
                         var data = JSON.parse(json);
                         billingWarehouseSelect
-                            .find('option')
+                            .find('option:not(:first-child)')
                             .remove();
 
                         $.each(data, function (key, value) {
@@ -190,13 +190,13 @@ var NovaPoshtaOptions = (function ($) {
                 method: "POST",
                 data: {
                     'action': NovaPoshtaHelper.getCitiesAction,
-                    'parent_area_ref': areaRef
+                    'parent_ref': areaRef
                 },
                 success: function (json) {
                     try {
                         var data = JSON.parse(json);
                         shippingCitySelect
-                            .find('option')
+                            .find('option:not(:first-child)')
                             .remove();
 
                         $.each(data, function (key, value) {
@@ -224,13 +224,13 @@ var NovaPoshtaOptions = (function ($) {
                 method: "POST",
                 data: {
                     'action': NovaPoshtaHelper.getWarehousesAction,
-                    'parent_area_ref': cityRef
+                    'parent_ref': cityRef
                 },
                 success: function (json) {
                     try {
                         var data = JSON.parse(json);
                         shippingWarehouseSelect
-                            .find('option')
+                            .find('option:not(:first-child)')
                             .remove();
 
                         $.each(data, function (key, value) {

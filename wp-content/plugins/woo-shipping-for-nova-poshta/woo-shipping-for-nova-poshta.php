@@ -3,7 +3,7 @@
  * Plugin Name: Woo Shipping for Nova Poshta
  * Plugin URI: https://ru.wordpress.org/plugins/woo-shipping-for-nova-poshta
  * Description: Plugin for administrating Nova Poshta shipping method within Woocommerce Plugin
- * Version: 2.0.3
+ * Version: 2.1.1
  * Author: Sergey Nezbritskiy
  * Text Domain: woo-shipping-for-nova-poshta
  * Domain Path: /i18n/
@@ -30,6 +30,7 @@ use plugins\NovaPoshta\classes\AjaxRoute;
 use plugins\NovaPoshta\classes\base\ArrayHelper;
 use plugins\NovaPoshta\classes\Calculator;
 use plugins\NovaPoshta\classes\Checkout;
+use plugins\NovaPoshta\classes\DatabaseScheduler;
 use plugins\NovaPoshta\classes\Log;
 use plugins\NovaPoshta\classes\base\Base;
 use plugins\NovaPoshta\classes\base\Options;
@@ -54,6 +55,7 @@ require_once __DIR__ . '/autoload.php';
  * @property NovaPoshtaApi api
  * @property Options options
  * @property Log log
+ * @property string pluginVersion
  */
 class NovaPoshta extends Base
 {
@@ -70,7 +72,7 @@ class NovaPoshta extends Base
         if ($this->isWoocommerce()) {
             //general plugin actions
             add_action('init', array(AjaxRoute::getClass(), 'init'));
-            add_action('admin_init', array(DatabaseSync::instance(), 'synchroniseLocations'));
+            add_action('admin_init', array(new DatabaseScheduler(), 'ensureSchedule'));
             add_action('plugins_loaded', array($this, 'loadPluginDomain'));
             add_action('wp_enqueue_scripts', array($this, 'scripts'));
             add_action('wp_enqueue_scripts', array($this, 'styles'));
@@ -95,7 +97,6 @@ class NovaPoshta extends Base
     {
         return in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')));
     }
-
 
     /**
      * @return bool
@@ -276,7 +277,7 @@ class NovaPoshta extends Base
      */
     public function activatePlugin()
     {
-        Database::instance()->createTables();
+        Database::instance()->upgrade();
         DatabaseSync::instance()->synchroniseLocations();
     }
 
@@ -285,7 +286,7 @@ class NovaPoshta extends Base
      */
     public function deactivatePlugin()
     {
-        Database::instance()->dropTables();
+        Database::instance()->downgrade();
         Options::instance()->clearOptions();
     }
 
@@ -350,6 +351,16 @@ class NovaPoshta extends Base
     protected function getApi()
     {
         return NovaPoshtaApi::instance();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getPluginVersion()
+    {
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        $pluginData = get_plugin_data(__FILE__);
+        return $pluginData['Version'];
     }
 
     /**

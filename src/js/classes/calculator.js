@@ -34,10 +34,10 @@ var Calculator = (function ($) {
                     },
                     success: function (json) {
                         var data = JSON.parse(json);
-                        response(jQuery.map(data, function (item) {
+                        response(jQuery.map(data, function (item, key) {
                             return {
-                                label: item.description,
-                                value: item.ref
+                                label: item,
+                                value: key
                             }
                         }));
                     }

@@ -2,7 +2,8 @@
 
 namespace plugins\NovaPoshta\classes;
 
-use plugins\NovaPoshta\classes\base\ArrayHelper;
+use plugins\NovaPoshta\classes\repository\AbstractAreaRepository;
+use plugins\NovaPoshta\classes\repository\AreaRepositoryFactory;
 
 /**
  * Class City
@@ -21,25 +22,11 @@ class City extends Area
     }
 
     /**
-     * @return void
+     * @return AbstractAreaRepository
      */
-    public static function ajaxGetCitiesByNameSuggestion()
+    protected function getRepository()
     {
-        $areaRef = ArrayHelper::getValue($_POST, 'parent_area_ref', null);
-        $name = $_POST['name'];
-        if (is_null($areaRef)) {
-            $areas = self::findByNameSuggestion($name);
-        } else {
-            $areas = self::findByNameSuggestionAndParentArea($name, $areaRef);
-        }
-        $result = [];
-        foreach ($areas as $area) {
-            $result[] = [
-                'ref' => $area->ref,
-                'description' => $area->description,
-            ];
-        }
-        echo json_encode($result);
-        exit;
+        return AreaRepositoryFactory::instance()->cityRepo();
     }
+
 }
