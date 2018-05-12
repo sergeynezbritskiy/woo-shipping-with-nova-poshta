@@ -13,12 +13,11 @@ class Region extends Area
 {
 
     /**
-     * @param string $type
      * @return string
      */
-    public static function key($type = '')
+    protected static function _key()
     {
-        return parent::_key(self::KEY_REGION, $type);
+        return 'nova_poshta_region';
     }
 
     /**
