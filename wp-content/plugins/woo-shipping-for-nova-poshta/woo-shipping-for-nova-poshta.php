@@ -72,7 +72,7 @@ class NovaPoshta extends Base
         if ($this->isWoocommerce()) {
             //general plugin actions
             add_action('init', array(AjaxRoute::getClass(), 'init'));
-            add_action('admin_init', array(DatabaseScheduler::getClass(), 'ensureSchedule'));
+            add_action('admin_init', array(new DatabaseScheduler(), 'ensureSchedule'));
             add_action('plugins_loaded', array($this, 'loadPluginDomain'));
             add_action('wp_enqueue_scripts', array($this, 'scripts'));
             add_action('wp_enqueue_scripts', array($this, 'styles'));
