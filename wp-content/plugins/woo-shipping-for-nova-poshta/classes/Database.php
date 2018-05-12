@@ -57,6 +57,7 @@ class Database extends Base
     public function downgrade()
     {
         $this->dropTables();
+        delete_site_option('nova_poshta_db_version');
     }
 
     /**

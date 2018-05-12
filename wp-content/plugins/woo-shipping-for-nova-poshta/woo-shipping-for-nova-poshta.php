@@ -73,6 +73,7 @@ class NovaPoshta extends Base
             //general plugin actions
             add_action('init', array(AjaxRoute::getClass(), 'init'));
             add_action('admin_init', array(new DatabaseScheduler(), 'ensureSchedule'));
+            add_action('plugins_loaded', array($this, 'checkDatabaseVersion'));
             add_action('plugins_loaded', array($this, 'loadPluginDomain'));
             add_action('wp_enqueue_scripts', array($this, 'scripts'));
             add_action('wp_enqueue_scripts', array($this, 'styles'));
@@ -288,6 +289,15 @@ class NovaPoshta extends Base
     {
         Database::instance()->downgrade();
         Options::instance()->clearOptions();
+    }
+
+    public function checkDatabaseVersion()
+    {
+        if (version_compare($this->pluginVersion, get_site_option('nova_poshta_db_version'), '>')) {
+            Database::instance()->upgrade();
+            DatabaseSync::instance()->synchroniseLocations();
+            add_site_option('nova_poshta_db_version', '2.1.1');
+        }
     }
 
     /**
