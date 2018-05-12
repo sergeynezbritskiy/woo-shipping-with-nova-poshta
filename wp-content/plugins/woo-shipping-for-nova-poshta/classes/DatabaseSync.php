@@ -36,39 +36,28 @@ class DatabaseSync extends BaseDatabaseSync
      */
     public function synchroniseLocations()
     {
-        if ($this->requiresUpdate()) {
-
-            $this->log->info('Synchronization required', Log::LOCATIONS_UPDATE);
-            $this->db->query('START TRANSACTION');
-            try {
-                $this->updateRegions();
-                $this->updateCities();
-                $this->updateWarehouses();
-                $this->setLocationsLastUpdateDate($this->updatedAt);
-                if (!$this->db->last_error) {
-                    $this->log->info('Synchronization finished successfully', Log::LOCATIONS_UPDATE);
-                    $this->db->query('COMMIT');
-                } else {
-                    $this->addError('Synchronization failed. Rollback.');
-                    $this->log->error('Synchronization failed. Rollback.', Log::LOCATIONS_UPDATE);
-                    $this->db->query('ROLLBACK');
-                }
-            } catch (\Exception $e) {
-                $this->addError($e->getMessage());
-                $this->log->error('Synchronization failed. ' . $e->getMessage(), Log::LOCATIONS_UPDATE);
+        $this->log->info('Synchronization required', Log::LOCATIONS_UPDATE);
+        $this->db->query('START TRANSACTION');
+        try {
+            $this->updateRegions();
+            $this->updateCities();
+            $this->updateWarehouses();
+            $this->setLocationsLastUpdateDate($this->updatedAt);
+            if (!$this->db->last_error) {
+                $this->log->info('Synchronization finished successfully', Log::LOCATIONS_UPDATE);
+                $this->db->query('COMMIT');
+            } else {
+                $this->addError('Synchronization failed. Rollback.');
+                $this->log->error('Synchronization failed. Rollback.', Log::LOCATIONS_UPDATE);
                 $this->db->query('ROLLBACK');
             }
-
-            $this->log->info("", Log::LOCATIONS_UPDATE);
+        } catch (\Exception $e) {
+            $this->addError($e->getMessage());
+            $this->log->error('Synchronization failed. ' . $e->getMessage(), Log::LOCATIONS_UPDATE);
+            $this->db->query('ROLLBACK');
         }
-    }
 
-    /**
-     * @return bool
-     */
-    private function requiresUpdate()
-    {
-        return ($this->locationsLastUpdateDate + $this->interval) < time();
+        $this->log->info("", Log::LOCATIONS_UPDATE);
     }
 
     /**
@@ -211,7 +200,6 @@ class DatabaseSync extends BaseDatabaseSync
     private function setLocationsLastUpdateDate($value)
     {
         NP()->options->setLocationsLastUpdateDate($value);
-        $this->locationsLastUpdateDate = $value;
     }
 
     /**

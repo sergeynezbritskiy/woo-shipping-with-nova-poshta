@@ -8,9 +8,7 @@ use wpdb;
 /**
  * Class DatabaseSync
  * @package plugins\NovaPoshta\classes\base
- * @property int interval
  * @property wpdb db
- * @property int $locationsLastUpdateDate
  * @property int updatedAt
  * @property Log log
  * @property array areas
@@ -28,16 +26,6 @@ abstract class DatabaseSync extends Base
     }
 
     /**
-     * @return int
-     */
-    protected function getInterval()
-    {
-        //604800 = 60*60*24*7 (update every week)
-        //86400 =60*60*24 (update every day)
-        return 86400;
-    }
-
-    /**
      * @return Log
      */
     protected function getLog()
@@ -51,14 +39,6 @@ abstract class DatabaseSync extends Base
     protected function getDb()
     {
         return NP()->db;
-    }
-
-    /**
-     * @return int
-     */
-    protected function getLocationsLastUpdateDate()
-    {
-        return NP()->options->locationsLastUpdateDate;
     }
 
     /**
