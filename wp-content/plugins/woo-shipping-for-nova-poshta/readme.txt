@@ -98,4 +98,6 @@ Source code for this plugin is stored on [Github](https://github.com/sergeynezbr
 = 2.1.1. =
 * Task - ensure that database structure is up to date
 = 2.1.2. =
-* Bug - add changes missing in previous releases
+* Bugfix - add changes missing in previous releases
+= 2.1.3. =
+* Bugfix - database version was not updating
