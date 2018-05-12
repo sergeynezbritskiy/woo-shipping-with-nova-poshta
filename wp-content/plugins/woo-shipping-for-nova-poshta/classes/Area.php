@@ -4,6 +4,7 @@ namespace plugins\NovaPoshta\classes;
 
 use NovaPoshta;
 use plugins\NovaPoshta\classes\base\Base;
+use plugins\NovaPoshta\classes\repository\AbstractAreaRepository;
 use stdClass;
 
 /**
@@ -14,8 +15,9 @@ use stdClass;
  * @property string description
  * @property string ref
  * @property string locale
+ * @property AbstractAreaRepository repository
  */
-class Area extends Base
+abstract class Area extends Base
 {
     const KEY_REGION = 'nova_poshta_region';
     const KEY_CITY = 'nova_poshta_city';
@@ -25,7 +27,13 @@ class Area extends Base
     const SHIPPING = 'shipping';
 
     /**
+     * @return AbstractAreaRepository
+     */
+    abstract protected function getRepository();
+
+    /**
      * @return string
+     * @deprecated use \plugins\NovaPoshta\classes\repository\WarehouseRepository::table instead
      */
     public static function table()
     {
@@ -78,7 +86,7 @@ class Area extends Base
      */
     protected function getContent()
     {
-        $table = static::table();
+        $table = $this->repository->table();
         $query = NP()->db->prepare("SELECT * FROM $table WHERE ref = %s", $this->ref);
         return NP()->db->get_row($query);
     }

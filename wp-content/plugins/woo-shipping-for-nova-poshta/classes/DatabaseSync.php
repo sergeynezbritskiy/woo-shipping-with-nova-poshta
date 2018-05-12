@@ -3,6 +3,7 @@
 namespace plugins\NovaPoshta\classes;
 
 use plugins\NovaPoshta\classes\base\DatabaseSync as BaseDatabaseSync;
+use plugins\NovaPoshta\classes\repository\AreaRepositoryFactory;
 
 /**
  * Class DatabaseSync
@@ -75,7 +76,7 @@ class DatabaseSync extends BaseDatabaseSync
      */
     private function updateRegions()
     {
-        $table = Region::table();
+        $table = AreaRepositoryFactory::instance()->regionRepo()->table();
         $areas = NP()->api->getAreas();
         $updatedAt = $this->updatedAt;
         $insert = array();
@@ -108,7 +109,7 @@ class DatabaseSync extends BaseDatabaseSync
      */
     private function updateCities()
     {
-        $table = City::table();
+        $table = AreaRepositoryFactory::instance()->cityRepo()->table();
         $updatedAt = $this->updatedAt;
         $page = 1;
         $limit = 300;
@@ -129,7 +130,7 @@ class DatabaseSync extends BaseDatabaseSync
      */
     private function saveCitiesPage($cities)
     {
-        $table = City::table();
+        $table = AreaRepositoryFactory::instance()->cityRepo()->table();
         $updatedAt = $this->updatedAt;
         $insert = array();
         foreach ($cities as $city) {
@@ -158,7 +159,7 @@ class DatabaseSync extends BaseDatabaseSync
      */
     private function updateWarehouses()
     {
-        $table = Warehouse::table();
+        $table = AreaRepositoryFactory::instance()->warehouseRepo()->table();
         $updatedAt = $this->updatedAt;
         $rowsAffected = 0;
         $page = 1;
@@ -179,7 +180,7 @@ class DatabaseSync extends BaseDatabaseSync
      */
     private function updateWarehousesPage($warehouses)
     {
-        $table = Warehouse::table();
+        $table = AreaRepositoryFactory::instance()->warehouseRepo()->table();
         $updatedAt = $this->updatedAt;
         $insert = array();
         foreach ($warehouses as $warehouse) {

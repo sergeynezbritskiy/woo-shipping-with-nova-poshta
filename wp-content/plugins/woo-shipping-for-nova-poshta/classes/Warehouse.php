@@ -1,6 +1,8 @@
 <?php
 
 namespace plugins\NovaPoshta\classes;
+use plugins\NovaPoshta\classes\repository\AbstractAreaRepository;
+use plugins\NovaPoshta\classes\repository\AreaRepositoryFactory;
 
 /**
  * Class Warehouse
@@ -8,14 +10,6 @@ namespace plugins\NovaPoshta\classes;
  */
 class Warehouse extends Area
 {
-
-    /**
-     * @return string
-     */
-    public static function table()
-    {
-        return NP()->db->prefix . self::KEY_WAREHOUSE;
-    }
 
     /**
      * @param string $type
@@ -26,4 +20,11 @@ class Warehouse extends Area
         return parent::_key(self::KEY_WAREHOUSE, $type);
     }
 
+    /**
+     * @return AbstractAreaRepository
+     */
+    protected function getRepository()
+    {
+        return AreaRepositoryFactory::instance()->warehouseRepo();
+    }
 }

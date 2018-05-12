@@ -3,6 +3,7 @@
 namespace plugins\NovaPoshta\classes;
 
 use plugins\NovaPoshta\classes\base\Base;
+use plugins\NovaPoshta\classes\repository\AreaRepositoryFactory;
 use wpdb;
 
 /**
@@ -68,7 +69,7 @@ class Database extends Base
 
     private function createTables()
     {
-
+        $factory = AreaRepositoryFactory::instance();
         if ($this->db->has_cap('collation')) {
             $collate = $this->db->get_charset_collate();
         } else {
@@ -78,7 +79,7 @@ class Database extends Base
         /*
          * create Regions table
          */
-        $regionTableName = Region::table();
+        $regionTableName = $factory->regionRepo()->table();
         $regionQuery = <<<AREA
             CREATE TABLE {$regionTableName} (
                 `ref` VARCHAR(50) NOT NULL,
@@ -93,7 +94,7 @@ AREA;
         /*
          * Create cities table
          */
-        $cityTableName = City::table();
+        $cityTableName = $factory->cityRepo()->table();
         $cityQuery = <<<CITY
             CREATE TABLE {$cityTableName} (
                 `ref` VARCHAR(50) NOT NULL,
@@ -110,7 +111,7 @@ CITY;
         /*
          * create warehouses table
          */
-        $warehouseTableName = Warehouse::table();
+        $warehouseTableName = $factory->warehouseRepo()->table();
         $warehouseQuery = <<<WAREHOUSE
             CREATE TABLE {$warehouseTableName} (
                 `ref` VARCHAR(50) NOT NULL,
@@ -128,9 +129,11 @@ WAREHOUSE;
 
     private function dropTables()
     {
-        $this->dropTableByName(Warehouse::table());
-        $this->dropTableByName(City::table());
-        $this->dropTableByName(Region::table());
+        $factory = AreaRepositoryFactory::instance();
+        $factory->cityRepo()->table();
+        $this->dropTableByName($factory->warehouseRepo()->table());
+        $this->dropTableByName($factory->cityRepo()->table());
+        $this->dropTableByName($factory->regionRepo()->table());
     }
 
     /**

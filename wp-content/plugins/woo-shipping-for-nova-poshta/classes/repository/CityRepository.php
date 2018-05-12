@@ -14,6 +14,14 @@ class CityRepository extends AbstractAreaRepository
     /**
      * @return string
      */
+    public function table()
+    {
+        return NP()->db->prefix . 'nova_poshta_city';
+    }
+
+    /**
+     * @return string
+     */
     protected function getAreaClass()
     {
         return City::getClass();

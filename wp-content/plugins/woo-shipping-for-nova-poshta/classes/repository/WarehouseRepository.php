@@ -14,6 +14,14 @@ class WarehouseRepository extends AbstractAreaRepository
     /**
      * @return string
      */
+    public function table()
+    {
+        return NP()->db->prefix . 'nova_poshta_warehouse';
+    }
+
+    /**
+     * @return string
+     */
     protected function getAreaClass()
     {
         return Warehouse::getClass();

@@ -2,20 +2,15 @@
 
 namespace plugins\NovaPoshta\classes;
 
+use plugins\NovaPoshta\classes\repository\AbstractAreaRepository;
+use plugins\NovaPoshta\classes\repository\AreaRepositoryFactory;
+
 /**
  * Class Area
  * @package plugins\NovaPoshta\classes
  */
 class Region extends Area
 {
-
-    /**
-     * @return string
-     */
-    public static function table()
-    {
-        return NP()->db->prefix . self::KEY_REGION;
-    }
 
     /**
      * @param string $type
@@ -26,4 +21,11 @@ class Region extends Area
         return parent::_key(self::KEY_REGION, $type);
     }
 
+    /**
+     * @return AbstractAreaRepository
+     */
+    protected function getRepository()
+    {
+        return AreaRepositoryFactory::instance()->regionRepo();
+    }
 }

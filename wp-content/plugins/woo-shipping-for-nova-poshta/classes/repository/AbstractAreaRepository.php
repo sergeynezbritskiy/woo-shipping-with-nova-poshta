@@ -18,6 +18,11 @@ abstract class AbstractAreaRepository extends Base
     /**
      * @return string
      */
+    abstract public function table();
+
+    /**
+     * @return string
+     */
     abstract protected function getAreaClass();
 
     /**
@@ -57,9 +62,7 @@ abstract class AbstractAreaRepository extends Base
         if ($name !== null) {
             $searchCriteria[] = $this->getNameSearchCriteria($name);
         }
-        /** @var Area $class */
-        $class = $this->areaClass;
-        $table = $class::table();
+        $table = $this->table();
         $query = "SELECT * FROM $table WHERE " . implode(' AND ', $searchCriteria);
         return $this->findByQuery($query);
     }
