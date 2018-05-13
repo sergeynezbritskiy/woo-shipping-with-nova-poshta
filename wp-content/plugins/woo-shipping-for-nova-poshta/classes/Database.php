@@ -87,12 +87,20 @@ class Database extends Base
                 `description` VARCHAR(256) NOT NULL,
                 `description_ru` VARCHAR(256) NOT NULL,
                 `updated_at` INT(10) UNSIGNED NOT NULL,
-                PRIMARY KEY (`ref`),
-                KEY (`description`),
-                KEY (`description_ru`)
+                PRIMARY KEY (`ref`)
             ) $collate;
 AREA;
         $this->db->query($regionQuery);
+
+        $indexQuery = <<<INDEX
+ALTER TABLE {$regionTableName} ADD INDEX idx_nova_poshta_region_description (description);
+INDEX;
+        $this->db->query($indexQuery);
+
+        $indexQuery = <<<INDEX
+ALTER TABLE {$regionTableName} ADD INDEX idx_nova_poshta_region_description_ru (description_ru)
+INDEX;
+        $this->db->query($indexQuery);
 
         /*
          * Create cities table
@@ -106,12 +114,20 @@ AREA;
                 `parent_ref` VARCHAR(50) NOT NULL,
                 `updated_at` INT(10) UNSIGNED NOT NULL,
                 PRIMARY KEY (`ref`),
-                KEY (`parent_ref`, `description`),
-                KEY (`parent_ref`, `description_ru`),
-                FOREIGN KEY (`parent_ref`) REFERENCES {$regionTableName}(`ref`) ON DELETE CASCADE 
-            ) $collate;
+                CONSTRAINT `fk_city_parent_ref_region_ref` FOREIGN KEY (`parent_ref`) REFERENCES {$regionTableName}(`ref`) ON DELETE CASCADE 
+            ) {$collate};
 CITY;
         $this->db->query($cityQuery);
+
+        $indexQuery = <<<INDEX
+ALTER TABLE {$cityTableName} ADD INDEX idx_nova_poshta_city_parent_ref_description (parent_ref, description)
+INDEX;
+        $this->db->query($indexQuery);
+
+        $indexQuery = <<<INDEX
+ALTER TABLE {$cityTableName} ADD INDEX idx_nova_poshta_city_parent_ref_description_ru (parent_ref, description_ru)
+INDEX;
+        $this->db->query($indexQuery);
 
         /*
          * create warehouses table
@@ -125,10 +141,20 @@ CITY;
                 `parent_ref` VARCHAR(50) NOT NULL,
                 `updated_at` INT(10) UNSIGNED NOT NULL,
                 PRIMARY KEY (`ref`),
-                FOREIGN KEY (`parent_ref`) REFERENCES {$cityTableName}(`ref`) ON DELETE CASCADE 
+                CONSTRAINT `fk_warehouse_parent_ref_city_ref` FOREIGN KEY (`parent_ref`) REFERENCES `$cityTableName`(`ref`) ON DELETE CASCADE 
             ) $collate;
 WAREHOUSE;
         $this->db->query($warehouseQuery);
+
+        $indexQuery = <<<INDEX
+ALTER TABLE {$warehouseTableName} ADD INDEX idx_nova_poshta_warehouse_parent_ref_description (parent_ref, description)
+INDEX;
+        $this->db->query($indexQuery);
+
+        $indexQuery = <<<INDEX
+ALTER TABLE {$warehouseTableName} ADD INDEX idx_nova_poshta_warehouse_parent_ref_description_ru (parent_ref, description_ru)
+INDEX;
+        $this->db->query($indexQuery);
 
     }
 
