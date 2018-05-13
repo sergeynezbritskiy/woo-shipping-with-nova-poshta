@@ -1,4 +1,5 @@
 <?php
+
 namespace plugins\NovaPoshta\classes\base;
 
 use plugins\NovaPoshta\classes\Area;
