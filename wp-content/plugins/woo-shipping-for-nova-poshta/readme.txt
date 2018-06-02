@@ -3,7 +3,7 @@ Contributors: snezbritskiy
 Tags: eCommerce, nova poshta, новая почта, shipping, e-commerce, store, sales, sell, shop, cart, checkout, storefront
 Requires at least: 4.1
 Tested up to: 4.9.1
-Stable tag: 2.1.4
+Stable tag: 2.1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,3 +103,6 @@ Source code for this plugin is stored on [Github](https://github.com/sergeynezbr
 * Bugfix - database version was not updating
 = 2.1.4. =
 * Bugfix - backward compatibility for Mysql 5.0
+= 2.1.5. =
+* Task - sort options in selects in natural order
+* Task - add filter for shipping rate. This add possibility to influence on shipping rate by your custom filters
