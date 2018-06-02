@@ -169,6 +169,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             }
         }
         // Register the rate
+        $rate = apply_filters('woo_shipping_for_nova_poshta_before_add_rate', $rate, $cityRecipient);
         $this->add_rate($rate);
     }
 
