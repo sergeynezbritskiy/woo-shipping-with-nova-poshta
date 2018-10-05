@@ -154,6 +154,18 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
         if (NP()->options->useFixedPriceOnDelivery) {
             $rate['cost'] = NP()->options->fixedPrice;
         } elseif ($cityRecipient) {
+            $cartVolume=0;
+            foreach(WC()->cart->get_cart() as $cart_item) {
+                // Get an instance of the WC_Product object and cart quantity
+                $product = $cart_item['data'];
+                $qty     = $cart_item['quantity'];
+                // Get product dimensions
+                $length = $product->get_length();
+                $width  = $product->get_width();
+                $height = $product->get_height();
+                // Calculations a cart volume
+                $cartVolume += $length * $width * $height * $qty/4000.0;
+            }
             $citySender = NP()->options->senderCity;
             $serviceType = 'WarehouseWarehouse';
             /** @noinspection PhpUndefinedFieldInspection */
@@ -161,7 +173,7 @@ class WC_NovaPoshta_Shipping_Method extends WC_Shipping_Method
             /** @noinspection PhpUndefinedFieldInspection */
             $cartTotal = max(1, WC()->cart->cart_contents_total);
             try {
-                $result = NP()->api->getDocumentPrice($citySender, $cityRecipient, $serviceType, $cartWeight, $cartTotal);
+                $result = NP()->api->getDocumentPrice($citySender, $cityRecipient, $serviceType, $cartWeight > $cartVolume ? $cartWeight : $cartVolume, $cartTotal);
                 $cost = array_shift($result);
                 $rate['cost'] = ArrayHelper::getValue($cost, 'Cost', 0);
             } catch (Exception $e) {
