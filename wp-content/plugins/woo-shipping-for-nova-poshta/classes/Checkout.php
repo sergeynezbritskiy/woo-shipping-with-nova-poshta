@@ -310,6 +310,7 @@ class Checkout extends Base
             'options' => OptionsHelper::getList($factory->regionRepo()->findAll()),
             'class' => array(),
             'custom_attributes' => array(),
+            'priority' => 41,
         ];
         $fields[City::key($location)] = [
             'label' => __('City', NOVA_POSHTA_DOMAIN),
@@ -319,6 +320,7 @@ class Checkout extends Base
             'class' => array(),
             'value' => '',
             'custom_attributes' => array(),
+            'priority' => 42,
         ];
         $fields[Warehouse::key($location)] = [
             'label' => __('Nova Poshta Warehouse (#)', NOVA_POSHTA_DOMAIN),
@@ -328,6 +330,7 @@ class Checkout extends Base
             'class' => array(),
             'value' => '',
             'custom_attributes' => array(),
+            'priority' => 43,
         ];
         return $fields;
     }
