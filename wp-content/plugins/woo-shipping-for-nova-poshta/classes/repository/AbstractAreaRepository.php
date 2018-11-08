@@ -49,6 +49,18 @@ abstract class AbstractAreaRepository extends Base
     }
 
     /**
+     * @param $ref
+     * @return Area|null
+     */
+    public function findByRef($ref)
+    {
+        $table = $this->table();
+        $query = NP()->db->prepare("SELECT * FROM $table WHERE `ref` = %s", $ref);
+        $result = $this->findByQuery($query);
+        return $result ? $result[0] : null;
+    }
+
+    /**
      * @param string|null $parentRef
      * @param string|null $name
      * @return Area[]
