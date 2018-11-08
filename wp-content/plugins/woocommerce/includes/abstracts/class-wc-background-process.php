@@ -43,7 +43,7 @@ abstract class WC_Background_Process extends WP_Background_Process {
 
 		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$column} LIKE %s", $key ) ); // @codingStandardsIgnoreLine.
 
-		return ( $count > 0 ) ? false : true;
+		return ! ( $count > 0 );
 	}
 
 	/**
@@ -72,7 +72,7 @@ abstract class WC_Background_Process extends WP_Background_Process {
 
 		$batch       = new stdClass();
 		$batch->key  = $query->$column;
-		$batch->data = maybe_unserialize( $query->$value_column );
+		$batch->data = array_filter( (array) maybe_unserialize( $query->$value_column ) );
 
 		return $batch;
 	}
@@ -146,10 +146,10 @@ abstract class WC_Background_Process extends WP_Background_Process {
 
 		if ( ! $memory_limit || -1 === intval( $memory_limit ) ) {
 			// Unlimited, set to 32GB.
-			$memory_limit = '32000M';
+			$memory_limit = '32G';
 		}
 
-		return intval( $memory_limit ) * 1024 * 1024;
+		return wp_convert_hr_to_bytes( $memory_limit );
 	}
 
 	/**
@@ -162,7 +162,7 @@ abstract class WC_Background_Process extends WP_Background_Process {
 		$interval = apply_filters( $this->identifier . '_cron_interval', 5 );
 
 		if ( property_exists( $this, 'cron_interval' ) ) {
-			$interval = apply_filters( $this->identifier . '_cron_interval', $this->cron_interval_identifier );
+			$interval = apply_filters( $this->identifier . '_cron_interval', $this->cron_interval );
 		}
 
 		// Adds every 5 minutes to the existing schedules.

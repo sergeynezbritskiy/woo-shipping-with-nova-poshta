@@ -8,14 +8,10 @@
  *
  * @version  3.2.0
  * @package  WooCommerce/Webhooks
- * @category Webhooks
  * @since    2.2.0
- * @author   Automattic
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 require_once 'legacy/class-wc-legacy-webhook.php';
 
@@ -168,7 +164,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			} elseif ( 'updated' === $this->get_event() && $resource_created ) {
 				$should_deliver = false;
 			}
-		} // End if().
+		}
+
+		if ( ! wc_is_webhook_valid_topic( $this->get_topic() ) ) {
+			$should_deliver = false;
+		}
 
 		/*
 		 * Let other plugins intercept deliver for some messages queue like rabbit/zeromq.
@@ -284,7 +284,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return array
 	 */
 	private function get_wp_api_payload( $resource, $resource_id, $event ) {
-		$version_suffix = 'wp_api_v1' === $this->get_api_version() ? '_V1' : '';
+		$rest_api_versions = wc_get_webhook_rest_api_versions();
+		$version_suffix    = end( $rest_api_versions ) === $this->get_api_version() ? strtoupper( str_replace( 'wp_api', '', $this->get_api_version() ) ) : '';
 
 		switch ( $resource ) {
 			case 'coupon':
@@ -344,7 +345,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				'id' => $resource_id,
 			);
 		} else {
-			if ( in_array( $this->get_api_version(), array( 'wp_api_v1', 'wp_api_v2' ), true ) ) {
+			if ( in_array( $this->get_api_version(), wc_get_webhook_rest_api_versions(), true ) ) {
 				$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
 			} else {
 				$payload = $this->get_legacy_api_payload( $resource, $resource_id, $event );
@@ -413,27 +414,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				'Body'        => wp_slash( $request['body'] ),
 			),
 		);
-		if ( is_wp_error( $response ) ) {
-			$message['Webhook Delivery']['Response'] = array(
-				'Code'    => $response->get_error_code(),
-				'Message' => $response->get_error_message(),
-				'Headers' => array(),
-				'Body'    => '',
-			);
-		} else {
-			$message['Webhook Delivery']['Response'] = array(
-				'Code'    => wp_remote_retrieve_response_code( $response ),
-				'Message' => wp_remote_retrieve_response_message( $response ),
-				'Headers' => wp_remote_retrieve_headers( $response ),
-				'Body'    => wp_remote_retrieve_body( $response ),
-			);
-		}
-
-		$logger->info(
-			wc_print_r( $message, true ), array(
-				'source' => 'webhooks-delivery',
-			)
-		);
 
 		// Parse response.
 		if ( is_wp_error( $response ) ) {
@@ -441,12 +421,23 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$response_message = $response->get_error_message();
 			$response_headers = array();
 			$response_body    = '';
-
 		} else {
 			$response_code    = wp_remote_retrieve_response_code( $response );
 			$response_message = wp_remote_retrieve_response_message( $response );
 			$response_headers = wp_remote_retrieve_headers( $response );
 			$response_body    = wp_remote_retrieve_body( $response );
+		}
+
+		$message['Webhook Delivery']['Response'] = array(
+			'Code'    => $response_code,
+			'Message' => $response_message,
+			'Headers' => $response_headers,
+			'Body'    => $response_body,
+		);
+
+		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+			$message['Webhook Delivery']['Body']             = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
+			$message['Webhook Delivery']['Response']['Body'] = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
 		}
 
 		$logger->info(
@@ -456,7 +447,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		);
 
 		// Track failures.
-		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 300 ) {
+		// Check for a success, which is a 2xx, 301 or 302 Response Code.
+		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
 			$this->set_failure_count( 0 );
 			$this->save();
 		} else {

@@ -8,16 +8,12 @@
  * @class    WC_Session_Handler
  * @version  2.5.0
  * @package  WooCommerce/Classes
- * @category Class
- * @author   Automattic
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Session_Handler
+ * Session handler class.
  */
 class WC_Session_Handler extends WC_Session {
 
@@ -216,17 +212,13 @@ class WC_Session_Handler extends WC_Session {
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
 
-			$wpdb->replace( // @codingStandardsIgnoreLine.
-				$this->_table,
-				array(
-					'session_key'    => $this->_customer_id,
-					'session_value'  => maybe_serialize( $this->_data ),
-					'session_expiry' => $this->_session_expiration,
-				),
-				array(
-					'%s',
-					'%s',
-					'%d',
+			$wpdb->query(
+				$wpdb->prepare(
+					"INSERT INTO {$wpdb->prefix}woocommerce_sessions (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d)
+ 					ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)",
+					$this->_customer_id,
+					maybe_serialize( $this->_data ),
+					$this->_session_expiration
 				)
 			);
 
@@ -313,7 +305,7 @@ class WC_Session_Handler extends WC_Session {
 
 		wp_cache_delete( $this->get_cache_prefix() . $customer_id, WC_SESSION_CACHE_GROUP );
 
-		$wpdb->delete( // @codingStandardsIgnoreLine.
+		$wpdb->delete(
 			$this->_table,
 			array(
 				'session_key' => $customer_id,
@@ -330,7 +322,6 @@ class WC_Session_Handler extends WC_Session {
 	public function update_session_timestamp( $customer_id, $timestamp ) {
 		global $wpdb;
 
-		// @codingStandardsIgnoreStart.
 		$wpdb->update(
 			$this->_table,
 			array(
@@ -340,9 +331,8 @@ class WC_Session_Handler extends WC_Session {
 				'session_key' => $customer_id,
 			),
 			array(
-				'%d'
+				'%d',
 			)
 		);
-		// @codingStandardsIgnoreEnd.
 	}
 }

@@ -344,7 +344,8 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		$max_pages = ceil( $total_terms / $per_page );
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
 
-		$base = add_query_arg( $request->get_query_params(), rest_url( '/' . $this->namespace . '/' . $this->rest_base ) );
+		$base  = str_replace( '(?P<attribute_id>[\d]+)', $request['attribute_id'], $this->rest_base );
+		$base = add_query_arg( $request->get_query_params(), rest_url( '/' . $this->namespace . '/' . $base ) );
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
 			if ( $prev_page > $max_pages ) {
@@ -380,20 +381,11 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		if ( isset( $request['slug'] ) ) {
 			$args['slug'] = $request['slug'];
 		}
-
 		if ( isset( $request['parent'] ) ) {
 			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
 				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
-
-			$parent = get_term( (int) $request['parent'], $taxonomy );
-
-			// If is null or WP_Error is invalid parent term.
-			if ( ! $parent || is_wp_error( $parent ) ) {
-				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Parent resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
-			}
-
-			$args['parent'] = $parent->term_id;
+			$args['parent'] = $request['parent'];
 		}
 
 		$term = wp_insert_term( $name, $taxonomy, $args );
@@ -486,25 +478,11 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		if ( isset( $request['slug'] ) ) {
 			$prepared_args['slug'] = $request['slug'];
 		}
-
 		if ( isset( $request['parent'] ) ) {
 			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
 				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
-
-			$parent_id = (int) $request['parent'];
-
-			if ( 0 === $parent_id ) {
-				$prepared_args['parent'] = $parent_id;
-			} else {
-				$parent = get_term( $parent_id, $taxonomy );
-
-				if ( ! $parent ) {
-					return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Parent resource does not exist.', 'woocommerce' ), array( 'status' => 400 ) );
-				}
-
-				$prepared_args['parent'] = $parent->term_id;
-			}
+			$prepared_args['parent'] = $request['parent'];
 		}
 
 		// Only update the term if we haz something to update.
@@ -708,7 +686,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['exclude'] = array(
-			'description'       => __( 'Ensure result set excludes specific ids.', 'woocommerce' ),
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',

@@ -113,7 +113,7 @@ class WC_Tax {
 	/**
 	 * Calc tax from inclusive price.
 	 *
-	 * @param  float $price Price to calcualte tax for.
+	 * @param  float $price Price to calculate tax for.
 	 * @param  array $rates Array of tax rates.
 	 * @return array
 	 */
@@ -159,7 +159,7 @@ class WC_Tax {
 	/**
 	 * Calc tax from exclusive price.
 	 *
-	 * @param  float $price Price to calcualte tax for.
+	 * @param  float $price Price to calculate tax for.
 	 * @param  array $rates Array of tax rates.
 	 * @return array
 	 */
@@ -409,7 +409,7 @@ class WC_Tax {
 			}
 
 			$matched_tax_rates[ $found_rate->tax_rate_id ] = array(
-				'rate'     => $found_rate->tax_rate,
+				'rate'     => (float) $found_rate->tax_rate,
 				'label'    => $found_rate->tax_rate_name,
 				'shipping' => $found_rate->tax_rate_shipping ? 'yes' : 'no',
 				'compound' => $found_rate->tax_rate_compound ? 'yes' : 'no',
@@ -603,7 +603,7 @@ class WC_Tax {
 			$compound  = $key_or_rate->tax_rate_compound;
 		} else {
 			$key 	   = $key_or_rate;
-			$compound  = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) ) ? true : false;
+			$compound  = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate_compound FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %s", $key ) );
 		}
 
 		return (bool) apply_filters( 'woocommerce_rate_compound', $compound, $key );
